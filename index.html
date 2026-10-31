@@ -129,9 +129,24 @@
     }
 
     .container:has(#homeSection:not(.hidden)) {
-      max-width: 1100px;
-      padding: 24px;
-    }
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+body:has(#homeSection:not(.hidden)) {
+  display: block;
+  padding: 24px 32px;
+}
+
+#homeSection {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
 
     #homeSection h1 {
       color: #345d49;
