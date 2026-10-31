@@ -6,136 +6,239 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Văn 7 cùng cô Thương</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
+
   <style>
-    /* GIAO DIỆN QUẢN LÝ GIÁO VIÊN */
-#homeSection {
-  max-width: 1000px;
-  margin: 30px auto;
-  padding: 32px;
-  background: #ffffff;
-  border-radius: 20px;
-  box-shadow: 0 8px 30px rgba(40, 70, 50, 0.07);
-}
+    * {
+      box-sizing: border-box;
+    }
 
-#homeSection h1 {
-  color: #345d49;
-  font-size: 30px;
-  margin-bottom: 8px;
-}
-
-#homeSection h2 {
-  color: #345d49;
-  font-size: 21px;
-  margin: 28px 0 16px;
-}
-
-#teacherPanel {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 22px;
-  margin-top: 25px;
-}
-
-#teacherPanel > h2,
-#teacherPanel .assignment-section {
-  grid-column: 1 / -1;
-}
-
-#teacherPanel .student-list,
-#teacherPanel .assignment-section,
-#teacherPanel form {
-  background: #f8faf8;
-  border: 1px solid #e3ebe5;
-  border-radius: 16px;
-  padding: 22px;
-}
-
-#teacherPanel input,
-#teacherPanel select,
-#teacherPanel textarea {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 12px 14px;
-  margin: 8px 0 14px;
-  border: 1px solid #d8e2da;
-  border-radius: 9px;
-  font: inherit;
-}
-
-#teacherPanel textarea {
-  min-height: 110px;
-  resize: vertical;
-}
-
-#teacherPanel button {
-  border: none;
-  border-radius: 9px;
-  padding: 12px 20px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-#teacherPanel .assignment-section {
-  max-width: 100%;
-}
-
-@media (max-width: 650px) {
-  #homeSection {
-    margin: 12px;
-    padding: 18px;
-  }
-
-  #teacherPanel {
-    grid-template-columns: 1fr;
-  }
-
-  #teacherPanel > h2,
-  #teacherPanel .assignment-section {
-    grid-column: 1;
-  }
-}
-    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #f7f5f0;
+      background: #f5f7f4;
       color: #35443d;
       min-height: 100vh;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      padding: 20px;
+      padding: 24px;
     }
+
     .container {
       width: 100%;
       max-width: 440px;
       background: white;
       padding: 34px 28px;
       border-radius: 22px;
-      box-shadow: 0 8px 30px #35443d12;
+      box-shadow: 0 8px 30px rgba(53, 68, 61, 0.07);
     }
-    .brand { text-align: center; margin-bottom: 28px; }
-    .book { font-size: 42px; }
-    h1 { font-size: 25px; margin: 12px 0 8px; color: #496b59; }
-    .sub { color: #7c8980; font-size: 14px; line-height: 1.6; }
-    label { display: block; margin: 17px 0 7px; font-size: 14px; }
+
+    /* KHUNG ĐĂNG NHẬP */
+    #loginSection {
+      width: 100%;
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .book {
+      font-size: 42px;
+    }
+
+    h1 {
+      font-size: 25px;
+      margin: 12px 0 8px;
+      color: #496b59;
+    }
+
+    .sub {
+      color: #7c8980;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    label {
+      display: block;
+      margin: 17px 0 7px;
+      font-size: 14px;
+    }
+
     input {
-      width: 100%; padding: 13px 14px; border: 1px solid #dce4dc;
-      border-radius: 10px; font-size: 15px; outline: none;
+      width: 100%;
+      padding: 13px 14px;
+      border: 1px solid #dce4dc;
+      border-radius: 10px;
+      font-size: 15px;
+      outline: none;
     }
-    input:focus { border-color: #789982; }
+
+    input:focus {
+      border-color: #789982;
+    }
+
     button {
-      width: 100%; padding: 14px; margin-top: 22px;
-      background: #668a72; color: white; border: 0;
-      border-radius: 10px; font-size: 16px; cursor: pointer;
+      width: 100%;
+      padding: 14px;
+      margin-top: 22px;
+      background: #668a72;
+      color: white;
+      border: 0;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
     }
-    button:hover { background: #52745e; }
-    .message { font-size: 14px; line-height: 1.6; margin-top: 16px; }
-    .welcome { text-align: center; }
-    .hidden { display: none; }
-    .logout { background: #e9eee9; color: #496b59; }
-    .note { margin-top: 24px; font-size: 12px; color: #929b94; text-align: center; }
+
+    button:hover {
+      background: #52745e;
+    }
+
+    .message {
+      font-size: 14px;
+      line-height: 1.6;
+      margin-top: 16px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .logout {
+      background: #e9eee9;
+      color: #496b59;
+    }
+
+    .note {
+      margin-top: 24px;
+      font-size: 12px;
+      color: #929b94;
+      text-align: center;
+    }
+
+    /* KHUNG QUẢN LÝ GIÁO VIÊN */
+    #homeSection {
+      width: 100%;
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 32px;
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(40, 70, 50, 0.07);
+      text-align: left;
+    }
+
+    .container:has(#homeSection:not(.hidden)) {
+      max-width: 1100px;
+      padding: 24px;
+    }
+
+    #homeSection h1 {
+      color: #345d49;
+      font-size: 30px;
+      margin-bottom: 8px;
+    }
+
+    #homeSection h2 {
+      color: #345d49;
+      font-size: 21px;
+      margin: 0 0 18px;
+    }
+
+    #teacherPanel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      margin-top: 28px;
+    }
+
+    #teacherPanel > h2,
+    #teacherPanel .assignment-section {
+      grid-column: 1 / -1;
+    }
+
+    #teacherPanel .student-list,
+    #teacherPanel .assignment-section,
+    #teacherPanel form {
+      background: #f8faf8;
+      border: 1px solid #e3ebe5;
+      border-radius: 16px;
+      padding: 22px;
+      min-width: 0;
+    }
+
+    #teacherPanel h3 {
+      color: #496b59;
+      margin-top: 0;
+    }
+
+    #teacherPanel input,
+    #teacherPanel select,
+    #teacherPanel textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px 14px;
+      margin: 8px 0 14px;
+      border: 1px solid #d8e2da;
+      border-radius: 9px;
+      font: inherit;
+    }
+
+    #teacherPanel textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    #teacherPanel button {
+      border: none;
+      border-radius: 9px;
+      padding: 12px 20px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    #teacherPanel .assignment-section {
+      width: 100%;
+    }
+
+    #teacherPanel .assignment-section form {
+      background: transparent;
+      border: none;
+      padding: 0;
+    }
+
+    #studentList {
+      line-height: 1.8;
+      overflow-wrap: anywhere;
+    }
+
+    /* GIAO DIỆN ĐIỆN THOẠI */
+    @media (max-width: 650px) {
+      body {
+        padding: 12px;
+      }
+
+      .container:has(#homeSection:not(.hidden)) {
+        padding: 12px;
+      }
+
+      #homeSection {
+        padding: 18px;
+      }
+
+      #teacherPanel {
+        grid-template-columns: 1fr;
+      }
+
+      #teacherPanel > h2,
+      #teacherPanel .assignment-section {
+        grid-column: 1;
+      }
+
+      #homeSection h1 {
+        font-size: 25px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -146,6 +249,7 @@
         <h1>Văn 7 cùng cô Thương</h1>
         <div class="sub">Cùng học Văn, cùng khám phá và trưởng thành.</div>
       </div>
+
 
       <form id="loginForm">
         <label for="email">Email hoặc tên đăng nhập</label>
