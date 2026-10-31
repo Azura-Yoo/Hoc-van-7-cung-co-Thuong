@@ -267,27 +267,44 @@ console.log("FUNCTION ERROR:", error);
     createStudentForm.reset();
   });
 }
-    if (error) {
-    message.textContent = "Không tải được danh sách học sinh.";
+async function loadStudents() {
+  const list = document.getElementById("studentList");
+  const message = document.getElementById("studentListMessage");
+
+  if (!list || !message || !supabaseClient) return;
+
+  list.textContent = "";
+  message.textContent = "Đang tải danh sách học sinh...";
+
+  const { data, error } = await supabaseClient
+    .from("profiles")
+    .select("full_name, username, class_name")
+    .eq("role", "student")
+    .order("full_name", { ascending: true });
+
+  if (error) {
+    message.textContent = "Không tải được danh sách học sinh: " + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    message.textContent = "Chưa có học sinh nào.";
     return;
   }
 
   message.textContent = `Có ${data.length} học sinh.`;
 
-  if (data.length === 0) {
-    list.textContent = "Chưa có học sinh nào.";
-    return;
-  }
-
   data.forEach((student, index) => {
     const item = document.createElement("div");
     item.className = "student-item";
     item.textContent =
-      `${index + 1}. ${student.full_name} | ${student.username} | Lớp ${student.class_name}`;
+      `${index + 1}. ${student.full_name || "Chưa có họ tên"} | ${student.username || "Chưa có tên đăng nhập"} | Lớp ${student.class_name || "Chưa rõ"}`;
+
     list.appendChild(item);
   });
 }
-    document.getElementById("refreshStudents")
+
+document.getElementById("refreshStudents")
   ?.addEventListener("click", loadStudents);
     async function checkSession() {
       if (!supabaseClient) return;
