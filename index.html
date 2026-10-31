@@ -414,19 +414,31 @@ body:has(#homeSection:not(.hidden)) {
           ? "Tài khoản giáo viên"
           : "Tài khoản học sinh";
 
-      document.getElementById("dashboardMessage").textContent =
-        data.role === "teacher"
-          ? "Chào cô Thương! Khu vực quản lý lớp học sẽ được hoàn thiện ở bước tiếp theo."
-          : "Chào em! Khu vực bài học và bài tập sẽ được hoàn thiện ở bước tiếp theo.";
-      const teacherPanel = document.getElementById("teacherPanel");
+  
+document.getElementById("dashboardMessage").textContent =
+  data.role === "teacher"
+    ? "Chào cô Thương! Chúc cô có những giờ học thật vui."
+    : "Chào em! Cùng hoàn thành tốt những bài tập cô giao nhé.";
+
+const teacherPanel = document.getElementById("teacherPanel");
+const studentPanel = document.getElementById("studentPanel");
 
 if (teacherPanel) {
   teacherPanel.classList.toggle("hidden", data.role !== "teacher");
-
-  if (data.role === "teacher") {
-    await loadStudents();
-  }
 }
+
+if (studentPanel) {
+  studentPanel.classList.toggle("hidden", data.role !== "student");
+}
+
+if (data.role === "teacher") {
+  await loadStudents();
+}
+
+if (data.role === "student") {
+  await loadAssignments(data.class_name);
+}
+
     }
 
     document.getElementById("loginForm").addEventListener("submit", async (event) => {
@@ -585,6 +597,55 @@ async function loadStudents() {
     message.textContent = "Không tải được danh sách học sinh: " + error.message;
     return;
   }
+  
+async function loadAssignments(className) {
+  const list = document.getElementById("studentAssignments");
+  const message = document.getElementById("studentAssignmentMessage");
+
+  if (!list || !message || !supabaseClient) return;
+
+  list.innerHTML = "";
+  message.textContent = "Đang tải bài tập...";
+
+  if (!className) {
+    message.textContent = "Tài khoản chưa được gán lớp. Em liên hệ cô Thương nhé.";
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("assignments")
+    .select("id, title, body, created_at")
+    .eq("class_name", className)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    message.textContent = "Chưa tải được bài tập: " + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    message.textContent = "Hiện chưa có bài tập nào được giao.";
+    return;
+  }
+
+  message.textContent = `Lớp ${className} có ${data.length} bài tập.`;
+
+  data.forEach((assignment, index) => {
+    const card = document.createElement("div");
+    card.className = "student-assignment-item";
+
+    const title = document.createElement("h3");
+    title.textContent = `${index + 1}. ${assignment.title}`;
+
+    const body = document.createElement("p");
+    body.textContent = assignment.body;
+
+    card.appendChild(title);
+    card.appendChild(body);
+    list.appendChild(card);
+  });
+}
+
 
   if (!data || data.length === 0) {
     message.textContent = "Chưa có học sinh nào.";
