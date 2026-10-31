@@ -531,6 +531,7 @@ const createAssignmentForm = document.getElementById("createAssignmentForm");
 if (createAssignmentForm) {
   createAssignmentForm.addEventListener("submit", async (event) => {
     event.preventDefault();
+    console.log("Đã bấm nút giao bài tập");
 
     const message = document.getElementById("assignmentMessage");
     const button = createAssignmentForm.querySelector('button[type="submit"]');
