@@ -77,7 +77,31 @@
       <h1>Chào mừng em!</h1>
       <p id="userName"></p>
       <p id="userRole" class="sub"></p>
-      <div id="dashboardMessage" class="message"></div>
+<div id="teacherPanel" class="hidden">
+  <h2>Quản lý học sinh</h2>
+  <h3>Cấp tài khoản mới</h3>
+
+  <form id="createStudentForm">
+    <label for="studentName">Họ và tên học sinh</label>
+    <input id="studentName" type="text" required>
+
+    <label for="studentUsername">Tên đăng nhập</label>
+    <input id="studentUsername" type="text"
+      placeholder="Ví dụ: nguyenvana7a" required>
+
+    <label for="studentPassword">Mật khẩu</label>
+    <input id="studentPassword" type="password"
+      minlength="8" required>
+
+    <label for="studentClass">Lớp</label>
+    <select id="studentClass" required>
+      <option value="7A">7A</option>
+    </select>
+
+    <button type="submit">Tạo tài khoản học sinh</button>
+    <div id="createStudentMessage" class="message"></div>
+  </form>
+</div>      
       <button class="logout" id="logoutButton">Đăng xuất</button>
     </section>
   </main>
@@ -137,6 +161,11 @@
         data.role === "teacher"
           ? "Chào cô Thương! Khu vực quản lý lớp học sẽ được hoàn thiện ở bước tiếp theo."
           : "Chào em! Khu vực bài học và bài tập sẽ được hoàn thiện ở bước tiếp theo.";
+      const teacherPanel = document.getElementById("teacherPanel");
+
+if (teacherPanel) {
+  teacherPanel.classList.toggle("hidden", data.role !== "teacher");
+}
     }
 
     document.getElementById("loginForm").addEventListener("submit", async (event) => {
@@ -181,7 +210,46 @@ const email = loginId.includes("@")
       loginSection.classList.remove("hidden");
       loginMessage.textContent = "Em đã đăng xuất.";
     });
+const createStudentForm = document.getElementById("createStudentForm");
 
+if (createStudentForm) {
+  createStudentForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const message = document.getElementById("createStudentMessage");
+    const button = createStudentForm.querySelector('button[type="submit"]');
+
+    button.disabled = true;
+    button.textContent = "Đang tạo tài khoản...";
+    message.textContent = "";
+
+    const student = {
+      full_name: document.getElementById("studentName").value.trim(),
+      username: document.getElementById("studentUsername").value.trim(),
+      password: document.getElementById("studentPassword").value,
+      class_name: document.getElementById("studentClass").value
+    };
+
+    const { data, error } = await supabaseClient.functions.invoke(
+      "create-student",
+      { body: student }
+    );
+
+    button.disabled = false;
+    button.textContent = "Tạo tài khoản học sinh";
+
+    if (error || !data?.success) {
+      message.textContent =
+        data?.error || error?.message || "Chưa tạo được tài khoản.";
+      return;
+    }
+
+    message.textContent =
+      `Đã tạo tài khoản ${data.username} cho ${data.full_name}.`;
+
+    createStudentForm.reset();
+  });
+}
     async function checkSession() {
       if (!supabaseClient) return;
       const { data } = await supabaseClient.auth.getSession();
