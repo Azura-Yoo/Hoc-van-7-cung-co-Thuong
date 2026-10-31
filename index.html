@@ -104,6 +104,14 @@
     <button type="submit">Tạo tài khoản học sinh</button>
     <div id="createStudentMessage" class="message"></div>
   </form>
+    <div class="student-list">
+  <h3>Danh sách học sinh</h3>
+  <button type="button" id="refreshStudents">
+    Làm mới danh sách
+  </button>
+  <div id="studentListMessage" class="message"></div>
+  <div id="studentList"></div>
+</div>
 </div>      
       <button class="logout" id="logoutButton">Đăng xuất</button>
     </section>
@@ -168,6 +176,10 @@
 
 if (teacherPanel) {
   teacherPanel.classList.toggle("hidden", data.role !== "teacher");
+
+  if (data.role === "teacher") {
+    await loadStudents();
+  }
 }
     }
 
@@ -233,11 +245,13 @@ if (createStudentForm) {
       class_name: document.getElementById("studentClass").value
     };
 
-  const { data, error } = await supabaseClient.functions.invoke(
+const { data, error } = await supabaseClient.functions.invoke(
   "clever-api",
   { body: student }
 );
 
+console.log("FUNCTION DATA:", data);
+console.log("FUNCTION ERROR:", error);
     button.disabled = false;
     button.textContent = "Tạo tài khoản học sinh";
 
@@ -253,6 +267,28 @@ if (createStudentForm) {
     createStudentForm.reset();
   });
 }
+    if (error) {
+    message.textContent = "Không tải được danh sách học sinh.";
+    return;
+  }
+
+  message.textContent = `Có ${data.length} học sinh.`;
+
+  if (data.length === 0) {
+    list.textContent = "Chưa có học sinh nào.";
+    return;
+  }
+
+  data.forEach((student, index) => {
+    const item = document.createElement("div");
+    item.className = "student-item";
+    item.textContent =
+      `${index + 1}. ${student.full_name} | ${student.username} | Lớp ${student.class_name}`;
+    list.appendChild(item);
+  });
+}
+    document.getElementById("refreshStudents")
+  ?.addEventListener("click", loadStudents);
     async function checkSession() {
       if (!supabaseClient) return;
       const { data } = await supabaseClient.auth.getSession();
