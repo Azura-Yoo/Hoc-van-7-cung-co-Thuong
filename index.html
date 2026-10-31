@@ -6,6 +6,93 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Văn 7 cùng cô Thương</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  /* GIAO DIỆN QUẢN LÝ GIÁO VIÊN */
+#homeSection {
+  max-width: 1000px;
+  margin: 30px auto;
+  padding: 32px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(40, 70, 50, 0.07);
+}
+
+#homeSection h1 {
+  color: #345d49;
+  font-size: 30px;
+  margin-bottom: 8px;
+}
+
+#homeSection h2 {
+  color: #345d49;
+  font-size: 21px;
+  margin: 28px 0 16px;
+}
+
+#teacherPanel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  margin-top: 25px;
+}
+
+#teacherPanel > h2,
+#teacherPanel .assignment-section {
+  grid-column: 1 / -1;
+}
+
+#teacherPanel .student-list,
+#teacherPanel .assignment-section,
+#teacherPanel form {
+  background: #f8faf8;
+  border: 1px solid #e3ebe5;
+  border-radius: 16px;
+  padding: 22px;
+}
+
+#teacherPanel input,
+#teacherPanel select,
+#teacherPanel textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  margin: 8px 0 14px;
+  border: 1px solid #d8e2da;
+  border-radius: 9px;
+  font: inherit;
+}
+
+#teacherPanel textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+#teacherPanel button {
+  border: none;
+  border-radius: 9px;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+#teacherPanel .assignment-section {
+  max-width: 100%;
+}
+
+@media (max-width: 650px) {
+  #homeSection {
+    margin: 12px;
+    padding: 18px;
+  }
+
+  #teacherPanel {
+    grid-template-columns: 1fr;
+  }
+
+  #teacherPanel > h2,
+  #teacherPanel .assignment-section {
+    grid-column: 1;
+  }
+}
   <style>
     * { box-sizing: border-box; }
     body {
@@ -79,12 +166,11 @@
   <p id="userName"></p>
   <p id="userRole" class="sub"></p>
   <div id="dashboardMessage" class="message"></div>
-
   <div id="teacherPanel" class="hidden">
     <h2>Quản lý học sinh</h2>
   <h3>Cấp tài khoản mới</h3>
 
-  <form id="createStudentForm">
+    <form id="createStudentForm">
     <label for="studentName">Họ và tên học sinh</label>
     <input id="studentName" type="text" required>
 
