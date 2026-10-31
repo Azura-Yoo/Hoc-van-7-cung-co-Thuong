@@ -233,10 +233,10 @@ if (createStudentForm) {
       class_name: document.getElementById("studentClass").value
     };
 
-    const { data, error } = await supabaseClient.functions.invoke(
-      "create-student",
-      { body: student }
-    );
+  const { data, error } = await supabaseClient.functions.invoke(
+  "clever-api",
+  { body: student }
+);
 
     button.disabled = false;
     button.textContent = "Tạo tài khoản học sinh";
