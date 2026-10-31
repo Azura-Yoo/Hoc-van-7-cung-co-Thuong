@@ -112,6 +112,36 @@
   <div id="studentListMessage" class="message"></div>
   <div id="studentList"></div>
 </div>
+    
+<div class="assignment-section">
+  <h2>Giao bài tập</h2>
+
+  <form id="createAssignmentForm">
+    <label for="assignmentTitle">Tên bài tập</label>
+    <input
+      id="assignmentTitle"
+      type="text"
+      placeholder="Ví dụ: Ôn tập Tiếng Việt"
+      required
+    >
+    <label for="assignmentBody">Nội dung yêu cầu</label>
+    <textarea
+      id="assignmentBody"
+      rows="5"
+      placeholder="Nhập nội dung bài tập..."
+      required
+    ></textarea>
+
+    <label for="assignmentClass">Lớp được giao</label>
+    <select id="assignmentClass" required>
+      <option value="7A">7A</option>
+    </select>
+
+    <button type="submit">Giao bài tập</button>
+    <div id="assignmentMessage" class="message"></div>
+  </form>
+</div>
+
 </div>      
       <button class="logout" id="logoutButton">Đăng xuất</button>
     </section>
@@ -265,6 +295,59 @@ console.log("FUNCTION ERROR:", error);
       `Đã tạo tài khoản ${data.username} cho ${data.full_name}.`;
 
     createStudentForm.reset();
+  });
+}
+    
+const createAssignmentForm = document.getElementById("createAssignmentForm");
+
+if (createAssignmentForm) {
+  createAssignmentForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const message = document.getElementById("assignmentMessage");
+    const button = createAssignmentForm.querySelector('button[type="submit"]');
+
+    const title = document.getElementById("assignmentTitle").value.trim();
+    const body = document.getElementById("assignmentBody").value.trim();
+    const className = document.getElementById("assignmentClass").value;
+
+    if (!title || !body || !className) {
+      message.textContent = "Cô vui lòng nhập đầy đủ thông tin.";
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent = "Đang giao bài...";
+
+    const { data: userData } = await supabaseClient.auth.getUser();
+    const user = userData.user;
+
+    if (!user) {
+      message.textContent = "Phiên đăng nhập đã hết hạn. Cô vui lòng đăng nhập lại.";
+      button.disabled = false;
+      button.textContent = "Giao bài tập";
+      return;
+    }
+
+    const { error } = await supabaseClient
+      .from("assignments")
+      .insert({
+        title: title,
+        body: body,
+        class_name: className,
+        created_by: user.id
+      });
+
+    button.disabled = false;
+    button.textContent = "Giao bài tập";
+
+    if (error) {
+      message.textContent = "Chưa giao được bài: " + error.message;
+      return;
+    }
+
+    message.textContent = "Đã giao bài tập thành công!";
+    createAssignmentForm.reset();
   });
 }
 async function loadStudents() {
