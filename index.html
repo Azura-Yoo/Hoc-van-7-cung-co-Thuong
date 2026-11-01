@@ -171,46 +171,98 @@ body:has(#homeSection:not(.hidden)){padding:24px 32px}
 <div id="dashboardMessage" class="message"></div>
 
 <div id="teacherPanel" class="hidden">
-<h2>Quản lý học sinh</h2>
 
+  <h2>Quản lý học sinh</h2>
 
-<form id="createStudentForm">
-  <h3>Cấp tài khoản mới</h3>
+  <form id="createStudentForm">
+    <h3>Cấp tài khoản mới</h3>
 
-  <label for="studentName">Họ và tên học sinh</label>
-  <input id="studentName" type="text" required>
+    <label for="studentName">Họ và tên học sinh</label>
+    <input id="studentName" type="text" required>
 
-  <label for="studentClass">Lớp</label>
-  <select id="studentClass" required>
-    <option value="7A">7A</option>
-    <option value="7C">7C</option>
-  </select>
+    <label for="studentClass">Lớp</label>
+    <select id="studentClass" required>
+      <option value="7A">7A</option>
+      <option value="7C">7C</option>
+    </select>
 
-  <p>Mật khẩu và tên đăng nhập sẽ được hệ thống tự động tạo theo họ tên và lớp.</p>
+    <p>Tên đăng nhập và mật khẩu được hệ thống tự động tạo.</p>
 
-  <button type="submit">Tạo tài khoản học sinh</button>
-  <div id="createStudentMessage" class="message"></div>
-</form>
- </div>
+    <button type="submit">Tạo tài khoản học sinh</button>
+    <div id="createStudentMessage" class="message"></div>
+  </form>
 
+  <hr>
 
-<div class="submission-section">
-<h2>Bài nộp của học sinh</h2>
-<p class="sub">Theo dõi, xem bài làm và chấm điểm cho học sinh.</p>
-<button type="button" id="refreshSubmissions">Làm mới bài nộp</button>
-<div id="submissionMessage" class="message">Nhấn làm mới để tải bài nộp.</div>
-<div class="submission-filters">
-<div>
-<label for="filterStudent">Lọc theo học sinh</label>
-<select id="filterStudent"><option value="">Tất cả học sinh</option></select>
-</div>
-<div>
-<label for="filterAssignment">Lọc theo bài tập</label>
-<select id="filterAssignment"><option value="">Tất cả bài tập</option></select>
-</div>
-</div>
-<div id="submissionList"></div>
-</div>
+  <h3>Cấp tài khoản hàng loạt</h3>
+  <p>Nhập mỗi học sinh một dòng theo mẫu: Họ tên | Lớp</p>
+  <textarea id="bulkStudentList" rows="8"
+    placeholder="Nguyễn Văn An | 7A"></textarea>
+
+  <button type="button" id="createBulkStudents">
+    Tạo tài khoản hàng loạt
+  </button>
+  <div id="bulkStudentMessage" class="message"></div>
+  <div id="bulkStudentResults"></div>
+
+  <hr>
+
+  <h3>Danh sách học sinh</h3>
+  <button type="button" id="refreshStudents">Làm mới danh sách</button>
+  <div id="studentListMessage" class="message"></div>
+  <div id="studentList"></div>
+
+  <hr>
+
+  <div class="assignment-section">
+    <h2>Giao bài tập</h2>
+
+    <form id="createAssignmentForm">
+      <label for="assignmentTitle">Tên bài tập</label>
+      <input id="assignmentTitle" type="text" required>
+
+      <label for="assignmentClass">Lớp nhận bài</label>
+      <select id="assignmentClass" required>
+        <option value="7A">7A</option>
+        <option value="7C">7C</option>
+      </select>
+
+      <label for="assignmentBody">Nội dung bài tập</label>
+      <textarea id="assignmentBody" required></textarea>
+
+      <button type="submit">Giao bài tập</button>
+      <div id="assignmentMessage" class="message"></div>
+    </form>
+  </div>
+
+  <hr>
+
+  <div class="submission-section">
+    <h2>Bài nộp của học sinh</h2>
+    <p class="sub">Theo dõi, xem bài làm và chấm điểm cho học sinh.</p>
+
+    <button type="button" id="refreshSubmissions">Làm mới bài nộp</button>
+    <div id="submissionMessage" class="message"></div>
+
+    <div class="submission-filters">
+      <div>
+        <label for="filterStudent">Lọc theo học sinh</label>
+        <select id="filterStudent">
+          <option value="">Tất cả học sinh</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="filterAssignment">Lọc theo bài tập</label>
+        <select id="filterAssignment">
+          <option value="">Tất cả bài tập</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="submissionList"></div>
+  </div>
+
 </div>
 
 <div id="studentPanel" class="hidden">
@@ -1126,87 +1178,66 @@ bulkButton.addEventListener("click", async () => {
   }
 });
 
-const used = new Set(
-  (existing || [])
-    .map(s => (s.username || "").toLowerCase())
-    .filter(Boolean)
-);
-
 const report = [];
 
 for (const student of students) {
-  const words = (student.full_name || "").trim().split(/\s+/);
+  try {
+    const { data, error } =
+      await supabaseClient.functions.invoke("clever-api", {
+        body: {
+          action: "create_student",
+          full_name: student.full_name,
+          class_name: student.class_name
+        }
+      });
 
-  if (words.length < 2) {
-    report.push({
-      ...student,
-      ok: false,
-      error: "Họ tên không hợp lệ"
-    });
-    continue;
-  }
+    if (error || !data || !data.success) {
+      report.push({
+        ...student,
+        ok: false,
+        error: (data && data.error) ||
+               (error && error.message) ||
+               "Không tạo được tài khoản"
+      });
 
-  const nameParts = words.slice(1);
-
-  const base = normalize(nameParts.join("")).toLowerCase()
-    + (student.class_name || "").toLowerCase();
-
-  let username = base;
-  let number = 2;
-
-  while (used.has(username.toLowerCase())) {
-    username = base + String(number).padStart(2, "0");
-    number++;
-  }
-
-  const password = nameParts.map(part => {
-    const clean = normalize(part).toLowerCase();
-    return clean.charAt(0).toUpperCase() + clean.slice(1);
-  }).join("") + student.class_name + "@";
-
-  const { data, error } = await supabaseClient.functions.invoke(
-    "clever-api",
-    {
-      body: {
-        full_name: student.full_name,
-        username,
-        password,
-        class_name: student.class_name
-      }
+      continue;
     }
-  );
 
-  if (!error && data && data.success) {
-    used.add(username.toLowerCase());
-    report.push({ ...student, username, password, ok: true });
-  } else {
     report.push({
       ...student,
-      username,
+      ok: true,
+      username: data.username,
+      password: data.password
+    });
+
+  } catch (err) {
+    report.push({
+      ...student,
       ok: false,
-      error: (data && data.error) || (error && error.message) || "Tạo tài khoản thất bại"
+      error: err.message
     });
   }
 }
 
   const success = report.filter(s => s.ok).length;
-  const failed = report.length - success;
+const failed = report.length - success;
 
-  message.textContent = `Đã tạo thành công ${success}/${report.length} tài khoản. Có ${failed} tài khoản chưa tạo được.`;
+message.textContent =
+  `Đã tạo thành công ${success}/${report.length} tài khoản. Có ${failed} tài khoản chưa tạo được.`;
 
-  results.innerHTML = report.map(s => `
-    <p>
-      ${s.ok ? "✅" : "❌"} ${s.full_name} (${s.class_name})
-      ${s.ok
-        ? ` | Tài khoản: <strong>${s.username}</strong> | Mật khẩu: <strong>${s.password}</strong>`
-        : ` | Lỗi: ${s.error}`}
-    </p>
-  `).join("");
+results.innerHTML = report.map(s => `
+  <p>
+    ${s.ok ? "✅" : "❌"} ${s.full_name} (${s.class_name})
+    ${s.ok
+      ? ` | Tài khoản: <strong>${s.username}</strong> | Mật khẩu: <strong>${s.password}</strong>`
+      : ` | Lỗi: ${s.error}`}
+  </p>
+`).join("");
 
-  bulkButton.disabled = false;
-  bulkButton.textContent = "Tạo tài khoản hàng loạt";
+bulkButton.disabled = false;
+bulkButton.textContent = "Tạo tài khoản hàng loạt";
 
-  await loadStudents();
+await loadStudents();
 });
  
 const createAssignmentForm=document.getElementById("createAssignmentForm");
