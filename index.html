@@ -2,1703 +2,1463 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Văn 7 cùng cô Thương</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23eaf2eb'/%3E%3Ctext x='50' y='72' font-size='65' text-anchor='middle'%3E📚%3C/text%3E%3C/svg%3E">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Văn 7 cùng cô Thương</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23eaf2eb'/%3E%3Ctext x='50' y='72' font-size='65' text-anchor='middle'%3E📚%3C/text%3E%3C/svg%3E">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f7f4;
-      color: #35443d;
-      min-height: 100vh;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 24px;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 440px;
-      background: white;
-      padding: 34px 28px;
-      border-radius: 22px;
-      box-shadow: 0 8px 30px rgba(53, 68, 61, 0.07);
-    }
-
-    /* KHUNG ĐĂNG NHẬP */
-    #loginSection {
-      width: 100%;
-    }
-
-    .brand {
-      text-align: center;
-      margin-bottom: 28px;
-    }
-
-    .book {
-      font-size: 42px;
-    }
-
-    h1 {
-      font-size: 25px;
-      margin: 12px 0 8px;
-      color: #496b59;
-    }
-
-    .sub {
-      color: #7c8980;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
-    label {
-      display: block;
-      margin: 17px 0 7px;
-      font-size: 14px;
-    }
-
-    input {
-      width: 100%;
-      padding: 13px 14px;
-      border: 1px solid #dce4dc;
-      border-radius: 10px;
-      font-size: 15px;
-      outline: none;
-    }
-
-    input:focus {
-      border-color: #789982;
-    }
-
-    button {
-      width: 100%;
-      padding: 14px;
-      margin-top: 22px;
-      background: #668a72;
-      color: white;
-      border: 0;
-      border-radius: 10px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #52745e;
-    }
-
-    .message {
-      font-size: 14px;
-      line-height: 1.6;
-      margin-top: 16px;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .logout {
-      background: #e9eee9;
-      color: #496b59;
-    }
-
-    .note {
-      margin-top: 24px;
-      font-size: 12px;
-      color: #929b94;
-      text-align: center;
-    }
-
-    /* KHUNG QUẢN LÝ GIÁO VIÊN */
-    #homeSection {
-      width: 100%;
-      max-width: 100%;
-      margin: 0 auto;
-      padding: 32px;
-      background: #ffffff;
-      border-radius: 20px;
-      box-shadow: 0 8px 30px rgba(40, 70, 50, 0.07);
-      text-align: left;
-    }
-
-    .container:has(#homeSection:not(.hidden)) {
-  width: 100%;
-  max-width: none;
-  padding: 0;
-  background: transparent;
-  box-shadow: none;
-  border-radius: 0;
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:24px;font-family:Arial,sans-serif;background:#f5f7f4;color:#35443d;min-height:100vh}
+.container{width:100%;max-width:440px;margin:0 auto;background:#fff;padding:34px 28px;border-radius:22px;box-shadow:0 8px 30px rgba(53,68,61,.07)}
+.hidden{display:none!important}
+.brand{text-align:center;margin-bottom:28px}
+.book{font-size:42px}
+h1{font-size:25px;margin:12px 0 8px;color:#496b59}
+.sub{color:#7c8980;font-size:14px;line-height:1.6}
+label{display:block;margin:17px 0 7px;font-size:14px}
+input,select,textarea{width:100%;padding:13px 14px;border:1px solid #dce4dc;border-radius:10px;font:inherit;font-size:15px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:#789982}
+button{padding:13px 18px;margin-top:12px;background:#668a72;color:#fff;border:0;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer}
+button:hover{background:#52745e}
+button:disabled{opacity:.6;cursor:not-allowed}
+form button{width:100%}
+.message{font-size:14px;line-height:1.6;margin-top:12px;overflow-wrap:anywhere}
+.note{margin-top:24px;font-size:12px;color:#929b94;text-align:center}
+.logout{background:#e9eee9;color:#496b59}
+body:has(#homeSection:not(.hidden)){padding:24px 32px}
+.container:has(#homeSection:not(.hidden)){width:100%;max-width:none;padding:0;background:transparent;box-shadow:none;border-radius:0}
+#homeSection{width:100%;max-width:1400px;margin:0 auto;padding:32px;background:#fff;border-radius:20px;box-shadow:0 8px 30px rgba(40,70,50,.07)}
+#homeSection h1{color:#345d49;font-size:30px}
+#homeSection h2{color:#345d49;font-size:21px;margin:0 0 14px}
+#teacherPanel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin-top:28px}
+#teacherPanel>h2,#teacherPanel .assignment-section,#teacherPanel .submission-section{grid-column:1/-1}
+#teacherPanel .student-list,#teacherPanel form,#teacherPanel .assignment-section,#teacherPanel .submission-section{background:#f8faf8;border:1px solid #e3ebe5;border-radius:16px;padding:22px;min-width:0}
+#teacherPanel h3{color:#496b59;margin-top:0}
+#teacherPanel input,#teacherPanel select,#teacherPanel textarea{margin:8px 0 14px}
+#teacherPanel textarea{min-height:110px;resize:vertical}
+#teacherPanel .assignment-section form{background:transparent;border:0;padding:0}
+#studentList{line-height:1.8;overflow-wrap:anywhere}
+.student-item{padding:12px 0;border-bottom:1px solid #e3ebe5}
+.student-item button{display:block;width:auto;background:#b66b60;margin-top:8px}
+.submission-section{min-width:0}
+.submission-section>button,.student-list>button{width:auto}
+.submission-filters{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin:15px 0}
+#studentPanel{margin-top:28px;padding:22px;background:#f8faf8;border:1px solid #e3ebe5;border-radius:16px}
+.student-assignment-item{overflow-wrap:anywhere}
+#revisionPanel{margin-top:28px;padding:24px;background:#fffaf5;border:1px solid #f0e2d5;border-radius:18px}
+#revisionPanel>h2{color:#805b43;margin:0 0 8px}
+#revisionPanel>.sub{margin-bottom:18px}
+.revision-unit{margin-top:16px;padding:20px;background:#fff;border:1px solid #eadfd5;border-radius:14px}
+.revision-unit h3{color:#805b43;margin:0 0 14px;font-size:19px}
+.revision-unit details{display:block;width:100%;margin:10px 0;padding:14px 16px;background:#fff8f1;border:1px solid #f0e5db;border-radius:10px}
+.revision-unit summary{cursor:pointer;font-weight:700;color:#6f503c;line-height:1.5}
+.revision-content{display:block;width:100%;padding-top:14px;line-height:1.75;color:#444;overflow-wrap:anywhere}
+.revision-content h4{color:#6f503c;margin:20px 0 8px}
+.revision-content h4:first-child{margin-top:0}
+.revision-content p{margin:8px 0}
+.revision-content li{margin:5px 0}
+.revision-content ul,.revision-content ol{padding-left:24px}
+.revision-content details{background:#fff;border-color:#e8ded3}
+.revision-note{padding:14px;background:#f7f4ef;border-left:4px solid #c6a98d;border-radius:6px;margin:12px 0}
+.reading-source{font-size:13px;color:#777;background:#f8f8f6;padding:12px;border-radius:8px}
+.reading-placeholder{padding:16px;border:1px dashed #cdbca9;border-radius:10px;background:#fffdf9}
+.revision-table{width:100%;border-collapse:collapse;margin:12px 0}
+.revision-table th,.revision-table td{border:1px solid #e4ddd4;padding:9px;text-align:left;vertical-align:top}
+.revision-table th{background:#f8f0e8}
+@media(max-width:700px){
+ body{padding:12px}
+ body:has(#homeSection:not(.hidden)){padding:10px}
+ .container:has(#homeSection:not(.hidden)){padding:0}
+ #homeSection{padding:18px}
+ #teacherPanel{grid-template-columns:1fr}
+ #teacherPanel>h2,#teacherPanel .assignment-section,#teacherPanel .submission-section{grid-column:1}
+ #homeSection h1{font-size:25px}
+ #revisionPanel{padding:14px}
+ .revision-unit{padding:14px}
+ .revision-unit h3{font-size:17px}
+ .submission-filters{grid-template-columns:1fr}
+ .revision-table{font-size:13px}
 }
-
-body:has(#homeSection:not(.hidden)) {
-  display: block;
-  padding: 24px 32px;
-}
-
-#homeSection {
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-    #homeSection h1 {
-      color: #345d49;
-      font-size: 30px;
-      margin-bottom: 8px;
-    }
-
-    #homeSection h2 {
-      color: #345d49;
-      font-size: 21px;
-      margin: 0 0 18px;
-    }
-
-    #teacherPanel {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 22px;
-      margin-top: 28px;
-    }
-
-    #teacherPanel > h2,
-    #teacherPanel .assignment-section {
-      grid-column: 1 / -1;
-    }
-
-    #teacherPanel .student-list,
-    #teacherPanel .assignment-section,
-    #teacherPanel form {
-      background: #f8faf8;
-      border: 1px solid #e3ebe5;
-      border-radius: 16px;
-      padding: 22px;
-      min-width: 0;
-    }
-
-    #teacherPanel h3 {
-      color: #496b59;
-      margin-top: 0;
-    }
-
-    #teacherPanel input,
-    #teacherPanel select,
-    #teacherPanel textarea {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 12px 14px;
-      margin: 8px 0 14px;
-      border: 1px solid #d8e2da;
-      border-radius: 9px;
-      font: inherit;
-    }
-
-    #teacherPanel textarea {
-      min-height: 110px;
-      resize: vertical;
-    }
-
-    #teacherPanel button {
-      border: none;
-      border-radius: 9px;
-      padding: 12px 20px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    #teacherPanel .assignment-section {
-      width: 100%;
-    }
-
-    #teacherPanel .assignment-section form {
-      background: transparent;
-      border: none;
-      padding: 0;
-    }
-
-    #studentList {
-      line-height: 1.8;
-      overflow-wrap: anywhere;
-    }
-
-    /* GIAO DIỆN ĐIỆN THOẠI */
-    @media (max-width: 650px) {
-      body {
-        padding: 12px;
-      }
-
-      .container:has(#homeSection:not(.hidden)) {
-        padding: 12px;
-      }
-
-      #homeSection {
-        padding: 18px;
-      }
-
-      #teacherPanel {
-        grid-template-columns: 1fr;
-      }
-
-      #teacherPanel > h2,
-      #teacherPanel .assignment-section {
-        grid-column: 1;
-      }
-
-      #homeSection h1 {
-        font-size: 25px;
-      }
-    }
-    /* KHO ÔN TẬP NGỮ VĂN 7 */
-#revisionPanel {
-  margin-top: 28px;
-  padding: 22px;
-  background: #fffaf5;
-  border: 1px solid #f0e2d5;
-  border-radius: 16px;
-}
-
-#revisionPanel h2 {
-  color: #805b43;
-  margin-bottom: 8px;
-}
-
-.revision-unit {
-  margin-top: 18px;
-  padding: 18px;
-  background: #ffffff;
-  border: 1px solid #eadfd5;
-  border-radius: 12px;
-}
-
-.revision-unit h3 {
-  color: #805b43;
-  margin-top: 0;
-  margin-bottom: 16px;
-}
-
-.revision-unit details {
-  margin: 10px 0;
-  padding: 13px 15px;
-  background: #fff8f1;
-  border-radius: 9px;
-  border: 1px solid #f0e5db;
-}
-
-.revision-unit summary {
-  cursor: pointer;
-  font-weight: 600;
-  color: #6f503c;
-}
-
-.revision-content {
-  padding-top: 12px;
-  line-height: 1.7;
-  color: #444;
-}
-    #revisionPanel .revision-unit details {
-  display: block;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-#revisionPanel .revision-unit details[open] {
-  background: #fff8f1;
-}
-
-#revisionPanel .revision-unit .revision-content {
-  display: block;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-#revisionPanel .revision-unit .writing-practice {
-  display: block;
-  width: 100%;
-  box-sizing: border-box;
-  padding: 15px;
-  margin-top: 10px;
-  background: #ffffff;
-  border: 1px solid #eadfd5;
-  border-radius: 9px;
-}
-  </style>
+</style>
 </head>
+
 <body>
-  <main class="container">
-    <section id="loginSection">
-      <div class="brand">
-        <div class="book">📚</div>
-        <h1>Văn 7 cùng cô Thương</h1>
-        <div class="sub">Cùng học Văn, cùng khám phá và trưởng thành.</div>
-      </div>
+<main class="container">
 
+<section id="loginSection">
+<div class="brand">
+<div class="book">📚</div>
+<h1>Văn 7 cùng cô Thương</h1>
+<div class="sub">Cùng học Văn, cùng khám phá và trưởng thành.</div>
+</div>
 
-      <form id="loginForm">
-        <label for="email">Email hoặc tên đăng nhập</label>
+<form id="loginForm">
+<label for="email">Email hoặc tên đăng nhập</label>
 <input id="email" type="text" placeholder="Nhập email hoặc tên tài khoản" required>
+<label for="password">Mật khẩu</label>
+<input id="password" type="password" placeholder="Nhập mật khẩu" required>
+<button type="submit" id="loginButton">Đăng nhập</button>
+</form>
+<div id="loginMessage" class="message"></div>
+<div class="note">Không có tài khoản? Liên hệ cô Thương để được cấp tài khoản.</div>
+</section>
 
-        <label for="password">Mật khẩu</label>
-        <input id="password" type="password" placeholder="Nhập mật khẩu" required>
+<section id="homeSection" class="hidden">
+<div class="book">🌿</div>
+<h1>Chào mừng em!</h1>
+<p id="userName"></p>
+<p id="userRole" class="sub"></p>
+<div id="dashboardMessage" class="message"></div>
 
-        <button type="submit" id="loginButton">Đăng nhập</button>
-      </form>
-      <div id="loginMessage" class="message"></div>
-      <div class="note">Không có tài khoản? Liên hệ cô Thương để được cấp tài khoản.</div>
-    </section>
+<div id="teacherPanel" class="hidden">
+<h2>Quản lý học sinh</h2>
 
-  <section id="homeSection" class="hidden welcome">
-  <div class="book">🌿</div>
-  <h1>Chào mừng em!</h1>
+<form id="createStudentForm">
+<h3>Cấp tài khoản mới</h3>
+<label for="studentName">Họ và tên học sinh</label>
+<input id="studentName" type="text" required>
+<label for="studentUsername">Tên đăng nhập</label>
+<input id="studentUsername" type="text" placeholder="Ví dụ: nguyenvana7a" required>
+<label for="studentPassword">Mật khẩu</label>
+<input id="studentPassword" type="password" minlength="8" required>
+<label for="studentClass">Lớp</label>
+<select id="studentClass" required><option value="7A">7A</option></select>
+<button type="submit">Tạo tài khoản học sinh</button>
+<div id="createStudentMessage" class="message"></div>
+</form>
 
-  <p id="userName"></p>
-  <p id="userRole" class="sub"></p>
-  <div id="dashboardMessage" class="message"></div>
-  <div id="teacherPanel" class="hidden">
-    <h2>Quản lý học sinh</h2>
-  <h3>Cấp tài khoản mới</h3>
-
-    <form id="createStudentForm">
-    <label for="studentName">Họ và tên học sinh</label>
-    <input id="studentName" type="text" required>
-
-    <label for="studentUsername">Tên đăng nhập</label>
-    <input id="studentUsername" type="text"
-      placeholder="Ví dụ: nguyenvana7a" required>
-
-    <label for="studentPassword">Mật khẩu</label>
-    <input id="studentPassword" type="password"
-      minlength="8" required>
-
-    <label for="studentClass">Lớp</label>
-    <select id="studentClass" required>
-      <option value="7A">7A</option>
-    </select>
-
-    <button type="submit">Tạo tài khoản học sinh</button>
-    <div id="createStudentMessage" class="message"></div>
-  </form>
-    <div class="student-list">
-  <h3>Danh sách học sinh</h3>
-  <button type="button" id="refreshStudents">
-    Làm mới danh sách
-  </button>
-  <div id="studentListMessage" class="message"></div>
-  <div id="studentList"></div>
+<div class="student-list">
+<h3>Danh sách học sinh</h3>
+<button type="button" id="refreshStudents">Làm mới danh sách</button>
+<div id="studentListMessage" class="message"></div>
+<div id="studentList"></div>
 </div>
-    
+
 <div class="assignment-section">
-  <h2>Giao bài tập</h2>
-
-  <form id="createAssignmentForm">
-    <label for="assignmentTitle">Tên bài tập</label>
-    <input
-      id="assignmentTitle"
-      type="text"
-      placeholder="Ví dụ: Ôn tập Tiếng Việt"
-      required
-    >
-    <label for="assignmentBody">Nội dung yêu cầu</label>
-    <textarea
-      id="assignmentBody"
-      rows="5"
-      placeholder="Nhập nội dung bài tập..."
-      required
-    ></textarea>
-
-    <label for="assignmentClass">Lớp được giao</label>
-    <select id="assignmentClass" required>
-      <option value="7A">7A</option>
-    </select>
-
-    <button type="submit">Giao bài tập</button>
-    <div id="assignmentMessage" class="message"></div>
-  </form>
+<h2>Giao bài tập</h2>
+<form id="createAssignmentForm">
+<label for="assignmentTitle">Tên bài tập</label>
+<input id="assignmentTitle" type="text" placeholder="Ví dụ: Ôn tập Tiếng Việt" required>
+<label for="assignmentBody">Nội dung yêu cầu</label>
+<textarea id="assignmentBody" rows="5" placeholder="Nhập nội dung bài tập..." required></textarea>
+<label for="assignmentClass">Lớp được giao</label>
+<select id="assignmentClass" required><option value="7A">7A</option></select>
+<button type="submit">Giao bài tập</button>
+<div id="assignmentMessage" class="message"></div>
+</form>
 </div>
+
 <div class="submission-section">
-  <h2>Bài nộp của học sinh</h2>
-  <p class="sub">Theo dõi, xem bài làm và chấm điểm cho học sinh.</p>
-
-  <button type="button" id="refreshSubmissions">
-    Làm mới bài nộp
-  </button>
-
- <div id="submissionMessage" class="message">
-  Nhấn làm mới để tải bài nộp.
-</div>
-
+<h2>Bài nộp của học sinh</h2>
+<p class="sub">Theo dõi, xem bài làm và chấm điểm cho học sinh.</p>
+<button type="button" id="refreshSubmissions">Làm mới bài nộp</button>
+<div id="submissionMessage" class="message">Nhấn làm mới để tải bài nộp.</div>
 <div class="submission-filters">
-  <label for="filterStudent">Lọc theo học sinh</label>
-  <select id="filterStudent">
-    <option value="">Tất cả học sinh</option>
-  </select>
-
-  <label for="filterAssignment">Lọc theo bài tập</label>
-  <select id="filterAssignment">
-    <option value="">Tất cả bài tập</option>
-  </select>
+<div>
+<label for="filterStudent">Lọc theo học sinh</label>
+<select id="filterStudent"><option value="">Tất cả học sinh</option></select>
+</div>
+<div>
+<label for="filterAssignment">Lọc theo bài tập</label>
+<select id="filterAssignment"><option value="">Tất cả bài tập</option></select>
+</div>
+</div>
+<div id="submissionList"></div>
+</div>
 </div>
 
-  <div id="submissionList"></div>
-</div>
-</div>      
-    <div id="studentPanel" class="hidden">
-  <h2>Bài tập của em</h2>
-  <p class="sub">Những bài tập cô Thương đã giao cho lớp mình.</p>
-
-  <div id="studentAssignmentMessage" class="message">
-    Đang chờ tải bài tập...
-  </div>
-
+<div id="studentPanel" class="hidden">
+<h2>Bài tập của em</h2>
+<p class="sub">Những bài tập cô Thương đã giao cho lớp mình.</p>
+<div id="studentAssignmentMessage" class="message">Đang chờ tải bài tập...</div>
 <div id="studentAssignments"></div>
 </div>
 
-<!-- KHO ÔN TẬP NGỮ VĂN 7 -->
+<!-- KHO ÔN TẬP -->
 <section id="revisionPanel">
-  <h2>Ôn tập Ngữ văn 7</h2>
-  <p class="sub">
-    Cùng cô Thương ôn luyện kiến thức và thực hành theo từng bài học.
-  </p>
+<h2>Ôn tập Ngữ văn 7</h2>
+<p class="sub">Cùng cô Thương hệ thống kiến thức, luyện tập và chuẩn bị tốt cho các bài kiểm tra.</p>
 
-  <div class="revision-unit">
-    <h3>Bài 1. Bầu trời tuổi thơ</h3>
+<!-- BÀI 1 -->
+<div class="revision-unit">
+<h3>Bài 1. Bầu trời tuổi thơ</h3>
 
-    <details>
-      <summary>A. Tri thức Ngữ văn</summary>
-      <div class="revision-content" id="revisionKnowledge1">
-        <h4>1. Đề tài</h4>
-<p>Đề tài là phạm vi đời sống được phản ánh trong tác phẩm văn học.</p>
-<p>Một tác phẩm có thể đề cập đến nhiều đề tài nhưng thường có một đề tài chính.</p>
-
+<details>
+<summary>A. Tri thức Ngữ văn</summary>
+<div class="revision-content">
+<h4>1. Đề tài</h4>
+<p>Đề tài là phạm vi đời sống được phản ánh trong tác phẩm văn học. Một tác phẩm có thể đề cập đến nhiều đề tài nhưng thường có một đề tài chính.</p>
 <h4>2. Chi tiết</h4>
-<p>Chi tiết là những yếu tố nhỏ tạo nên thế giới hình tượng của tác phẩm như: cảnh vật, con người, sự việc, hành động...</p>
-<p>Chi tiết góp phần làm cho tác phẩm trở nên sinh động, hấp dẫn và thể hiện ý nghĩa của văn bản.</p>
-
+<p>Chi tiết là những yếu tố nhỏ tạo nên thế giới hình tượng của tác phẩm như cảnh vật, con người, sự việc, hành động, lời nói. Chi tiết góp phần làm cho tác phẩm sinh động, hấp dẫn và thể hiện ý nghĩa của văn bản.</p>
 <h4>3. Tính cách nhân vật</h4>
-<p>Tính cách nhân vật là những đặc điểm riêng tương đối ổn định của nhân vật.</p>
-<p>Có thể nhận biết tính cách nhân vật qua:</p>
-<ul>
-  <li>Hành động, cử chỉ.</li>
-  <li>Lời nói, cách ứng xử.</li>
-  <li>Suy nghĩ, cảm xúc.</li>
-  <li>Mối quan hệ với các nhân vật khác.</li>
-  <li>Lời nhận xét của người kể chuyện và nhân vật khác.</li>
-</ul>
-
+<p>Tính cách nhân vật là những đặc điểm riêng tương đối ổn định của nhân vật. Có thể nhận biết tính cách qua:</p>
+<ul><li>Hành động, cử chỉ.</li><li>Lời nói và cách ứng xử.</li><li>Suy nghĩ, cảm xúc.</li><li>Mối quan hệ với các nhân vật khác.</li><li>Lời nhận xét của người kể chuyện hoặc nhân vật khác.</li></ul>
 <h4>4. Văn bản tóm tắt</h4>
-<p>Văn bản tóm tắt là văn bản ngắn gọn, phản ánh trung thành nội dung chính của văn bản gốc.</p>
-<p>Khi tóm tắt cần giữ lại những sự việc, ý chính quan trọng và lược bỏ các chi tiết không cần thiết.</p>
-
+<p>Văn bản tóm tắt là văn bản ngắn gọn, phản ánh trung thành nội dung cơ bản của văn bản gốc. Bản tóm tắt cần giữ lại những sự việc, ý chính quan trọng và lược bỏ chi tiết phụ.</p>
 <h4>5. Mở rộng thành phần chính và trạng ngữ bằng cụm từ</h4>
-<p>Thành phần chính của câu và trạng ngữ có thể được mở rộng bằng cụm từ để cung cấp thông tin cụ thể, đầy đủ hơn.</p>
-<p>Các loại cụm từ thường gặp:</p>
-<ul>
-  <li>Cụm danh từ.</li>
-  <li>Cụm động từ.</li>
-  <li>Cụm tính từ.</li>
-</ul>
-
+<p>Thành phần chính của câu và trạng ngữ có thể được mở rộng bằng cụm từ để cung cấp thông tin cụ thể, đầy đủ hơn. Các cụm từ thường gặp là cụm danh từ, cụm động từ và cụm tính từ.</p>
 <h4>Ghi nhớ</h4>
-<p>Khi đọc một truyện, cần chú ý đề tài, chi tiết tiêu biểu, nhân vật, tính cách nhân vật và nội dung chính của văn bản.</p>
-      </div>
-    </details>
+<p>Khi đọc truyện, cần chú ý đề tài, chi tiết tiêu biểu, nhân vật, tính cách nhân vật và nội dung chính của văn bản.</p>
+</div>
+</details>
 
-    <details>
-      <summary>B. Thực hành Tiếng Việt</summary>
-      <div class="revision-content" id="revisionVietnamese1">
-<h4>1. Mở rộng trạng ngữ của câu bằng cụm từ</h4>
-
-<p><strong>Trạng ngữ</strong> là thành phần phụ của câu, giúp xác định thời gian, nơi chốn, nguyên nhân, mục đích, phương tiện hoặc cách thức diễn ra sự việc.</p>
-
-<p><strong>Mở rộng trạng ngữ bằng cụm từ</strong> là dùng cụm từ thay cho từ ngữ làm trạng ngữ để cung cấp thông tin cụ thể, đầy đủ hơn.</p>
-
+<details>
+<summary>B. Thực hành Tiếng Việt</summary>
+<div class="revision-content">
+<h4>1. Mở rộng thành phần chính của câu bằng cụm từ</h4>
+<p>Thành phần chính của câu gồm chủ ngữ và vị ngữ. Có thể mở rộng chủ ngữ hoặc vị ngữ bằng cụm từ để câu cung cấp thông tin cụ thể hơn.</p>
 <p><strong>Ví dụ:</strong></p>
-<ul>
-  <li>Đêm, chúng tôi nghe tiếng chim hót.</li>
-  <li>Đêm hôm ấy, chúng tôi nghe tiếng chim hót.</li>
-</ul>
+<ul><li>Câu chưa mở rộng: Chim hót.</li><li>Câu mở rộng: Những chú chim nhỏ trên cành cây hót líu lo.</li></ul>
+<h4>2. Mở rộng trạng ngữ bằng cụm từ</h4>
+<p>Trạng ngữ là thành phần phụ của câu, giúp xác định thời gian, nơi chốn, nguyên nhân, mục đích, phương tiện hoặc cách thức diễn ra sự việc.</p>
+<p><strong>Ví dụ:</strong></p>
+<ul><li>Đêm, chúng tôi nghe tiếng chim hót.</li><li>Đêm hôm ấy, chúng tôi nghe tiếng chim hót.</li></ul>
 <p>Trạng ngữ “Đêm hôm ấy” cụ thể hơn “Đêm”, giúp người đọc hình dung rõ thời điểm diễn ra sự việc.</p>
-
-<h4>2. Từ láy</h4>
-
-<p><strong>Từ láy</strong> là từ được tạo thành bằng cách lặp lại âm đầu, phần vần hoặc cả âm đầu và phần vần.</p>
-
-<p><strong>Các kiểu từ láy thường gặp:</strong></p>
-<ul>
-  <li>Láy âm đầu: long lanh, lung linh.</li>
-  <li>Láy vần: lao xao, lác đác.</li>
-  <li>Láy cả âm đầu và vần: xanh xanh, đo đỏ.</li>
-</ul>
-
-<p><strong>Tác dụng:</strong> Gợi hình ảnh, âm thanh, trạng thái; làm cho cách diễn đạt sinh động và giàu sức biểu cảm.</p>
-
-<h4>3. Mở rộng thành phần chính của câu bằng cụm từ</h4>
-
-<p>Thành phần chính của câu gồm chủ ngữ và vị ngữ. Có thể mở rộng các thành phần này bằng cụm từ để câu cung cấp nhiều thông tin cụ thể hơn.</p>
-
-<p><strong>Ví dụ:</strong></p>
-<ul>
-  <li>Câu ban đầu: Gió thổi.</li>
-  <li>Câu mở rộng: Những cơn gió mùa thu thổi nhè nhẹ qua vườn.</li>
-</ul>
-
-<p>Trong câu mở rộng, chủ ngữ và vị ngữ được diễn đạt cụ thể hơn, giúp người đọc hình dung rõ sự việc.</p>
-
-<h4>4. Cách nhận biết và thực hiện</h4>
-
-<ul>
-  <li>Xác định trạng ngữ, chủ ngữ hoặc vị ngữ trong câu.</li>
-  <li>Quan sát từ ngữ đang đảm nhiệm thành phần đó.</li>
-  <li>Thay từ ngữ bằng cụm từ phù hợp để bổ sung thông tin.</li>
-  <li>Đọc lại câu, kiểm tra ý nghĩa và sự phù hợp về ngữ pháp.</li>
-</ul>
-
-<h4>5. Bài tập tự luyện</h4>
-
-<p><strong>Bài 1.</strong> Tìm trạng ngữ trong câu sau và cho biết trạng ngữ bổ sung thông tin gì:</p>
-<p>“Buổi sáng hôm ấy, những chú chim ríu rít chuyền cành.”</p>
-
-<p><strong>Bài 2.</strong> Mở rộng trạng ngữ trong câu sau bằng cụm từ:</p>
-<p>“Chiều, em cùng bạn ra sân chơi.”</p>
-
-<p><strong>Bài 3.</strong> Tìm các từ láy trong câu sau và nêu tác dụng:</p>
-<p>“Những chiếc lá khẽ rung rinh trong làn gió nhè nhẹ.”</p>
-
-<p><strong>Bài 4.</strong> Mở rộng chủ ngữ và vị ngữ trong câu:</p>
-<p>“Chim hót.”</p>
-
-<p><strong>Bài 5.</strong> So sánh hai câu sau và nhận xét tác dụng của việc mở rộng thành phần câu:</p>
-<ul>
-  <li>Rừng cây im lặng.</li>
-  <li>Rừng cây xanh thẳm im lặng trong buổi sớm mai.</li>
-</ul>
-
-<h4>6. Gợi ý đáp án</h4>
-
+<h4>3. Cụm danh từ, cụm động từ, cụm tính từ</h4>
+<ul><li><strong>Cụm danh từ:</strong> tổ hợp từ có danh từ làm trung tâm. Ví dụ: những bông hoa nhỏ xinh.</li><li><strong>Cụm động từ:</strong> tổ hợp từ có động từ làm trung tâm. Ví dụ: đang chăm chú đọc sách.</li><li><strong>Cụm tính từ:</strong> tổ hợp từ có tính từ làm trung tâm. Ví dụ: rất dịu dàng và ấm áp.</li></ul>
+<h4>4. Bài tập tự luyện</h4>
+<p><strong>Bài 1.</strong> Tìm trạng ngữ và cho biết trạng ngữ bổ sung thông tin gì trong câu: “Buổi sáng hôm ấy, những chú chim ríu rít chuyền cành.”</p>
+<p><strong>Bài 2.</strong> Mở rộng trạng ngữ trong câu: “Chiều, em cùng bạn ra sân chơi.”</p>
+<p><strong>Bài 3.</strong> Xác định chủ ngữ, vị ngữ trong câu: “Những cánh chim trắng muốt đang chao liệng trên bầu trời xanh.”</p>
+<p><strong>Bài 4.</strong> Mở rộng chủ ngữ và vị ngữ trong câu: “Gió thổi.”</p>
+<p><strong>Bài 5.</strong> So sánh hai câu: “Rừng cây im lặng” và “Rừng cây xanh thẳm im lặng trong buổi sớm mai”. Nêu tác dụng của việc mở rộng thành phần câu.</p>
+<h4>5. Gợi ý đáp án</h4>
 <p><strong>Bài 1:</strong> Trạng ngữ “Buổi sáng hôm ấy”, bổ sung thông tin về thời gian.</p>
-
 <p><strong>Bài 2:</strong> Có thể viết: “Vào buổi chiều mùa thu, em cùng bạn ra sân chơi.”</p>
+<p><strong>Bài 3:</strong> Chủ ngữ: “Những cánh chim trắng muốt”; vị ngữ: “đang chao liệng trên bầu trời xanh”.</p>
+<p><strong>Bài 4:</strong> Có thể viết: “Những cơn gió mùa thu thổi nhè nhẹ qua khu vườn.”</p>
+<p><strong>Bài 5:</strong> Câu thứ hai cung cấp thêm thông tin về đặc điểm của rừng cây và thời gian diễn ra sự việc, giúp câu văn cụ thể, giàu hình ảnh hơn.</p>
+</div>
+</details>
 
-<p><strong>Bài 3:</strong> Các từ láy: “rung rinh”, “nhè nhẹ”. Tác dụng: gợi hình ảnh chiếc lá chuyển động nhẹ nhàng và làn gió thoảng qua.</p>
+<details>
+<summary>C. Đọc hiểu văn bản ngoài SGK</summary>
+<div class="revision-content">
+<div class="reading-placeholder">
+<h4>Ngữ liệu luyện đọc hiểu</h4>
+<p><strong>Định hướng:</strong> Luyện đọc hiểu truyện đồng thoại, truyện viết về thế giới tuổi thơ, tình cảm gia đình, thiên nhiên và những trải nghiệm của trẻ em.</p>
+<p><strong>Văn bản tham khảo đang có:</strong> “Con sẻ” – I. Tuốc-ghê-nhép, theo trang hướng dẫn học tập Tiếng Việt 4.</p>
+<p class="reading-source">Nguồn tham khảo: https://loigiaihay.com/soan-bai-con-se-trang-90-sgk-tieng-viet-4-tap-2-c118a18529.html</p>
+<p>Lưu ý: Ngữ liệu này là văn bản tham khảo ngoài SGK Ngữ văn 7, không phải đề kiểm tra giữa kì Ngữ văn 7. Câu hỏi dưới đây là câu hỏi luyện tập do cô biên soạn.</p>
+</div>
+<h4>Câu hỏi luyện tập với văn bản “Con sẻ”</h4>
+<p><strong>Câu 1.</strong> Xác định người kể chuyện và ngôi kể.</p>
+<p><strong>Câu 2.</strong> Sự việc nào khiến sẻ non gặp nguy hiểm?</p>
+<p><strong>Câu 3.</strong> Tìm những chi tiết thể hiện hành động dũng cảm của sẻ già.</p>
+<p><strong>Câu 4.</strong> Vì sao sẻ già bất chấp nguy hiểm để lao xuống bảo vệ sẻ non?</p>
+<p><strong>Câu 5.</strong> Nêu tác dụng của hình ảnh so sánh con chó như một con quỷ khổng lồ.</p>
+<p><strong>Câu 6.</strong> Qua câu chuyện, em nhận xét gì về tình yêu thương và sự hi sinh?</p>
+<p><strong>Câu 7.</strong> Viết đoạn văn khoảng 5–7 câu trình bày suy nghĩ của em về ý nghĩa của tình yêu thương trong cuộc sống.</p>
+<h4>Gợi ý trả lời</h4>
+<p><strong>Câu 1:</strong> Người kể chuyện xưng “tôi”, kể theo ngôi thứ nhất.</p>
+<p><strong>Câu 2:</strong> Sẻ non bị rơi khỏi tổ và đứng trước nguy cơ bị con chó tấn công.</p>
+<p><strong>Câu 3:</strong> Sẻ già lao xuống trước mõm chó, dựng lông, kêu lên và lấy thân mình che chở sẻ non.</p>
+<p><strong>Câu 4:</strong> Vì tình yêu thương và bản năng bảo vệ con khiến sẻ già sẵn sàng đối mặt với nguy hiểm.</p>
+<p><strong>Câu 5:</strong> Hình ảnh so sánh làm nổi bật sự đáng sợ của con chó khi nhìn từ phía sẻ già, qua đó nhấn mạnh sự dũng cảm của sẻ già.</p>
+<p><strong>Câu 6:</strong> Tình yêu thương tạo nên sức mạnh, giúp mỗi cá thể biết quan tâm, bảo vệ và hi sinh vì người mình yêu thương.</p>
+<p><strong>Câu 7:</strong> Học sinh trình bày suy nghĩ hợp lí, có lí lẽ và dẫn chứng phù hợp.</p>
+</div>
+</details>
 
-<p><strong>Bài 4:</strong> Có thể viết: “Những chú chim nhỏ trên cành cây hót líu lo.”</p>
-
-<p><strong>Bài 5:</strong> Câu thứ hai cung cấp thêm thông tin về đặc điểm của rừng cây và thời gian, không gian diễn ra sự việc, giúp câu văn cụ thể, giàu hình ảnh hơn.</p>
-
-<p><strong>Ghi nhớ:</strong> Khi mở rộng thành phần câu, cần bảo đảm câu đúng ngữ pháp, rõ nghĩa và phù hợp với nội dung muốn diễn đạt.</p>
-      </div>
-    </details>
-
-    <details>
-      <summary>C. Đọc hiểu văn bản ngoài SGK</summary>
-      <div class="revision-content" id="revisionReading1">
-
-<div class="reading-practice">
-  <h4>NGỮ LIỆU 1. CON SẺ</h4>
-
-  <p><strong>Thể loại:</strong> Truyện ngắn</p>
-  <p><strong>Tác giả:</strong> I. Tuốc-ghê-nhép</p>
-  <p><strong>Nội dung trọng tâm:</strong> Tình yêu thương, sự dũng cảm và bản năng bảo vệ con của loài vật.</p>
-
-  <h4>VĂN BẢN</h4>
-
-  <div class="reading-text">
-    <p><strong>Con sẻ</strong></p>
-
-    <p>
-      Tôi đi dọc lối vào vườn. Con chó chạy trước tôi. Chợt nó dừng chân và bắt đầu bò, tuồng như đánh hơi thấy vật gì. Tôi nhìn dọc lối đi và thấy một con sẻ non mép vàng óng, trên đầu có một nhúm lông tơ. Nó rơi từ trên tổ xuống.
-    </p>
-
-    <p>
-      Con chó chậm rãi lại gần. Bỗng từ trên cây cao gần đó, một con sẻ già có bộ ức đen nhánh lao xuống như hòn đá rơi trước mõm con chó. Lông sẻ già dựng ngược, miệng rít lên tuyệt vọng và thảm thiết. Nó nhảy hai ba bước về phía cái mõm há rộng đầy răng của con chó.
-    </p>
-
-    <p>
-      Sẻ già lao đến cứu con, lấy thân mình phủ kín sẻ con. Giọng nó yếu ớt nhưng hung dữ và khản đặc. Trước mắt nó, con chó như một con quỷ khổng lồ. Nó sẽ hi sinh. Nhưng một sức mạnh vô hình vẫn cuốn nó xuống đất.
-    </p>
-
-    <p>
-      Con chó của tôi dừng lại và lùi... Dường như nó hiểu rằng trước mặt nó có một sức mạnh. Tôi vội lên tiếng gọi con chó đang bối rối, bắt nó tránh ra xa, lòng đầy thán phục.
-    </p>
-
-    <p>
-      Vâng, lòng tôi đầy thán phục, xin bạn đừng cười. Tôi kính cẩn nghiêng mình trước con chim sẻ bé bỏng dũng cảm kia, trước tình yêu của nó.
-    </p>
-
-    <p><em>Theo TUỐC-GHÊ-NHÉP</em></p>
-  </div>
-
-  <h4>CHÚ THÍCH</h4>
-  <p><strong>1. Tuồng như:</strong> Có vẻ như là, dường như.</p>
-  <p><strong>2. Khản đặc:</strong> (Nói, kêu) gần như không ra tiếng.</p>
-  <p><strong>3. Bối rối:</strong> Lúng túng, mất bình tĩnh, không biết nên xử trí thế nào.</p>
-  <p><strong>4. Kính cẩn:</strong> Tỏ rõ sự kính trọng bằng điệu bộ, cử chỉ, nét mặt rất nghiêm trang.</p>
+<details>
+<summary>D. Viết</summary>
+<div class="revision-content">
+<h4>Đề bài: Tóm tắt văn bản theo những yêu cầu khác nhau về độ dài</h4>
+<h4>1. Tri thức cần nhớ</h4>
+<p>Tóm tắt văn bản là dùng lời văn của mình trình bày ngắn gọn những nội dung chính của văn bản gốc, giúp người đọc nắm được những sự việc, thông tin quan trọng.</p>
+<h4>2. Yêu cầu khi tóm tắt</h4>
+<ul><li>Phản ánh đúng nội dung chính của văn bản gốc.</li><li>Lựa chọn sự việc, thông tin quan trọng.</li><li>Không làm sai lệch ý nghĩa văn bản.</li><li>Diễn đạt ngắn gọn, rõ ràng, mạch lạc bằng lời văn của mình.</li><li>Đảm bảo độ dài theo yêu cầu.</li></ul>
+<h4>3. Quy trình thực hiện</h4>
+<ol><li>Đọc kĩ văn bản để hiểu nội dung.</li><li>Xác định nhân vật, đối tượng và sự việc chính.</li><li>Lựa chọn, sắp xếp các ý theo trình tự hợp lí.</li><li>Viết bản tóm tắt bằng lời văn của mình.</li><li>Đọc lại, chỉnh sửa nội dung và độ dài.</li></ol>
+<h4>4. Ví dụ minh họa</h4>
+<p><strong>Tóm tắt ngắn:</strong> Một con sẻ non bị rơi khỏi tổ và gặp nguy hiểm trước con chó. Sẻ già bất chấp nguy hiểm lao xuống che chở cho con khiến con chó phải lùi lại. Người kể chuyện vô cùng thán phục trước tình yêu thương và lòng dũng cảm của sẻ già.</p>
+<p><strong>Tóm tắt đầy đủ hơn:</strong> Trong một lần đi dọc lối vào vườn, người kể chuyện nhìn thấy một con sẻ non bị rơi khỏi tổ. Con chó đi trước phát hiện ra sẻ non và chậm rãi tiến lại gần. Bất ngờ, một con sẻ già từ trên cây lao xuống, dũng cảm đối mặt với con chó để bảo vệ con. Nó lấy thân mình che kín sẻ non dù biết bản thân có thể gặp nguy hiểm. Trước hành động ấy, con chó dừng lại rồi lùi đi. Người kể chuyện vô cùng thán phục trước sự dũng cảm và tình yêu thương của chim sẻ già.</p>
+<h4>5. Bài tập thực hành</h4>
+<p><strong>Bài 1.</strong> Tóm tắt một văn bản truyện đã học bằng khoảng 3 câu.</p>
+<p><strong>Bài 2.</strong> Tóm tắt chính văn bản ấy bằng khoảng 5–7 câu.</p>
+<p><strong>Bài 3.</strong> So sánh hai bản tóm tắt về nội dung và độ dài.</p>
+<p><strong>Bài 4.</strong> Một học sinh bỏ qua sự việc quan trọng nhất khi tóm tắt. Theo em, bản tóm tắt đó có đạt yêu cầu không? Vì sao?</p>
+<h4>6. Ghi nhớ</h4>
+<p>Bản tóm tắt cần ngắn gọn nhưng không được thiếu nội dung cốt lõi. Độ dài có thể thay đổi theo yêu cầu nhưng tính chính xác và trung thành với văn bản gốc luôn phải được bảo đảm.</p>
+</div>
+</details>
 </div>
 
-  <h4>I. CÂU HỎI LUYỆN TẬP</h4>
+<!-- BÀI 2 -->
+<div class="revision-unit">
+<h3>Bài 2. Khúc nhạc tâm hồn</h3>
 
-  <p><strong>Câu 1.</strong> Xác định thể loại của văn bản.</p>
+<details>
+<summary>A. Tri thức Ngữ văn</summary>
+<div class="revision-content">
+<h4>1. Thơ bốn chữ và thơ năm chữ</h4>
+<p>Thơ bốn chữ là thể thơ có các dòng thơ thường gồm bốn tiếng. Thơ năm chữ là thể thơ có các dòng thơ thường gồm năm tiếng. Hai thể thơ này thường có nhịp điệu linh hoạt, phù hợp để thể hiện cảm xúc và suy nghĩ.</p>
+<h4>2. Vần trong thơ</h4>
+<p>Vần là sự lặp lại những âm có cách phát âm gần giống nhau ở các vị trí nhất định, tạo sự liên kết và nhạc điệu cho bài thơ. Có thể gặp vần chân và vần lưng.</p>
+<h4>3. Nhịp thơ</h4>
+<p>Nhịp thơ là cách ngắt nhịp trong dòng thơ. Nhịp thơ góp phần tạo âm hưởng và thể hiện cảm xúc. Khi đọc thơ cần chú ý cách ngắt nhịp để cảm nhận đúng sắc thái của câu thơ.</p>
+<h4>4. Hình ảnh thơ</h4>
+<p>Hình ảnh thơ là những hình ảnh được tạo nên bằng ngôn từ, giúp người đọc hình dung cảnh vật, con người, sự việc và cảm xúc.</p>
+<h4>5. Tình cảm, cảm xúc trong thơ</h4>
+<p>Thơ thường thể hiện những rung động, tình cảm và suy nghĩ của người viết trước con người, thiên nhiên và cuộc sống. Khi đọc thơ, cần nhận ra cảm xúc chủ đạo và những từ ngữ, hình ảnh thể hiện cảm xúc ấy.</p>
+</div>
+</details>
 
-  <p><strong>Câu 2.</strong> Văn bản được kể theo ngôi thứ mấy? Người kể chuyện là ai?</p>
+<details>
+<summary>B. Thực hành Tiếng Việt</summary>
+<div class="revision-content">
+<h4>1. Biện pháp tu từ so sánh</h4>
+<p>So sánh là đối chiếu sự vật, sự việc này với sự vật, sự việc khác có nét tương đồng nhằm tăng sức gợi hình, gợi cảm.</p>
+<p><strong>Ví dụ:</strong> Mặt trời đỏ như quả cầu lửa.</p>
+<h4>2. Biện pháp tu từ nhân hóa</h4>
+<p>Nhân hóa là gọi hoặc tả con vật, cây cối, đồ vật bằng những từ ngữ vốn dùng để gọi hoặc tả con người; làm cho sự vật trở nên gần gũi, sinh động.</p>
+<p><strong>Ví dụ:</strong> Hàng cây dang tay đón gió.</p>
+<h4>3. Biện pháp tu từ ẩn dụ</h4>
+<p>Ẩn dụ là gọi tên sự vật, hiện tượng này bằng tên sự vật, hiện tượng khác có nét tương đồng nhằm tăng sức gợi hình, gợi cảm.</p>
+<h4>4. Từ ngữ và hình ảnh biểu cảm</h4>
+<p>Khi đọc thơ, cần chú ý những từ ngữ gợi hình, gợi cảm, từ láy, cách dùng từ và hình ảnh có khả năng thể hiện cảm xúc của tác giả.</p>
+<h4>5. Bài tập tự luyện</h4>
+<p><strong>Bài 1.</strong> Xác định số tiếng trong mỗi dòng thơ sau: “Trăng lên đầu núi / Gió hát bên thềm”.</p>
+<p><strong>Bài 2.</strong> Tìm biện pháp tu từ trong câu: “Hàng cây nghiêng mình chào đón nắng mai”.</p>
+<p><strong>Bài 3.</strong> Chỉ ra hình ảnh so sánh trong câu: “Tiếng suối trong như tiếng hát xa”.</p>
+<p><strong>Bài 4.</strong> Nêu tác dụng của biện pháp nhân hóa trong câu: “Những bông hoa mỉm cười trong nắng sớm”.</p>
+<p><strong>Bài 5.</strong> Viết hai dòng thơ bốn chữ hoặc năm chữ có sử dụng biện pháp so sánh hoặc nhân hóa.</p>
+<h4>6. Gợi ý đáp án</h4>
+<p><strong>Bài 1:</strong> Dòng thứ nhất có 4 tiếng; dòng thứ hai có 4 tiếng.</p>
+<p><strong>Bài 2:</strong> Nhân hóa: “nghiêng mình chào đón”.</p>
+<p><strong>Bài 3:</strong> Hình ảnh so sánh: “Tiếng suối trong như tiếng hát xa”.</p>
+<p><strong>Bài 4:</strong> Làm cho hoa trở nên gần gũi, có hành động như con người, gợi vẻ tươi tắn của cảnh vật.</p>
+<p><strong>Bài 5:</strong> Học sinh tự thực hiện, đảm bảo số tiếng theo yêu cầu và có hình ảnh tu từ phù hợp.</p>
+</div>
+</details>
 
-  <p><strong>Câu 3.</strong> Xác định nhân vật chính trong câu chuyện.</p>
+<details>
+<summary>C. Đọc hiểu văn bản ngoài SGK</summary>
+<div class="revision-content">
+<div class="reading-placeholder">
+<h4>Định hướng luyện đọc hiểu thơ</h4>
+<p>Phần này dành cho ngữ liệu thơ ngoài SGK được trích từ đề kiểm tra hoặc đề ôn tập có nguồn xác minh được.</p>
+<p>Cần ưu tiên ngữ liệu phù hợp với nội dung thơ bốn chữ, năm chữ; tình cảm gia đình, tình yêu quê hương, thiên nhiên và tuổi thơ.</p>
+<p class="revision-note">Cô Thương bổ sung văn bản, tên đơn vị ra đề, năm học và đường dẫn nguồn tại đây. Không sử dụng thơ tự sáng tác để thay thế ngữ liệu đề kiểm tra.</p>
+</div>
+<h4>Các dạng câu hỏi cần luyện</h4>
+<ol><li>Xác định thể thơ và căn cứ nhận biết.</li><li>Chỉ ra cách gieo vần, ngắt nhịp trong một đoạn thơ.</li><li>Xác định hình ảnh thơ tiêu biểu.</li><li>Nhận biết và nêu tác dụng của biện pháp tu từ.</li><li>Xác định cảm xúc chủ đạo của bài thơ.</li><li>Nêu nội dung hoặc thông điệp của văn bản.</li><li>Viết đoạn văn ngắn trình bày cảm nhận về một hình ảnh thơ.</li></ol>
+</div>
+</details>
 
-  <p><strong>Câu 4.</strong> Vì sao sẻ già bất chấp nguy hiểm để lao xuống bảo vệ sẻ non?</p>
-
-  <p><strong>Câu 5.</strong> Tìm một chi tiết thể hiện sự dũng cảm của sẻ già và phân tích ý nghĩa của chi tiết ấy.</p>
-
-  <p><strong>Câu 6.</strong> Nêu tác dụng của biện pháp tu từ so sánh được sử dụng khi miêu tả con chó trong văn bản.</p>
-
-  <p><strong>Câu 7.</strong> Qua câu chuyện, em hiểu gì về tình yêu thương và sự hi sinh?</p>
-
-  <p><strong>Câu 8.</strong> Viết đoạn văn khoảng 5–7 câu trình bày suy nghĩ của em về ý nghĩa của tình yêu thương trong cuộc sống.</p>
-
-  <h4>II. GỢI Ý ĐÁP ÁN</h4>
-
-  <p><strong>Câu 1.</strong> Truyện ngắn.</p>
-
-  <p><strong>Câu 2.</strong> Ngôi kể thứ nhất. Người kể chuyện xưng “tôi”, trực tiếp chứng kiến sự việc.</p>
-
-  <p><strong>Câu 3.</strong> Sẻ già là nhân vật trung tâm thể hiện rõ chủ đề câu chuyện.</p>
-
-  <p><strong>Câu 4.</strong> Vì tình yêu thương và bản năng bảo vệ con khiến sẻ già sẵn sàng đối mặt với nguy hiểm để cứu sẻ non.</p>
-
-  <p><strong>Câu 5.</strong> Học sinh có thể chọn chi tiết sẻ già lao xuống trước mõm chó, dang thân che chở sẻ non. Chi tiết thể hiện lòng dũng cảm và tình yêu thương sâu sắc.</p>
-
-  <p><strong>Câu 6.</strong> So sánh con chó với một con quỷ khổng lồ làm nổi bật sự đáng sợ của con chó khi nhìn từ phía sẻ già, qua đó nhấn mạnh sự dũng cảm của sẻ già.</p>
-
-  <p><strong>Câu 7.</strong> Tình yêu thương có thể tạo nên sức mạnh lớn lao, giúp con người và muôn loài biết quan tâm, bảo vệ và hi sinh vì nhau.</p>
-
-  <p><strong>Câu 8.</strong> Học sinh trình bày suy nghĩ hợp lí, có lí lẽ và dẫn chứng phù hợp. Khuyến khích cách diễn đạt chân thành, có liên hệ thực tế.</p>
-
-  <p><em>Lưu ý: Đây là câu hỏi luyện tập và gợi ý đáp án do cô Thương biên soạn, không phải nguyên văn toàn bộ câu hỏi và đáp án của đề gốc.</em></p>
+<details>
+<summary>D. Viết</summary>
+<div class="revision-content">
+<h4>Nội dung 1. Tập làm một bài thơ bốn chữ hoặc năm chữ</h4>
+<h4>1. Yêu cầu</h4>
+<ul><li>Mỗi dòng thơ thường có bốn hoặc năm tiếng theo thể thơ đã chọn.</li><li>Thể hiện được một cảm xúc, suy nghĩ hoặc chủ đề nhất định.</li><li>Sử dụng hình ảnh gần gũi, từ ngữ giàu sức gợi.</li><li>Có thể gieo vần, ngắt nhịp linh hoạt để tạo nhạc điệu.</li><li>Đảm bảo sự liên kết giữa các dòng thơ.</li></ul>
+<h4>2. Quy trình thực hiện</h4>
+<ol><li>Lựa chọn đề tài: gia đình, mái trường, bạn bè, thiên nhiên, quê hương...</li><li>Xác định cảm xúc muốn thể hiện.</li><li>Tìm hình ảnh và từ ngữ phù hợp.</li><li>Viết các dòng thơ theo thể thơ đã chọn.</li><li>Đọc thành tiếng, điều chỉnh nhịp, vần và cách diễn đạt.</li></ol>
+<h4>Nội dung 2. Viết đoạn văn ghi lại cảm xúc sau khi đọc một bài thơ bốn chữ hoặc năm chữ</h4>
+<h4>1. Yêu cầu</h4>
+<ul><li>Giới thiệu bài thơ và cảm xúc chung khi đọc.</li><li>Nêu cảm xúc về nội dung, hình ảnh, từ ngữ hoặc nhịp điệu.</li><li>Chọn một số chi tiết tiêu biểu để làm rõ cảm xúc.</li><li>Diễn đạt chân thành, mạch lạc, có liên kết.</li><li>Không biến đoạn văn thành bản kể lại hoặc diễn xuôi toàn bộ bài thơ.</li></ul>
+<h4>2. Bố cục đoạn văn</h4>
+<p><strong>Mở đoạn:</strong> Giới thiệu bài thơ và ấn tượng chung.</p>
+<p><strong>Thân đoạn:</strong> Trình bày cảm xúc về nội dung, hình ảnh, ngôn từ, nhịp điệu; có dẫn chứng phù hợp.</p>
+<p><strong>Kết đoạn:</strong> Khẳng định cảm xúc, ý nghĩa của bài thơ đối với bản thân.</p>
+<h4>3. Bài tập thực hành</h4>
+<p><strong>Bài 1.</strong> Viết một bài thơ bốn chữ hoặc năm chữ về chủ đề mái trường.</p>
+<p><strong>Bài 2.</strong> Chọn một bài thơ bốn chữ hoặc năm chữ đã học, ghi lại ba hình ảnh khiến em ấn tượng.</p>
+<p><strong>Bài 3.</strong> Viết đoạn văn ghi lại cảm xúc sau khi đọc bài thơ em yêu thích.</p>
+<p><strong>Bài 4.</strong> Đọc lại đoạn văn và gạch chân câu nêu cảm xúc chung, câu phân tích hình ảnh thơ và câu kết đoạn.</p>
+<h4>4. Ghi nhớ</h4>
+<p>Khi viết thơ, cần chú ý số tiếng, nhịp điệu và cảm xúc. Khi viết đoạn văn cảm nhận, cần có cảm xúc chân thành, dẫn chứng phù hợp và lời văn rõ ràng.</p>
+</div>
+</details>
 </div>
 
-      </div>
-    </details>
+<!-- BÀI 3 -->
+<div class="revision-unit">
+<h3>Bài 3. Cội nguồn yêu thương</h3>
 
-    <details>
-      <summary>D. Viết</summary>
-      <div class="revision-content" id="revisionWriting1">
-<div class="writing-practice">
-
-  <h4>1. TRI THỨC CẦN NHỚ</h4>
-
-  <p><strong>a. Tóm tắt văn bản là gì?</strong></p>
-  <p>
-    Tóm tắt văn bản là dùng lời văn của mình trình bày ngắn gọn những nội dung chính của văn bản gốc, giúp người đọc nắm được những sự việc, thông tin quan trọng mà không cần đọc toàn bộ văn bản.
-  </p>
-
-  <p><strong>b. Yêu cầu khi tóm tắt văn bản</strong></p>
-  <ul>
-    <li>Phản ánh đúng nội dung chính của văn bản gốc.</li>
-    <li>Lựa chọn những sự việc, chi tiết, thông tin quan trọng.</li>
-    <li>Không làm sai lệch ý nghĩa của văn bản.</li>
-    <li>Diễn đạt ngắn gọn, rõ ràng, mạch lạc bằng lời văn của mình.</li>
-    <li>Đảm bảo độ dài theo yêu cầu của đề bài.</li>
-  </ul>
-
-  <p><strong>c. Các mức độ tóm tắt</strong></p>
-  <p>
-    Cùng một văn bản có thể được tóm tắt với những độ dài khác nhau. Bản tóm tắt càng ngắn thì càng phải lựa chọn những nội dung cốt lõi; bản tóm tắt dài hơn có thể giữ lại nhiều sự việc và chi tiết quan trọng hơn.
-  </p>
-
-  <h4>2. QUY TRÌNH TÓM TẮT VĂN BẢN</h4>
-
-  <p><strong>Bước 1. Đọc kĩ văn bản</strong></p>
-  <ul>
-    <li>Đọc toàn bộ văn bản để hiểu nội dung.</li>
-    <li>Xác định văn bản viết về ai, về việc gì hoặc vấn đề gì.</li>
-    <li>Chú ý các sự việc, thông tin quan trọng.</li>
-  </ul>
-
-  <p><strong>Bước 2. Xác định nội dung chính</strong></p>
-  <ul>
-    <li>Xác định nhân vật hoặc đối tượng chính.</li>
-    <li>Tìm các sự việc chính theo trình tự xuất hiện.</li>
-    <li>Loại bỏ những chi tiết phụ, lời miêu tả không cần thiết.</li>
-  </ul>
-
-  <p><strong>Bước 3. Sắp xếp các ý chính</strong></p>
-  <p>
-    Sắp xếp các sự việc, thông tin theo trình tự hợp lí, đảm bảo mối liên hệ giữa các ý.
-  </p>
-
-  <p><strong>Bước 4. Viết bản tóm tắt</strong></p>
-  <p>
-    Dùng lời văn của mình để trình bày ngắn gọn các ý đã lựa chọn. Điều chỉnh cách diễn đạt sao cho phù hợp với độ dài đề bài yêu cầu.
-  </p>
-
-  <p><strong>Bước 5. Đọc lại và chỉnh sửa</strong></p>
-  <ul>
-    <li>Kiểm tra xem bản tóm tắt đã đủ nội dung chính chưa.</li>
-    <li>Kiểm tra tính chính xác, trình tự và sự liên kết giữa các ý.</li>
-    <li>Kiểm tra lỗi chính tả, dùng từ và độ dài.</li>
-  </ul>
-
-  <h4>3. VÍ DỤ MINH HỌA</h4>
-
-  <p><strong>Văn bản dùng để thực hành:</strong> Con sẻ – Tuốc-ghê-nhép.</p>
-
-  <p><strong>a. Tóm tắt ngắn (khoảng 2–3 câu)</strong></p>
-  <p>
-    Một con sẻ non bị rơi khỏi tổ và gặp nguy hiểm trước con chó. Sẻ già bất chấp nguy hiểm, lao xuống che chở cho con khiến con chó phải dừng lại và lùi đi. Chứng kiến tình yêu thương và lòng dũng cảm ấy, người kể chuyện vô cùng thán phục.
-  </p>
-
-  <p><strong>b. Tóm tắt đầy đủ hơn (khoảng 5–7 câu)</strong></p>
-  <p>
-    Trong một lần đi dọc lối vào vườn, người kể chuyện nhìn thấy một con sẻ non bị rơi khỏi tổ. Con chó đi trước phát hiện ra sẻ non và chậm rãi tiến lại gần. Bất ngờ, một con sẻ già từ trên cây lao xuống, dũng cảm đối mặt với con chó để bảo vệ con. Nó lấy thân mình che kín sẻ non dù biết bản thân có thể gặp nguy hiểm. Trước hành động ấy, con chó dừng lại rồi lùi đi. Người kể chuyện vô cùng thán phục trước sự dũng cảm và tình yêu thương của chim sẻ già.
-  </p>
-
-  <p><strong>c. Nhận xét</strong></p>
-  <ul>
-    <li>Cả hai bản tóm tắt đều giữ được nội dung cốt lõi của văn bản.</li>
-    <li>Bản tóm tắt ngắn chỉ giữ lại những sự việc quan trọng nhất.</li>
-    <li>Bản tóm tắt dài hơn trình bày rõ hơn diễn biến câu chuyện.</li>
-    <li>Cả hai đều không cần chép lại toàn bộ lời văn của tác giả.</li>
-  </ul>
-
-  <h4>4. NHỮNG LỖI CẦN TRÁNH</h4>
-
-  <ul>
-    <li><strong>Kể lại quá dài:</strong> Giữ quá nhiều chi tiết khiến bản tóm tắt gần giống văn bản gốc.</li>
-    <li><strong>Bỏ sót sự việc quan trọng:</strong> Làm người đọc không hiểu được nội dung chính.</li>
-    <li><strong>Sắp xếp lộn xộn:</strong> Trình bày sự việc không theo trình tự hợp lí.</li>
-    <li><strong>Thêm ý kiến cá nhân:</strong> Đưa cảm xúc, nhận xét riêng vào bản tóm tắt khi không cần thiết.</li>
-    <li><strong>Không đúng độ dài:</strong> Viết quá ngắn hoặc quá dài so với yêu cầu của đề.</li>
-  </ul>
-
-  <h4>5. BÀI TẬP THỰC HÀNH</h4>
-
-  <p><strong>Bài tập 1.</strong> Tóm tắt văn bản Con sẻ bằng khoảng 3 câu.</p>
-
-  <p><strong>Bài tập 2.</strong> Tóm tắt văn bản Con sẻ bằng khoảng 5–7 câu. So sánh bản tóm tắt này với bài làm ở bài tập 1.</p>
-
-  <p><strong>Bài tập 3.</strong> Trong các nội dung sau, nội dung nào không nhất thiết phải giữ lại khi tóm tắt văn bản Con sẻ?</p>
-  <ol type="a">
-    <li>Con sẻ non bị rơi khỏi tổ.</li>
-    <li>Con chó tiến lại gần sẻ non.</li>
-    <li>Sẻ già lao xuống bảo vệ con.</li>
-    <li>Miêu tả thật chi tiết màu lông và từng cử động của con sẻ.</li>
-  </ol>
-
-  <p><strong>Bài tập 4.</strong> Một học sinh tóm tắt câu chuyện nhưng bỏ qua hành động sẻ già lao xuống che chở sẻ non. Theo em, bản tóm tắt đó có đạt yêu cầu không? Vì sao?</p>
-
-  <p><strong>Bài tập 5.</strong> Hãy viết hai bản tóm tắt cùng một văn bản theo hai yêu cầu độ dài khác nhau. Sau đó chỉ ra điểm giống và khác nhau giữa hai bản.
-
-  </p>
-
-  <h4>6. GỢI Ý ĐÁP ÁN</h4>
-
-  <p><strong>Bài tập 1.</strong></p>
-  <p>
-    Một con sẻ non bị rơi khỏi tổ và gặp nguy hiểm trước con chó. Sẻ già bất chấp nguy hiểm lao xuống che chở cho con khiến con chó phải lùi lại. Người kể chuyện vô cùng thán phục trước tình yêu thương và lòng dũng cảm của sẻ già.
-  </p>
-
-  <p><strong>Bài tập 2.</strong></p>
-  <p>
-    Học sinh có thể tham khảo bản tóm tắt 5–7 câu ở phần ví dụ minh họa. Cần đảm bảo đủ các sự việc chính, đúng trình tự và diễn đạt bằng lời văn của mình.
-  </p>
-
-  <p><strong>Bài tập 3.</strong> Đáp án D.</p>
-
-  <p><strong>Bài tập 4.</strong></p>
-  <p>
-    Bản tóm tắt chưa đạt yêu cầu vì đã bỏ qua sự việc quan trọng nhất của câu chuyện: hành động sẻ già dũng cảm lao xuống bảo vệ con. Đây là sự việc làm nổi bật chủ đề tình yêu thương và lòng dũng cảm.
-  </p>
-
-  <p><strong>Bài tập 5.</strong></p>
-  <p>
-    Học sinh tự thực hiện. Giáo viên đánh giá dựa trên độ chính xác của nội dung, khả năng lựa chọn ý chính, cách diễn đạt và việc đáp ứng yêu cầu về độ dài.
-  </p>
-
-  <h4>7. GHI NHỚ</h4>
-
-  <p>
-    Muốn tóm tắt tốt một văn bản, cần đọc kĩ, xác định đúng nội dung chính, lựa chọn các sự việc quan trọng, sắp xếp hợp lí và diễn đạt ngắn gọn bằng lời văn của mình. Đặc biệt, phải chú ý yêu cầu về độ dài của bản tóm tắt.
-  </p>
-
+<details>
+<summary>A. Tri thức Ngữ văn</summary>
+<div class="revision-content">
+<h4>1. Nhân vật trong truyện</h4>
+<p>Nhân vật là đối tượng được nhà văn xây dựng trong tác phẩm. Nhân vật có thể là con người, con vật hoặc sự vật được nhân hóa. Nhân vật góp phần thể hiện chủ đề và tư tưởng của tác phẩm.</p>
+<h4>2. Ngoại hình và hành động của nhân vật</h4>
+<p>Ngoại hình giúp người đọc hình dung dáng vẻ, diện mạo nhân vật. Hành động thể hiện cách ứng xử, tính cách và phẩm chất của nhân vật.</p>
+<h4>3. Ngôn ngữ và suy nghĩ của nhân vật</h4>
+<p>Lời nói, suy nghĩ và cảm xúc giúp người đọc hiểu đời sống nội tâm, thái độ và tính cách của nhân vật.</p>
+<h4>4. Người kể chuyện và ngôi kể</h4>
+<p>Người kể chuyện là người được nhà văn tạo ra để kể lại câu chuyện. Truyện có thể được kể theo ngôi thứ nhất hoặc ngôi thứ ba. Việc lựa chọn ngôi kể ảnh hưởng đến cách kể và khả năng thể hiện sự việc, nhân vật.</p>
+<h4>5. Chủ đề của tác phẩm</h4>
+<p>Chủ đề là vấn đề chính được tác phẩm đặt ra và thể hiện thông qua nhân vật, sự việc, hình ảnh và cách kể chuyện.</p>
+<h4>6. Phân tích đặc điểm nhân vật</h4>
+<p>Phân tích đặc điểm nhân vật là làm rõ những nét nổi bật về ngoại hình, hành động, lời nói, suy nghĩ, cảm xúc và mối quan hệ của nhân vật; từ đó nhận xét về tính cách, phẩm chất và ý nghĩa của nhân vật.</p>
 </div>
-      </div>
-    </details>
-  </div>
+</details>
+
+<details>
+<summary>B. Thực hành Tiếng Việt</summary>
+<div class="revision-content">
+<h4>1. Từ Hán Việt</h4>
+<p>Từ Hán Việt là từ có nguồn gốc tiếng Hán, được đọc theo âm Hán Việt và sử dụng trong tiếng Việt. Từ Hán Việt thường xuất hiện trong văn bản trang trọng, văn bản nghị luận và văn bản thông tin.</p>
+<h4>2. Nghĩa của từ trong ngữ cảnh</h4>
+<p>Muốn hiểu chính xác nghĩa của từ, cần đặt từ trong câu và văn bản cụ thể, chú ý các từ ngữ xung quanh và nội dung đang được nói đến.</p>
+<h4>3. Biện pháp tu từ điệp ngữ</h4>
+<p>Điệp ngữ là biện pháp lặp lại từ ngữ hoặc cụm từ nhằm nhấn mạnh ý, tạo nhịp điệu và tăng sức biểu cảm.</p>
+<h4>4. Liên kết trong văn bản</h4>
+<p>Các câu trong văn bản cần có sự liên kết về nội dung và hình thức. Một số phương tiện liên kết thường gặp là phép lặp, phép thế, phép nối và phép liên tưởng.</p>
+<h4>5. Bài tập tự luyện</h4>
+<p><strong>Bài 1.</strong> Tìm các từ Hán Việt trong câu: “Tình cảm gia đình là nền tảng quan trọng của mỗi con người.”</p>
+<p><strong>Bài 2.</strong> Giải thích nghĩa của từ “cội nguồn” trong nhan đề Bài 3.</p>
+<p><strong>Bài 3.</strong> Tìm điệp ngữ trong câu: “Mẹ vẫn chờ, mẹ vẫn đợi, mẹ vẫn yêu thương con.”</p>
+<p><strong>Bài 4.</strong> Chỉ ra phương tiện liên kết giữa hai câu: “Lan rất yêu bà. Cô bé thường giúp bà quét sân và chăm sóc vườn cây.”</p>
+<p><strong>Bài 5.</strong> Viết một đoạn văn khoảng 5 câu về tình cảm gia đình, trong đó sử dụng ít nhất một phép liên kết.</p>
+<h4>6. Gợi ý đáp án</h4>
+<p><strong>Bài 1:</strong> Tình cảm, gia đình, nền tảng, quan trọng.</p>
+<p><strong>Bài 2:</strong> “Cội nguồn” chỉ nguồn gốc, nơi bắt đầu, những điều làm nên sự hình thành và phát triển của một con người hoặc sự vật.</p>
+<p><strong>Bài 3:</strong> Điệp ngữ “mẹ vẫn” nhấn mạnh tình yêu thương và sự chờ đợi của người mẹ.</p>
+<p><strong>Bài 4:</strong> Phép thế: “Cô bé” thay thế cho “Lan”.</p>
+<p><strong>Bài 5:</strong> Học sinh tự thực hiện, đảm bảo nội dung và phương tiện liên kết phù hợp.</p>
+</div>
+</details>
+
+<details>
+<summary>C. Đọc hiểu văn bản ngoài SGK</summary>
+<div class="revision-content">
+<div class="reading-placeholder">
+<h4>Định hướng luyện đọc hiểu truyện</h4>
+<p>Ưu tiên các văn bản truyện ngoài SGK có nguồn từ đề kiểm tra, đề ôn tập của trường học, phòng giáo dục, sở giáo dục hoặc đơn vị giáo dục đáng tin cậy.</p>
+<p>Nội dung phù hợp: tình cảm gia đình, tình thầy trò, tình bạn, lòng biết ơn, tình yêu quê hương và những bài học ứng xử trong cuộc sống.</p>
+<p class="revision-note">Khi bổ sung ngữ liệu cần ghi rõ tên văn bản, tác giả, đơn vị sử dụng đề, năm học và đường dẫn nguồn. Không tự tạo văn bản rồi ghi là đề thi chính thức.</p>
+</div>
+<h4>Các dạng câu hỏi cần luyện</h4>
+<ol><li>Xác định thể loại, ngôi kể và người kể chuyện.</li><li>Chỉ ra nhân vật chính và các nhân vật có liên quan.</li><li>Tìm chi tiết thể hiện ngoại hình, hành động, lời nói và suy nghĩ của nhân vật.</li><li>Nhận xét đặc điểm, tính cách nhân vật qua các chi tiết.</li><li>Xác định chủ đề và thông điệp của văn bản.</li><li>Liên hệ bài học từ văn bản với bản thân.</li></ol>
+</div>
+</details>
+
+<details>
+<summary>D. Viết</summary>
+<div class="revision-content">
+<h4>Đề bài: Viết bài văn phân tích đặc điểm nhân vật trong một tác phẩm văn học</h4>
+<h4>1. Yêu cầu</h4>
+<ul><li>Giới thiệu tác phẩm và nhân vật cần phân tích.</li><li>Chỉ ra những đặc điểm nổi bật của nhân vật.</li><li>Làm rõ đặc điểm qua ngoại hình, hành động, lời nói, suy nghĩ, cảm xúc và mối quan hệ.</li><li>Sử dụng dẫn chứng tiêu biểu, chính xác từ tác phẩm.</li><li>Nhận xét ý nghĩa của nhân vật trong việc thể hiện chủ đề tác phẩm.</li></ul>
+<h4>2. Bố cục bài văn</h4>
+<p><strong>Mở bài:</strong> Giới thiệu tác phẩm, tác giả và nhân vật cần phân tích; nêu nhận xét khái quát về nhân vật.</p>
+<p><strong>Thân bài:</strong></p>
+<ul><li>Khái quát hoàn cảnh xuất hiện hoặc vị trí của nhân vật.</li><li>Phân tích đặc điểm thứ nhất và dẫn chứng.</li><li>Phân tích đặc điểm thứ hai và dẫn chứng.</li><li>Phân tích các đặc điểm khác nếu cần.</li><li>Nhận xét nghệ thuật xây dựng nhân vật.</li></ul>
+<p><strong>Kết bài:</strong> Khẳng định ấn tượng, đánh giá về nhân vật và ý nghĩa của nhân vật đối với người đọc.</p>
+<h4>3. Cách tìm dẫn chứng</h4>
+<p>Đọc lại văn bản, đánh dấu những chi tiết thể hiện rõ đặc điểm nhân vật. Mỗi nhận xét cần có dẫn chứng phù hợp và phần phân tích giải thích dẫn chứng ấy thể hiện điều gì.</p>
+<h4>4. Lỗi cần tránh</h4>
+<ul><li>Kể lại toàn bộ câu chuyện thay vì phân tích nhân vật.</li><li>Nhận xét chung chung, thiếu dẫn chứng.</li><li>Chỉ kể hành động mà không phân tích ý nghĩa.</li><li>Dẫn chứng không chính xác hoặc không liên quan.</li><li>Bố cục thiếu mở bài, thân bài hoặc kết bài.</li></ul>
+<h4>5. Bài tập thực hành</h4>
+<p><strong>Bài 1.</strong> Chọn một nhân vật trong văn bản đã học và lập bảng tìm dẫn chứng về ngoại hình, hành động, lời nói, suy nghĩ.</p>
+<p><strong>Bài 2.</strong> Viết đoạn văn phân tích một phẩm chất nổi bật của nhân vật.</p>
+<p><strong>Bài 3.</strong> Lập dàn ý cho bài văn phân tích đặc điểm nhân vật.</p>
+<p><strong>Bài 4.</strong> Viết hoàn chỉnh bài văn phân tích đặc điểm nhân vật em yêu thích.</p>
+<h4>6. Tự kiểm tra bài viết</h4>
+<ul><li>Đã giới thiệu đúng nhân vật và tác phẩm chưa?</li><li>Đã nêu được những đặc điểm nổi bật chưa?</li><li>Mỗi đặc điểm đã có dẫn chứng và phân tích chưa?</li><li>Đã nhận xét được nghệ thuật xây dựng nhân vật chưa?</li><li>Bài viết đã có bố cục rõ ràng và diễn đạt mạch lạc chưa?</li></ul>
+</div>
+</details>
+</div>
+
+<!-- BÀI 4 -->
+<div class="revision-unit">
+<h3>Bài 4. Giai điệu đất nước</h3>
+
+<details>
+<summary>A. Tri thức Ngữ văn</summary>
+<div class="revision-content">
+<h4>1. Thơ trữ tình</h4>
+<p>Thơ trữ tình là loại thơ chủ yếu dùng để thể hiện tình cảm, cảm xúc và suy nghĩ của con người trước cuộc sống, thiên nhiên và con người.</p>
+<h4>2. Cảm xúc trong thơ</h4>
+<p>Cảm xúc trong thơ có thể được thể hiện trực tiếp qua từ ngữ hoặc gián tiếp qua hình ảnh, cảnh vật, âm thanh và các biện pháp nghệ thuật.</p>
+<h4>3. Hình ảnh thơ</h4>
+<p>Hình ảnh thơ là những hình ảnh được tạo nên bằng ngôn từ, có khả năng gợi ra cảnh vật, con người, sự việc và cảm xúc. Hình ảnh thơ thường góp phần thể hiện chủ đề và tình cảm của tác giả.</p>
+<h4>4. Mạch cảm xúc</h4>
+<p>Mạch cảm xúc là sự vận động, phát triển của cảm xúc trong bài thơ. Khi đọc thơ cần theo dõi cảm xúc từ đầu đến cuối để hiểu sự chuyển biến trong suy nghĩ, tình cảm của tác giả.</p>
+<h4>5. Chất trữ tình</h4>
+<p>Chất trữ tình thể hiện ở cảm xúc, giọng điệu, hình ảnh và cách diễn đạt giàu sức gợi. Chất trữ tình giúp văn bản có khả năng lay động tình cảm người đọc.</p>
+</div>
+</details>
+
+<details>
+<summary>B. Thực hành Tiếng Việt</summary>
+<div class="revision-content">
+<h4>1. Từ ngữ địa phương</h4>
+<p>Từ ngữ địa phương là những từ ngữ được sử dụng phổ biến ở một hoặc một số địa phương nhất định. Khi sử dụng cần chú ý đối tượng giao tiếp và hoàn cảnh giao tiếp.</p>
+<h4>2. Biện pháp tu từ nói quá</h4>
+<p>Nói quá là biện pháp tu từ phóng đại mức độ, quy mô hoặc tính chất của sự vật, sự việc nhằm nhấn mạnh, gây ấn tượng và tăng sức biểu cảm.</p>
+<h4>3. Biện pháp tu từ nói giảm nói tránh</h4>
+<p>Nói giảm nói tránh là cách diễn đạt tế nhị, nhẹ nhàng để tránh gây cảm giác đau buồn, nặng nề hoặc thiếu lịch sự.</p>
+<h4>4. Dấu câu và công dụng</h4>
+<p>Dấu câu giúp phân chia các thành phần câu, đánh dấu ranh giới giữa các câu và thể hiện mục đích nói, sắc thái biểu cảm. Khi viết cần sử dụng dấu câu đúng quy tắc.</p>
+<h4>5. Bài tập tự luyện</h4>
+<p><strong>Bài 1.</strong> Tìm một số từ ngữ địa phương mà em biết và giải thích nghĩa của chúng.</p>
+<p><strong>Bài 2.</strong> Xác định biện pháp tu từ trong câu: “Cả lớp em vui như mở hội.”</p>
+<p><strong>Bài 3.</strong> Giải thích tác dụng của cách nói giảm nói tránh trong câu: “Ông đã về với tổ tiên.”</p>
+<p><strong>Bài 4.</strong> Đặt một câu có sử dụng biện pháp nói quá.</p>
+<p><strong>Bài 5.</strong> Viết một đoạn văn ngắn về quê hương, sử dụng ít nhất một biện pháp tu từ đã học.</p>
+<h4>6. Gợi ý đáp án</h4>
+<p><strong>Bài 1:</strong> Học sinh lựa chọn từ ngữ địa phương quen thuộc và giải thích đúng nghĩa.</p>
+<p><strong>Bài 2:</strong> So sánh: “vui như mở hội”, nhấn mạnh niềm vui của cả lớp.</p>
+<p><strong>Bài 3:</strong> “Về với tổ tiên” là cách nói giảm nói tránh, diễn đạt nhẹ nhàng về sự qua đời.</p>
+<p><strong>Bài 4:</strong> Ví dụ: “Em đã chờ bạn lâu cả thế kỉ.”</p>
+<p><strong>Bài 5:</strong> Học sinh tự thực hiện, chú ý dùng từ và biện pháp tu từ phù hợp.</p>
+</div>
+</details>
+
+<details>
+<summary>C. Đọc hiểu văn bản ngoài SGK</summary>
+<div class="revision-content">
+<div class="reading-placeholder">
+<h4>Định hướng luyện đọc hiểu thơ về quê hương, đất nước</h4>
+<p>Ưu tiên ngữ liệu thơ ngoài SGK có nguồn từ đề kiểm tra, đề ôn tập được công bố bởi các trường học, phòng giáo dục, sở giáo dục hoặc đơn vị giáo dục đáng tin cậy.</p>
+<p>Nội dung luyện tập: tình yêu quê hương, đất nước; vẻ đẹp thiên nhiên; con người lao động; niềm tự hào và trách nhiệm đối với cộng đồng.</p>
+<p class="revision-note">Bổ sung văn bản và thông tin nguồn sau khi đối chiếu đề gốc. Không tự gán tên tác giả, năm học hoặc đơn vị ra đề.</p>
+</div>
+<h4>Các dạng câu hỏi cần luyện</h4>
+<ol><li>Xác định thể thơ, phương thức biểu đạt chính.</li><li>Chỉ ra hình ảnh thể hiện vẻ đẹp quê hương, đất nước.</li><li>Phân tích tác dụng của biện pháp tu từ.</li><li>Nhận xét mạch cảm xúc và tình cảm của tác giả.</li><li>Nêu nội dung, chủ đề và thông điệp của bài thơ.</li><li>Viết đoạn văn nêu cảm nhận về một hình ảnh hoặc đoạn thơ.</li></ol>
+</div>
+</details>
+
+<details>
+<summary>D. Viết</summary>
+<div class="revision-content">
+<h4>Đề bài: Viết bài văn biểu cảm về con người hoặc sự việc</h4>
+<h4>1. Yêu cầu</h4>
+<ul><li>Giới thiệu được đối tượng biểu cảm: con người hoặc sự việc.</li><li>Thể hiện cảm xúc chân thành, rõ ràng.</li><li>Kết hợp kể, tả để làm nổi bật đối tượng và cảm xúc.</li><li>Sắp xếp ý theo trình tự hợp lí.</li><li>Sử dụng từ ngữ giàu sức gợi, phù hợp với cảm xúc.</li></ul>
+<h4>2. Bố cục bài văn</h4>
+<p><strong>Mở bài:</strong> Giới thiệu người hoặc sự việc và nêu cảm xúc chung.</p>
+<p><strong>Thân bài:</strong></p>
+<ul><li>Giới thiệu những nét nổi bật của đối tượng.</li><li>Kể lại những kỉ niệm, sự việc có liên quan.</li><li>Miêu tả những chi tiết gợi cảm xúc.</li><li>Trình bày suy nghĩ, tình cảm và ý nghĩa của đối tượng đối với bản thân.</li></ul>
+<p><strong>Kết bài:</strong> Khẳng định tình cảm, suy nghĩ và mong muốn của bản thân.</p>
+<h4>3. Cách tìm ý</h4>
+<p>Với bài văn biểu cảm về con người, có thể lựa chọn người thân, thầy cô, bạn bè hoặc một người có ảnh hưởng tích cực đến em.</p>
+<p>Với bài văn biểu cảm về sự việc, có thể lựa chọn một kỉ niệm đáng nhớ, một lần được giúp đỡ, một hoạt động tập thể hoặc một sự kiện khiến em xúc động.</p>
+<h4>4. Lỗi cần tránh</h4>
+<ul><li>Kể chuyện quá nhiều nhưng không bộc lộ cảm xúc.</li><li>Miêu tả dài dòng, thiếu trọng tâm.</li><li>Cảm xúc chung chung, thiếu chi tiết gợi cảm.</li><li>Sắp xếp ý lộn xộn, lặp ý.</li></ul>
+<h4>5. Bài tập thực hành</h4>
+<p><strong>Bài 1.</strong> Lập dàn ý cho bài văn biểu cảm về một người thân.</p>
+<p><strong>Bài 2.</strong> Viết đoạn mở bài biểu cảm về một người thầy hoặc cô giáo mà em yêu quý.</p>
+<p><strong>Bài 3.</strong> Viết đoạn văn kể lại một kỉ niệm khiến em xúc động và nêu cảm xúc của mình.</p>
+<p><strong>Bài 4.</strong> Viết hoàn chỉnh bài văn biểu cảm về một con người hoặc sự việc mà em nhớ nhất.</p>
+<h4>6. Tự kiểm tra</h4>
+<ul><li>Đối tượng biểu cảm đã được giới thiệu rõ chưa?</li><li>Cảm xúc có chân thành và phù hợp không?</li><li>Có chi tiết cụ thể để làm rõ cảm xúc không?</li><li>Bài viết có bố cục và liên kết hợp lí không?</li></ul>
+</div>
+</details>
+</div>
+
+<!-- BÀI 5 -->
+<div class="revision-unit">
+<h3>Bài 5. Màu sắc trăm miền</h3>
+
+<details>
+<summary>A. Tri thức Ngữ văn</summary>
+<div class="revision-content">
+<h4>1. Văn bản thông tin</h4>
+<p>Văn bản thông tin là văn bản chủ yếu cung cấp thông tin về sự vật, hiện tượng, con người hoặc vấn đề trong đời sống. Thông tin cần được trình bày rõ ràng, chính xác và có căn cứ.</p>
+<h4>2. Thông tin cơ bản và chi tiết</h4>
+<p>Thông tin cơ bản là nội dung quan trọng nhất mà văn bản muốn cung cấp. Chi tiết giúp làm rõ, bổ sung hoặc minh họa cho thông tin cơ bản.</p>
+<h4>3. Cách triển khai thông tin</h4>
+<p>Thông tin có thể được triển khai theo trình tự thời gian, không gian, quan hệ nguyên nhân – kết quả, phân loại đối tượng hoặc theo mức độ quan trọng.</p>
+<h4>4. Nhan đề và đề mục</h4>
+<p>Nhan đề giúp người đọc nhận biết nội dung chính của văn bản. Đề mục chia văn bản thành các phần, giúp người đọc theo dõi thông tin thuận lợi hơn.</p>
+<h4>5. Văn hóa truyền thống</h4>
+<p>Văn hóa truyền thống là những giá trị vật chất và tinh thần được hình thành, lưu truyền qua nhiều thế hệ, thể hiện bản sắc của cộng đồng, dân tộc. Mỗi người cần có ý thức trân trọng, gìn giữ và phát huy những giá trị tốt đẹp.</p>
+</div>
+</details>
+
+<details>
+<summary>B. Thực hành Tiếng Việt</summary>
+<div class="revision-content">
+<h4>1. Số từ</h4>
+<p>Số từ là những từ chỉ số lượng hoặc số thứ tự của sự vật. Số từ có thể đứng trước danh từ để bổ sung ý nghĩa về số lượng hoặc vị trí.</p>
+<h4>2. Phó từ</h4>
+<p>Phó từ là những từ chuyên đi kèm động từ, tính từ để bổ sung ý nghĩa về thời gian, mức độ, sự tiếp diễn, phủ định, cầu khiến...</p>
+<h4>3. Nghĩa của từ trong ngữ cảnh</h4>
+<p>Một từ có thể có nhiều nghĩa. Cần căn cứ vào câu, đoạn và tình huống sử dụng để xác định nghĩa phù hợp.</p>
+<h4>4. Thành ngữ</h4>
+<p>Thành ngữ là những cụm từ có cấu tạo ổn định, biểu thị một ý nghĩa hoàn chỉnh, thường mang tính hình ảnh và biểu cảm.</p>
+<h4>5. Bài tập tự luyện</h4>
+<p><strong>Bài 1.</strong> Xác định số từ trong câu: “Ba bạn học sinh tham gia cuộc thi đọc sách.”</p>
+<p><strong>Bài 2.</strong> Tìm phó từ trong câu: “Em đang chăm chú đọc một cuốn sách hay.”</p>
+<p><strong>Bài 3.</strong> Giải thích nghĩa của thành ngữ “Uống nước nhớ nguồn”.</p>
+<p><strong>Bài 4.</strong> Đặt câu với một thành ngữ nói về tình đoàn kết.</p>
+<p><strong>Bài 5.</strong> Viết đoạn văn ngắn giới thiệu một nét văn hóa truyền thống ở địa phương em, trong đó có sử dụng số từ hoặc phó từ.</p>
+<h4>6. Gợi ý đáp án</h4>
+<p><strong>Bài 1:</strong> Số từ “Ba”.</p>
+<p><strong>Bài 2:</strong> Phó từ “đang”, bổ sung ý nghĩa về sự tiếp diễn của hoạt động.</p>
+<p><strong>Bài 3:</strong> Thành ngữ nhắc nhở con người biết ơn những người đã tạo dựng, vun đắp thành quả mà mình đang được hưởng.</p>
+<p><strong>Bài 4:</strong> Học sinh tự đặt câu phù hợp.</p>
+<p><strong>Bài 5:</strong> Học sinh tự thực hiện, bảo đảm nội dung và yêu cầu tiếng Việt.</p>
+</div>
+</details>
+
+<details>
+<summary>C. Đọc hiểu văn bản ngoài SGK</summary>
+<div class="revision-content">
+<div class="reading-placeholder">
+<h4>Định hướng luyện đọc hiểu văn bản thông tin</h4>
+<p>Ưu tiên văn bản ngoài SGK giới thiệu phong tục, lễ hội, ẩm thực, làng nghề, danh lam thắng cảnh, di sản và những nét văn hóa đặc sắc của các vùng miền.</p>
+<p>Ngữ liệu cần được lấy từ đề kiểm tra hoặc tài liệu giáo dục có nguồn xác minh được; cần ghi rõ đơn vị, năm học và đường dẫn.</p>
+<p class="revision-note">Phần văn bản cụ thể sẽ được bổ sung sau khi đối chiếu nguồn đề gốc. Không sử dụng văn bản tự biên soạn thay cho ngữ liệu đọc hiểu có nguồn.</p>
+</div>
+<h4>Các dạng câu hỏi cần luyện</h4>
+<ol><li>Xác định chủ đề và thông tin chính của văn bản.</li><li>Chỉ ra cách triển khai thông tin.</li><li>Tìm thông tin cụ thể được nêu trong văn bản.</li><li>Giải thích ý nghĩa của nhan đề, đề mục hoặc một chi tiết.</li><li>Nhận xét tác dụng của hình ảnh, số liệu hoặc cách trình bày thông tin.</li><li>Nêu suy nghĩ về việc giữ gìn bản sắc văn hóa dân tộc.</li></ol>
+</div>
+</details>
+
+<details>
+<summary>D. Viết</summary>
+<div class="revision-content">
+<h4>Đề bài: Viết văn bản tường trình</h4>
+<h4>1. Văn bản tường trình là gì?</h4>
+<p>Văn bản tường trình là loại văn bản được dùng để trình bày một cách rõ ràng, trung thực diễn biến của một sự việc đã xảy ra, thường liên quan đến người viết hoặc trách nhiệm của người viết.</p>
+<h4>2. Yêu cầu</h4>
+<ul><li>Thông tin chính xác, trung thực, khách quan.</li><li>Trình bày rõ thời gian, địa điểm, người liên quan và diễn biến sự việc.</li><li>Sắp xếp sự việc theo trình tự hợp lí.</li><li>Ngôn ngữ rõ ràng, nghiêm túc, không suy diễn hoặc thêm thông tin không có căn cứ.</li><li>Đảm bảo đúng thể thức của văn bản tường trình.</li></ul>
+<h4>3. Bố cục văn bản tường trình</h4>
+<ol><li><strong>Quốc hiệu và tiêu ngữ:</strong> Trình bày theo quy định khi văn bản yêu cầu.</li><li><strong>Địa điểm, thời gian:</strong> Ghi nơi viết và ngày tháng năm.</li><li><strong>Tên văn bản:</strong> BẢN TƯỜNG TRÌNH.</li><li><strong>Kính gửi:</strong> Ghi người hoặc cơ quan tiếp nhận.</li><li><strong>Thông tin người viết:</strong> Họ tên, lớp hoặc đơn vị.</li><li><strong>Nội dung tường trình:</strong> Trình bày sự việc, thời gian, địa điểm, người liên quan và diễn biến.</li><li><strong>Lời cam đoan:</strong> Cam đoan nội dung trình bày là đúng sự thật.</li><li><strong>Kí tên:</strong> Người viết kí và ghi rõ họ tên.</li></ol>
+<h4>4. Cách viết</h4>
+<p><strong>Bước 1:</strong> Xác định sự việc cần tường trình và người tiếp nhận văn bản.</p>
+<p><strong>Bước 2:</strong> Thu thập thông tin chính xác về thời gian, địa điểm, người liên quan và diễn biến.</p>
+<p><strong>Bước 3:</strong> Sắp xếp sự việc theo trình tự thời gian hoặc trình tự hợp lí.</p>
+<p><strong>Bước 4:</strong> Viết văn bản theo đúng bố cục.</p>
+<p><strong>Bước 5:</strong> Đọc lại, kiểm tra tính chính xác và thể thức.</p>
+<h4>5. Mẫu khung tham khảo</h4>
+<div class="reading-placeholder">
+<p style="text-align:center"><strong>BẢN TƯỜNG TRÌNH</strong></p>
+<p>Kính gửi: ............................................................</p>
+<p>Em tên là: ............................................................</p>
+<p>Học sinh lớp: ........................................................</p>
+<p>Em xin tường trình sự việc như sau:</p>
+<p>Vào khoảng ........ giờ, ngày ........ tháng ........ năm ........, tại ........................................, đã xảy ra sự việc ........................................................................</p>
+<p>Diễn biến sự việc: ........................................................................................................</p>
+<p>Những người có liên quan: ..........................................................................................</p>
+<p>Nguyên nhân (nếu xác định được): ............................................................................</p>
+<p>Em xin cam đoan những nội dung trình bày trên là đúng sự thật và xin chịu trách nhiệm về lời tường trình của mình.</p>
+<p style="text-align:right">........, ngày .... tháng .... năm ....</p>
+<p style="text-align:right"><strong>Người tường trình</strong><br><br>(Kí và ghi rõ họ tên)</p>
+</div>
+<h4>6. Bài tập thực hành</h4>
+<p><strong>Bài 1.</strong> Nêu những thông tin cần có trong một văn bản tường trình.</p>
+<p><strong>Bài 2.</strong> Sắp xếp các thông tin về một sự việc theo trình tự thời gian.</p>
+<p><strong>Bài 3.</strong> Viết văn bản tường trình về một sự việc xảy ra trong lớp hoặc trong trường mà em biết rõ.</p>
+<p><strong>Bài 4.</strong> Đọc lại văn bản và kiểm tra xem các thông tin đã chính xác, khách quan và đầy đủ chưa.</p>
+<h4>7. Lỗi cần tránh</h4>
+<ul><li>Trình bày thiếu thời gian hoặc địa điểm.</li><li>Kể sự việc không theo trình tự.</li><li>Thêm nhận xét, cảm xúc chủ quan không cần thiết.</li><li>Thông tin không chính xác hoặc không kiểm chứng.</li><li>Thiếu lời cam đoan, chữ kí hoặc thông tin người viết.</li></ul>
+</div>
+</details>
+</div>
+
+<!-- ÔN TẬP GIỮA KÌ -->
+<div class="revision-unit">
+<h3>Ôn tập giữa học kì I</h3>
+<p class="sub">Phạm vi ôn tập: Bài 1. Bầu trời tuổi thơ và Bài 2. Khúc nhạc tâm hồn.</p>
+
+<details>
+<summary>A. Hệ thống kiến thức cần nhớ</summary>
+<div class="revision-content">
+<h4>1. Đọc hiểu văn bản</h4>
+<ul><li>Nhận biết đề tài, chi tiết tiêu biểu, nhân vật và tính cách nhân vật trong truyện.</li><li>Nhận biết người kể chuyện, ngôi kể và tác dụng của ngôi kể.</li><li>Nhận biết hình ảnh thơ, vần, nhịp, thể thơ bốn chữ và năm chữ.</li><li>Nhận biết tình cảm, cảm xúc của tác giả thể hiện trong thơ.</li><li>Nhận biết và phân tích tác dụng của một số biện pháp tu từ.</li></ul>
+<h4>2. Thực hành Tiếng Việt</h4>
+<ul><li>Mở rộng thành phần chính của câu bằng cụm từ.</li><li>Mở rộng trạng ngữ bằng cụm từ.</li><li>Nhận biết và phân tích tác dụng của biện pháp tu từ.</li><li>Giải thích nghĩa của từ trong ngữ cảnh.</li></ul>
+<h4>3. Viết</h4>
+<ul><li>Tóm tắt văn bản theo những yêu cầu khác nhau về độ dài.</li><li>Trình bày ý kiến về một vấn đề của đời sống trên cơ sở tôn trọng ý kiến khác biệt.</li><li>Tập làm thơ bốn chữ hoặc năm chữ.</li><li>Viết đoạn văn ghi lại cảm xúc sau khi đọc một bài thơ bốn chữ hoặc năm chữ.</li></ul>
+<h4>4. Các văn bản trọng tâm đã học</h4>
+<ul><li>Bầy chim chìa vôi – Nguyễn Quang Thiều.</li><li>Đi lấy mật – trích Đất rừng phương Nam, Đoàn Giỏi.</li><li>Ngàn sao làm việc – Võ Quảng.</li><li>Đồng dao mùa xuân – Nguyễn Khoa Điềm.</li><li>Gặp lá cơm nếp – Thanh Thảo.</li><li>Trở gió – Nguyễn Ngọc Tư.</li></ul>
+</div>
+</details>
+
+<details>
+<summary>B. Luyện tập Tiếng Việt</summary>
+<div class="revision-content">
+<p><strong>Câu 1.</strong> Xác định trạng ngữ trong câu: “Vào buổi sáng mùa thu, những chú chim nhỏ ríu rít gọi nhau trên cành.”</p>
+<p><strong>Câu 2.</strong> Mở rộng trạng ngữ trong câu: “Buổi tối, em đọc sách.”</p>
+<p><strong>Câu 3.</strong> Mở rộng chủ ngữ và vị ngữ trong câu: “Mưa rơi.”</p>
+<p><strong>Câu 4.</strong> Chỉ ra biện pháp tu từ trong câu: “Hàng cây dang tay đón gió.”</p>
+<p><strong>Câu 5.</strong> Nêu tác dụng của biện pháp tu từ trong câu: “Tiếng suối trong như tiếng hát xa.”</p>
+<p><strong>Câu 6.</strong> Giải thích nghĩa của từ “lấp lánh” trong câu: “Những vì sao lấp lánh trên bầu trời đêm.”</p>
+<p><strong>Câu 7.</strong> Đặt một câu có sử dụng cụm danh từ làm chủ ngữ và một trạng ngữ được mở rộng bằng cụm từ.</p>
+<h4>Gợi ý đáp án</h4>
+<p><strong>Câu 1:</strong> “Vào buổi sáng mùa thu” là trạng ngữ chỉ thời gian.</p>
+<p><strong>Câu 2:</strong> Có thể viết: “Vào mỗi buổi tối yên tĩnh, em đọc sách.”</p>
+<p><strong>Câu 3:</strong> Có thể viết: “Những hạt mưa nhỏ đang rơi tí tách trên mái hiên.”</p>
+<p><strong>Câu 4:</strong> Nhân hóa, thể hiện qua cách nói “dang tay đón gió”.</p>
+<p><strong>Câu 5:</strong> So sánh tiếng suối với tiếng hát, làm nổi bật âm thanh trong trẻo, êm dịu.</p>
+<p><strong>Câu 6:</strong> “Lấp lánh” gợi ánh sáng nhỏ, sáng lên và nhấp nháy liên tục.</p>
+<p><strong>Câu 7:</strong> Học sinh tự đặt câu, xác định đúng các thành phần.</p>
+</div>
+</details>
+
+<details>
+<summary>C. Luyện tập đọc hiểu</summary>
+<div class="revision-content">
+<h4>Những yêu cầu cần luyện</h4>
+<ol><li>Đọc kĩ văn bản, xác định thể loại và phương thức biểu đạt.</li><li>Xác định nội dung chính, đề tài hoặc chủ đề.</li><li>Tìm chi tiết, hình ảnh tiêu biểu và nêu ý nghĩa.</li><li>Nhận xét nhân vật hoặc cảm xúc của tác giả.</li><li>Nhận biết biện pháp tu từ và phân tích tác dụng.</li><li>Rút ra thông điệp, bài học từ văn bản.</li></ol>
+<div class="revision-note">Ngữ liệu đọc hiểu trong đề kiểm tra cần được lấy từ đề gốc có nguồn xác minh. Khi đưa vào kho, cần ghi rõ đơn vị ra đề, năm học và đường dẫn.</div>
+</div>
+</details>
+
+<details>
+<summary>D. Luyện tập viết</summary>
+<div class="revision-content">
+<h4>Dạng 1. Tóm tắt văn bản</h4>
+<p><strong>Đề luyện:</strong> Tóm tắt một văn bản truyện đã học theo hai yêu cầu độ dài khác nhau.</p>
+<p><strong>Yêu cầu:</strong> Giữ đúng nội dung chính, lựa chọn sự việc quan trọng, diễn đạt bằng lời văn của mình và đáp ứng độ dài đề bài.</p>
+<h4>Dạng 2. Trình bày ý kiến về một vấn đề đời sống</h4>
+<p><strong>Đề luyện:</strong> Có ý kiến cho rằng mỗi người cần biết tôn trọng sự khác biệt của người khác. Em hãy trình bày suy nghĩ của mình.</p>
+<p><strong>Gợi ý:</strong></p>
+<ul><li>Giải thích thế nào là tôn trọng sự khác biệt.</li><li>Nêu biểu hiện của việc tôn trọng sự khác biệt.</li><li>Trình bày ý nghĩa của thái độ ấy trong cuộc sống.</li><li>Đưa ra dẫn chứng phù hợp.</li><li>Phản hồi ý kiến trái chiều bằng thái độ bình tĩnh, tôn trọng.</li><li>Rút ra bài học cho bản thân.</li></ul>
+<h4>Dạng 3. Viết thơ và đoạn văn cảm xúc</h4>
+<p>Thực hành viết một bài thơ bốn chữ hoặc năm chữ; viết đoạn văn ghi lại cảm xúc sau khi đọc bài thơ ấy hoặc một bài thơ đã học.</p>
+<h4>Tự kiểm tra</h4>
+<ul><li>Đã trả lời đúng yêu cầu đề bài chưa?</li><li>Các ý có rõ ràng, logic không?</li><li>Có dẫn chứng phù hợp không?</li><li>Diễn đạt có trong sáng, đúng chính tả và ngữ pháp không?</li></ul>
+</div>
+</details>
+</div>
+
+<!-- ÔN TẬP CUỐI KÌ -->
+<div class="revision-unit">
+<h3>Ôn tập cuối học kì I</h3>
+<p class="sub">Phạm vi ôn tập: Bài 3. Cội nguồn yêu thương; Bài 4. Giai điệu đất nước; Bài 5. Màu sắc trăm miền.</p>
+
+<details>
+<summary>A. Hệ thống kiến thức cần nhớ</summary>
+<div class="revision-content">
+<h4>1. Đọc hiểu văn bản</h4>
+<ul><li>Nhận biết nhân vật, đặc điểm nhân vật, người kể chuyện và ngôi kể.</li><li>Phân tích chi tiết, hành động, lời nói, suy nghĩ và cảm xúc của nhân vật.</li><li>Nhận biết thơ trữ tình, hình ảnh thơ và mạch cảm xúc.</li><li>Nhận biết chủ đề, thông điệp và tình cảm của tác giả.</li><li>Nhận biết đặc điểm của văn bản thông tin, thông tin chính và cách triển khai thông tin.</li></ul>
+<h4>2. Thực hành Tiếng Việt</h4>
+<ul><li>Từ Hán Việt và nghĩa của từ trong ngữ cảnh.</li><li>Điệp ngữ và các phương tiện liên kết trong văn bản.</li><li>Từ ngữ địa phương.</li><li>Nói quá, nói giảm nói tránh.</li><li>Số từ, phó từ và thành ngữ.</li></ul>
+<h4>3. Viết</h4>
+<ul><li>Viết bài văn phân tích đặc điểm nhân vật trong một tác phẩm văn học.</li><li>Viết bài văn biểu cảm về con người hoặc sự việc.</li><li>Viết văn bản tường trình.</li></ul>
+<h4>4. Các văn bản trọng tâm đã học</h4>
+<ul><li>Vừa nhắm mắt vừa mở cửa sổ – Nguyễn Ngọc Thuần.</li><li>Người thầy đầu tiên – trích tác phẩm của Trin-ghi-dơ Ai-tơ-ma-tốp.</li><li>Quê hương – Tế Hanh.</li><li>Mùa xuân nho nhỏ – Thanh Hải.</li><li>Gò Me – Hoàng Tố Nguyên.</li><li>Bài thơ “Đường núi” của Nguyễn Đình Thi – Vũ Quần Phương.</li><li>Tháng Giêng, mơ về trăng non rét ngọt – Vũ Bằng.</li><li>Chuyện cơm hến – Hoàng Phủ Ngọc Tường.</li><li>Hội lồng tồng – Trần Quốc Vượng, Lê Văn Hảo, Dương Tất Tứ.</li></ul>
+</div>
+</details>
+
+<details>
+<summary>B. Luyện tập Tiếng Việt</summary>
+<div class="revision-content">
+<p><strong>Câu 1.</strong> Tìm từ Hán Việt trong câu: “Truyền thống hiếu học là niềm tự hào của dân tộc.”</p>
+<p><strong>Câu 2.</strong> Giải thích nghĩa của từ “truyền thống” trong câu trên.</p>
+<p><strong>Câu 3.</strong> Xác định điệp ngữ trong câu: “Tre giữ làng, giữ nước, giữ mái nhà tranh.”</p>
+<p><strong>Câu 4.</strong> Tìm phép liên kết trong hai câu: “Mai rất yêu quê hương. Cô bé luôn tự hào về nơi mình sinh ra.”</p>
+<p><strong>Câu 5.</strong> Đặt một câu có sử dụng từ ngữ địa phương mà em biết, sau đó giải thích nghĩa.</p>
+<p><strong>Câu 6.</strong> Xác định biện pháp tu từ trong câu: “Tiếng cười vang xa đến tận chân trời.”</p>
+<p><strong>Câu 7.</strong> Tìm số từ và phó từ trong câu: “Hai bạn đang cùng nhau chuẩn bị tiết mục văn nghệ.”</p>
+<p><strong>Câu 8.</strong> Giải thích ý nghĩa thành ngữ “Uống nước nhớ nguồn”.</p>
+<h4>Gợi ý đáp án</h4>
+<p><strong>Câu 1:</strong> Truyền thống, hiếu học, tự hào, dân tộc.</p>
+<p><strong>Câu 2:</strong> Truyền thống là những giá trị, phong tục, tập quán hoặc phẩm chất tốt đẹp được lưu truyền qua nhiều thế hệ.</p>
+<p><strong>Câu 3:</strong> Điệp từ “giữ”, nhấn mạnh vai trò và ý nghĩa của cây tre.</p>
+<p><strong>Câu 4:</strong> Phép thế: “Cô bé” thay thế cho “Mai”.</p>
+<p><strong>Câu 5:</strong> Học sinh tự thực hiện, giải thích đúng nghĩa từ.</p>
+<p><strong>Câu 6:</strong> Nói quá, nhấn mạnh âm thanh tiếng cười vang xa.</p>
+<p><strong>Câu 7:</strong> Số từ: “Hai”; phó từ: “đang”.</p>
+<p><strong>Câu 8:</strong> Nhắc nhở con người biết ơn những người đã tạo dựng, vun đắp thành quả cho mình.</p>
+</div>
+</details>
+
+<details>
+<summary>C. Luyện tập đọc hiểu</summary>
+<div class="revision-content">
+<h4>Những dạng bài cần ôn</h4>
+<ol><li>Đọc hiểu truyện: ngôi kể, nhân vật, chi tiết, đặc điểm nhân vật và chủ đề.</li><li>Đọc hiểu thơ: thể thơ, hình ảnh, nhịp điệu, biện pháp tu từ, mạch cảm xúc và thông điệp.</li><li>Đọc hiểu văn bản thông tin: thông tin chính, chi tiết, cách triển khai và ý nghĩa của văn bản.</li><li>Liên hệ, vận dụng: trình bày suy nghĩ, rút ra bài học và liên hệ với đời sống.</li></ol>
+<div class="revision-note">Khi luyện đề, cần sử dụng ngữ liệu từ đề kiểm tra hoặc đề ôn tập có nguồn xác minh được. Ghi rõ tên văn bản, tác giả, đơn vị ra đề, năm học và đường dẫn nguồn.</div>
+</div>
+</details>
+
+<details>
+<summary>D. Luyện tập viết</summary>
+<div class="revision-content">
+<h4>Dạng 1. Phân tích đặc điểm nhân vật</h4>
+<p><strong>Đề luyện:</strong> Phân tích đặc điểm một nhân vật trong tác phẩm văn học mà em đã học.</p>
+<p><strong>Trọng tâm:</strong> Giới thiệu nhân vật; phân tích ngoại hình, hành động, lời nói, suy nghĩ, cảm xúc; lựa chọn dẫn chứng; nhận xét nghệ thuật xây dựng nhân vật và ý nghĩa của nhân vật.</p>
+<h4>Dạng 2. Biểu cảm về con người hoặc sự việc</h4>
+<p><strong>Đề luyện:</strong> Viết bài văn biểu cảm về một người thân, thầy cô, bạn bè hoặc một kỉ niệm khiến em nhớ mãi.</p>
+<p><strong>Trọng tâm:</strong> Giới thiệu đối tượng; kể và tả những chi tiết tiêu biểu; bộc lộ cảm xúc chân thành; nêu ý nghĩa của đối tượng hoặc sự việc đối với bản thân.</p>
+<h4>Dạng 3. Viết văn bản tường trình</h4>
+<p><strong>Đề luyện:</strong> Viết văn bản tường trình về một sự việc xảy ra trong lớp hoặc trong trường mà em biết rõ.</p>
+<p><strong>Trọng tâm:</strong> Đúng thể thức; thông tin trung thực; xác định rõ thời gian, địa điểm, người liên quan và diễn biến; có lời cam đoan và chữ kí.</p>
+<h4>5. Bảng tự kiểm tra trước khi nộp bài</h4>
+<table class="revision-table">
+<tr><th>Nội dung</th><th>Yêu cầu</th></tr>
+<tr><td>Bố cục</td><td>Đủ các phần, trình bày rõ ràng.</td></tr>
+<tr><td>Nội dung</td><td>Đúng trọng tâm đề bài, không lạc đề.</td></tr>
+<tr><td>Dẫn chứng</td><td>Phù hợp, chính xác, có phân tích.</td></tr>
+<tr><td>Diễn đạt</td><td>Mạch lạc, trong sáng, có liên kết.</td></tr>
+<tr><td>Chính tả</td><td>Hạn chế lỗi chính tả, dùng từ và đặt câu.</td></tr>
+</table>
+</div>
+</details>
+</div>
+
 </section>
 
 <button class="logout" id="logoutButton">Đăng xuất</button>
-    </section>
-  </main>
+</section>
+</main>
 
-  <script>
-    // Điền API URL và Publishable key của dự án Supabase tại đây.
-    const SUPABASE_URL = "https://xhgxxbjdidpkizxvrsfo.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_NcGKpKd7YSw9CnofZh1XCw_4qfOm71i";
+<script>
+const SUPABASE_URL="https://xhgxxbjdidpkizxvrsfo.supabase.co";
+const SUPABASE_KEY="sb_publishable_NcGKpKd7YSw9CnofZh1XCw_4qfOm71i";
 
-    const loginSection = document.getElementById("loginSection");
-    const homeSection = document.getElementById("homeSection");
-    const loginMessage = document.getElementById("loginMessage");
+const loginSection=document.getElementById("loginSection");
+const homeSection=document.getElementById("homeSection");
+const loginMessage=document.getElementById("loginMessage");
 
-    let supabaseClient = null;
+let supabaseClient=null;
 
-    if (
-      SUPABASE_URL.startsWith("https://") &&
-      !SUPABASE_URL.includes("DAN_API_URL") &&
-      SUPABASE_KEY.startsWith("sb_publishable_")
-    ) {
-      supabaseClient = window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-      );
-    } else {
-      loginMessage.textContent =
-        "Website đang chờ cấu hình thông tin kết nối Supabase.";
-    }
-
-    async function showUser(user) {
-      if (!supabaseClient || !user) return;
-
-      const { data, error } = await supabaseClient
-        .from("profiles")
-        .select("full_name, role, class_name")
-        .eq("id", user.id)
-        .single();
-
-      if (error || !data) {
-        loginMessage.textContent =
-          "Tài khoản chưa có hồ sơ được cấp. Vui lòng liên hệ cô Thương.";
-        return;
-      }
-
-      loginSection.classList.add("hidden");
-      homeSection.classList.remove("hidden");
-
-      document.getElementById("userName").textContent =
-        data.full_name || user.email;
-
-      document.getElementById("userRole").textContent =
-        data.role === "teacher"
-          ? "Tài khoản giáo viên"
-          : "Tài khoản học sinh";
-
-  
-document.getElementById("dashboardMessage").textContent =
-  data.role === "teacher"
-    ? "Chào cô Thương! Chúc cô có những giờ học thật vui."
-    : "Chào em! Cùng hoàn thành tốt những bài tập cô giao nhé.";
-
-const teacherPanel = document.getElementById("teacherPanel");
-const studentPanel = document.getElementById("studentPanel");
-const revisionPanel = document.getElementById("revisionPanel");
-
-if (revisionPanel) {
-  revisionPanel.classList.remove("hidden");
-}
-      console.log("REVISION PANEL:", revisionPanel);
-console.log("REVISION DISPLAY:", revisionPanel ? getComputedStyle(revisionPanel).display : "KHÔNG TÌM THẤY");
-if (teacherPanel) {
-  teacherPanel.classList.toggle("hidden", data.role !== "teacher");
+if(SUPABASE_URL.startsWith("https://")&&SUPABASE_KEY.startsWith("sb_publishable_")){
+supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+}else{
+loginMessage.textContent="Website đang chờ cấu hình thông tin kết nối Supabase.";
 }
 
-if (studentPanel) {
-  studentPanel.classList.toggle("hidden", data.role !== "student");
+async function showUser(user){
+if(!supabaseClient||!user)return;
+
+const {data,error}=await supabaseClient
+.from("profiles")
+.select("full_name, role, class_name")
+.eq("id",user.id)
+.single();
+
+if(error||!data){
+loginMessage.textContent="Tài khoản chưa có hồ sơ được cấp. Vui lòng liên hệ cô Thương.";
+return;
 }
 
-if (data.role === "teacher") {
-  await loadStudents();
-  await loadSubmissions();
+loginSection.classList.add("hidden");
+homeSection.classList.remove("hidden");
+
+document.getElementById("userName").textContent=data.full_name||user.email;
+document.getElementById("userRole").textContent=data.role==="teacher"?"Tài khoản giáo viên":"Tài khoản học sinh";
+document.getElementById("dashboardMessage").textContent=data.role==="teacher"?"Chào cô Thương! Chúc cô có những giờ học thật vui.":"Chào em! Cùng hoàn thành tốt những bài tập cô giao nhé.";
+
+document.getElementById("revisionPanel").classList.remove("hidden");
+
+const teacherPanel=document.getElementById("teacherPanel");
+const studentPanel=document.getElementById("studentPanel");
+
+teacherPanel.classList.toggle("hidden",data.role!=="teacher");
+studentPanel.classList.toggle("hidden",data.role!=="student");
+
+if(data.role==="teacher"){
+await loadStudents();
+await loadSubmissions();
 }
 
-if (data.role === "student") {
-  const message = document.getElementById("studentAssignmentMessage");
-  message.textContent = "Đã gọi hàm tải bài tập...";
-  await loadAssignments(data.class_name);
+if(data.role==="student"){
+await loadAssignments(data.class_name);
+}
 }
 
-    }
+document.getElementById("loginForm").addEventListener("submit",async(event)=>{
+event.preventDefault();
 
-    document.getElementById("loginForm").addEventListener("submit", async (event) => {
-      event.preventDefault();
+if(!supabaseClient){
+loginMessage.textContent="Chưa cấu hình kết nối. Hãy kiểm tra API URL và Publishable key.";
+return;
+}
 
-      if (!supabaseClient) {
-        loginMessage.textContent =
-          "Chưa cấu hình kết nối. Hãy kiểm tra API URL và Publishable key.";
-        return;
-      }
+const button=document.getElementById("loginButton");
+button.disabled=true;
+button.textContent="Đang đăng nhập...";
+loginMessage.textContent="";
 
-      const button = document.getElementById("loginButton");
-      button.disabled = true;
-      button.textContent = "Đang đăng nhập...";
-      loginMessage.textContent = "";
+const loginId=document.getElementById("email").value.trim();
+const email=loginId.includes("@")?loginId:`${loginId.toLowerCase()}@students.hocvan7.invalid`;
+const password=document.getElementById("password").value;
 
-const loginId = document.getElementById("email").value.trim();
-const email = loginId.includes("@")
-  ? loginId
-  : `${loginId.toLowerCase()}@students.hocvan7.invalid`;
-      const password = document.getElementById("password").value;
+const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
 
-      const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email,
-        password
-      });
+button.disabled=false;
+button.textContent="Đăng nhập";
 
-      button.disabled = false;
-      button.textContent = "Đăng nhập";
+if(error){
+loginMessage.textContent="Đăng nhập chưa thành công: "+error.message;
+return;
+}
+await showUser(data.user);
+});
 
-      if (error) {
-        loginMessage.textContent = "Đăng nhập chưa thành công: " + error.message;
-        return;
-      }
-      await showUser(data.user);
-    });
+document.getElementById("logoutButton").addEventListener("click",async()=>{
+if(supabaseClient)await supabaseClient.auth.signOut();
+homeSection.classList.add("hidden");
+loginSection.classList.remove("hidden");
+loginMessage.textContent="Em đã đăng xuất.";
+});
 
-    document.getElementById("logoutButton").addEventListener("click", async () => {
-      await supabaseClient.auth.signOut();
-      homeSection.classList.add("hidden");
-      loginSection.classList.remove("hidden");
-      loginMessage.textContent = "Em đã đăng xuất.";
-    });
-const createStudentForm = document.getElementById("createStudentForm");
+const createStudentForm=document.getElementById("createStudentForm");
 
-if (createStudentForm) {
-  createStudentForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
+createStudentForm.addEventListener("submit",async(event)=>{
+event.preventDefault();
 
-    const message = document.getElementById("createStudentMessage");
-    const button = createStudentForm.querySelector('button[type="submit"]');
+const message=document.getElementById("createStudentMessage");
+const button=createStudentForm.querySelector('button[type="submit"]');
 
-    button.disabled = true;
-    button.textContent = "Đang tạo tài khoản...";
-    message.textContent = "";
+button.disabled=true;
+button.textContent="Đang tạo tài khoản...";
+message.textContent="";
 
-    const student = {
-      full_name: document.getElementById("studentName").value.trim(),
-      username: document.getElementById("studentUsername").value.trim(),
-      password: document.getElementById("studentPassword").value,
-      class_name: document.getElementById("studentClass").value
-    };
+const student={
+full_name:document.getElementById("studentName").value.trim(),
+username:document.getElementById("studentUsername").value.trim(),
+password:document.getElementById("studentPassword").value,
+class_name:document.getElementById("studentClass").value
+};
 
-const { data, error } = await supabaseClient.functions.invoke(
-  "clever-api",
-  { body: student }
+const {data,error}=await supabaseClient.functions.invoke("clever-api",{body:student});
+
+button.disabled=false;
+button.textContent="Tạo tài khoản học sinh";
+
+if(error||!data||!data.success){
+message.textContent=(data&&data.error)||(error&&error.message)||"Chưa tạo được tài khoản.";
+return;
+}
+
+message.textContent=`Đã tạo tài khoản ${data.username} cho ${data.full_name}.`;
+createStudentForm.reset();
+await loadStudents();
+});
+
+const createAssignmentForm=document.getElementById("createAssignmentForm");
+
+createAssignmentForm.addEventListener("submit",async(event)=>{
+event.preventDefault();
+
+const message=document.getElementById("assignmentMessage");
+const button=createAssignmentForm.querySelector('button[type="submit"]');
+const title=document.getElementById("assignmentTitle").value.trim();
+const body=document.getElementById("assignmentBody").value.trim();
+const className=document.getElementById("assignmentClass").value;
+
+if(!title||!body||!className){
+message.textContent="Cô vui lòng nhập đầy đủ thông tin.";
+return;
+}
+
+button.disabled=true;
+button.textContent="Đang giao bài...";
+
+const {data:userData}=await supabaseClient.auth.getUser();
+const user=userData.user;
+
+if(!user){
+message.textContent="Phiên đăng nhập đã hết hạn. Cô vui lòng đăng nhập lại.";
+button.disabled=false;
+button.textContent="Giao bài tập";
+return;
+}
+
+const {error}=await supabaseClient.from("assignments").insert({
+title,
+body,
+class_name:className,
+created_by:user.id
+});
+
+button.disabled=false;
+button.textContent="Giao bài tập";
+
+if(error){
+message.textContent="Chưa giao được bài: "+error.message;
+return;
+}
+
+message.textContent="Đã giao bài tập thành công!";
+createAssignmentForm.reset();
+});
+
+async function loadStudents(){
+const list=document.getElementById("studentList");
+const message=document.getElementById("studentListMessage");
+if(!list||!message||!supabaseClient)return;
+
+list.textContent="";
+message.textContent="Đang tải danh sách học sinh...";
+
+const {data,error}=await supabaseClient
+.from("profiles")
+.select("id, full_name, username, class_name")
+.eq("role","student")
+.order("full_name",{ascending:true});
+
+if(error){
+message.textContent="Không tải được danh sách học sinh: "+error.message;
+return;
+}
+
+if(!data||data.length===0){
+message.textContent="Chưa có học sinh nào.";
+return;
+}
+
+message.textContent=`Có ${data.length} học sinh.`;
+
+data.forEach((student,index)=>{
+const item=document.createElement("div");
+item.className="student-item";
+
+const info=document.createElement("span");
+info.textContent=`${index+1}. ${student.full_name||"Chưa có họ tên"} | ${student.username||"Chưa có tên đăng nhập"} | Lớp ${student.class_name||"Chưa rõ"}`;
+
+const deleteButton=document.createElement("button");
+deleteButton.type="button";
+deleteButton.textContent="Xóa học sinh";
+
+deleteButton.addEventListener("click",async()=>{
+const confirmed=confirm(`Mày có chắc chắn muốn xóa học sinh ${student.full_name} không?\n\nToàn bộ tài khoản, bài nộp, điểm, nhận xét và ảnh bài làm sẽ bị xóa.`);
+if(!confirmed)return;
+
+deleteButton.disabled=true;
+deleteButton.textContent="Đang xóa...";
+
+try{
+const {data:result,error}=await supabaseClient.functions.invoke("clever-api",{
+body:{action:"delete_student",student_id:student.id}
+});
+
+if(error||!result||!result.success){
+alert((result&&result.error)||(error&&error.message)||"Chưa xóa được học sinh.");
+deleteButton.disabled=false;
+deleteButton.textContent="Xóa học sinh";
+return;
+}
+
+alert("Đã xóa học sinh và dữ liệu liên quan.");
+await loadStudents();
+}catch(err){
+alert("Có lỗi xảy ra: "+err.message);
+deleteButton.disabled=false;
+deleteButton.textContent="Xóa học sinh";
+}
+});
+
+item.appendChild(info);
+item.appendChild(deleteButton);
+list.appendChild(item);
+});
+}
+
+document.getElementById("refreshStudents").addEventListener("click",loadStudents);
+
+async function loadSubmissions(){
+const filterStudent=document.getElementById("filterStudent");
+const filterAssignment=document.getElementById("filterAssignment");
+const list=document.getElementById("submissionList");
+const message=document.getElementById("submissionMessage");
+
+if(!list||!message||!supabaseClient)return;
+
+list.innerHTML="";
+message.textContent="Đang tải bài nộp của học sinh...";
+
+const {data:submissions,error}=await supabaseClient
+.from("submissions")
+.select("id, assignment_id, student_id, attempt, answer, image_paths, feedback, score, submitted_at")
+.order("submitted_at",{ascending:false});
+
+if(error){
+message.textContent="Không tải được bài nộp: "+error.message;
+return;
+}
+
+if(!submissions||submissions.length===0){
+message.textContent="Chưa có học sinh nào nộp bài.";
+return;
+}
+
+const assignmentIds=[...new Set(submissions.map(s=>s.assignment_id))];
+const studentIds=[...new Set(submissions.map(s=>s.student_id))];
+
+const {data:assignments,error:assignmentError}=await supabaseClient
+.from("assignments").select("id,title,class_name").in("id",assignmentIds);
+
+if(assignmentError){
+message.textContent="Không tải được thông tin bài tập: "+assignmentError.message;
+return;
+}
+
+const {data:students,error:studentError}=await supabaseClient
+.from("profiles").select("id,full_name,class_name").in("id",studentIds);
+
+if(studentError){
+message.textContent="Không tải được tên học sinh: "+studentError.message;
+return;
+}
+
+const assignmentMap=new Map((assignments||[]).map(a=>[a.id,a]));
+const studentMap=new Map((students||[]).map(s=>[s.id,s]));
+
+const currentStudent=filterStudent.value;
+filterStudent.innerHTML='<option value="">Tất cả học sinh</option>';
+(students||[]).forEach(student=>{
+const option=document.createElement("option");
+option.value=student.id;
+option.textContent=student.full_name;
+filterStudent.appendChild(option);
+});
+filterStudent.value=currentStudent;
+
+const currentAssignment=filterAssignment.value;
+filterAssignment.innerHTML='<option value="">Tất cả bài tập</option>';
+(assignments||[]).forEach(assignment=>{
+const option=document.createElement("option");
+option.value=assignment.id;
+option.textContent=assignment.title;
+filterAssignment.appendChild(option);
+});
+filterAssignment.value=currentAssignment;
+
+const selectedStudentId=filterStudent.value;
+const selectedAssignmentId=filterAssignment.value;
+
+const filtered=submissions.filter(s=>
+(!selectedStudentId||s.student_id===selectedStudentId)&&
+(!selectedAssignmentId||s.assignment_id===selectedAssignmentId)
 );
 
-console.log("FUNCTION DATA:", data);
-console.log("FUNCTION ERROR:", error);
-    button.disabled = false;
-    button.textContent = "Tạo tài khoản học sinh";
+message.textContent=`Hiển thị ${filtered.length}/${submissions.length} bài nộp.`;
 
-if (error || !data || !data.success) {
-  message.textContent =
-    (data && data.error) || (error && error.message) || "Chưa tạo được tài khoản.";
-  return;
+for(const submission of filtered){
+const assignment=assignmentMap.get(submission.assignment_id);
+const student=studentMap.get(submission.student_id);
+
+const card=document.createElement("div");
+card.style.cssText="background:#f8faf8;border:1px solid #e3ebe5;border-radius:14px;padding:20px;margin:16px 0;";
+
+const heading=document.createElement("h3");
+heading.textContent=student?`${student.full_name} | Lớp ${student.class_name||"Chưa rõ"}`:"Học sinh chưa xác định";
+
+const assignmentName=document.createElement("p");
+assignmentName.textContent="Bài tập: "+(assignment?assignment.title:"Không xác định");
+
+const attemptInfo=document.createElement("p");
+attemptInfo.textContent=`Lần nộp: ${submission.attempt||1}/2`;
+attemptInfo.style.cssText="color:#477b58;font-weight:bold";
+
+const answer=document.createElement("p");
+answer.style.whiteSpace="pre-wrap";
+answer.textContent="Bài làm: "+(submission.answer||"Không có nội dung văn bản.");
+
+const time=document.createElement("p");
+time.textContent=submission.submitted_at?"Thời gian nộp: "+new Date(submission.submitted_at).toLocaleString("vi-VN"):"";
+
+card.append(heading,assignmentName,attemptInfo,answer,time);
+
+if(submission.image_paths&&submission.image_paths.length){
+const imageHeading=document.createElement("p");
+imageHeading.textContent="Ảnh bài làm:";
+card.appendChild(imageHeading);
+
+for(const path of submission.image_paths){
+const {data:imageData,error:imageError}=await supabaseClient.storage.from("student-submissions").createSignedUrl(path,3600);
+if(imageError||!imageData){
+const errorText=document.createElement("p");
+errorText.textContent="Không tải được ảnh: "+path;
+card.appendChild(errorText);
+continue;
+}
+const image=document.createElement("img");
+image.src=imageData.signedUrl;
+image.alt="Ảnh bài làm của học sinh";
+image.style.cssText="display:block;max-width:100%;max-height:500px;object-fit:contain;margin:10px 0;border-radius:8px";
+card.appendChild(image);
+}
 }
 
-    message.textContent =
-      `Đã tạo tài khoản ${data.username} cho ${data.full_name}.`;
+const scoreLabel=document.createElement("label");
+scoreLabel.textContent="Điểm (thang 10)";
+const scoreInput=document.createElement("input");
+scoreInput.type="number";
+scoreInput.min="0";
+scoreInput.max="10";
+scoreInput.step="0.25";
+scoreInput.placeholder="Nhập điểm";
+scoreInput.value=submission.score??"";
+scoreInput.style.maxWidth="180px";
 
-    createStudentForm.reset();
-  });
+const feedbackLabel=document.createElement("label");
+feedbackLabel.textContent="Nhận xét của cô";
+const feedbackInput=document.createElement("textarea");
+feedbackInput.rows=3;
+feedbackInput.placeholder="Nhập nhận xét cho học sinh...";
+feedbackInput.value=submission.feedback||"";
+
+const saveButton=document.createElement("button");
+saveButton.type="button";
+saveButton.textContent="Lưu điểm và nhận xét";
+
+const result=document.createElement("p");
+result.className="message";
+
+saveButton.addEventListener("click",async()=>{
+const scoreText=scoreInput.value.trim();
+const feedback=feedbackInput.value.trim();
+let score=null;
+
+if(scoreText!==""){
+score=Number(scoreText);
+if(!Number.isFinite(score)||score<0||score>10){
+result.textContent="Điểm phải nằm trong khoảng từ 0 đến 10.";
+return;
 }
-    
-const createAssignmentForm = document.getElementById("createAssignmentForm");
-
-if (createAssignmentForm) {
-  createAssignmentForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    console.log("Đã bấm nút giao bài tập");
-
-    const message = document.getElementById("assignmentMessage");
-    const button = createAssignmentForm.querySelector('button[type="submit"]');
-
-    const title = document.getElementById("assignmentTitle").value.trim();
-    const body = document.getElementById("assignmentBody").value.trim();
-    const className = document.getElementById("assignmentClass").value;
-
-    if (!title || !body || !className) {
-      message.textContent = "Cô vui lòng nhập đầy đủ thông tin.";
-      return;
-    }
-
-    button.disabled = true;
-    button.textContent = "Đang giao bài...";
-
-    const { data: userData } = await supabaseClient.auth.getUser();
-    const user = userData.user;
-
-    if (!user) {
-      message.textContent = "Phiên đăng nhập đã hết hạn. Cô vui lòng đăng nhập lại.";
-      button.disabled = false;
-      button.textContent = "Giao bài tập";
-      return;
-    }
-
-    const { error } = await supabaseClient
-      .from("assignments")
-      .insert({
-        title: title,
-        body: body,
-        class_name: className,
-        created_by: user.id
-      });
-
-    button.disabled = false;
-    button.textContent = "Giao bài tập";
-
-    if (error) {
-      message.textContent = "Chưa giao được bài: " + error.message;
-      return;
-    }
-
-    message.textContent = "Đã giao bài tập thành công!";
-    createAssignmentForm.reset();
-  });
 }
 
+saveButton.disabled=true;
+saveButton.textContent="Đang lưu...";
 
-async function loadStudents() {
-  const list = document.getElementById("studentList");
-  const message = document.getElementById("studentListMessage");
+const {error:updateError}=await supabaseClient.from("submissions").update({
+score,
+feedback:feedback||null
+}).eq("id",submission.id);
 
-  if (!list || !message || !supabaseClient) return;
-
-  list.textContent = "";
-  message.textContent = "Đang tải danh sách học sinh...";
-
-  const { data, error } = await supabaseClient
-    .from("profiles")
-    .select("id, full_name, username, class_name")
-    .eq("role", "student")
-    .order("full_name", { ascending: true });
-
-  if (error) {
-    message.textContent =
-      "Không tải được danh sách học sinh: " + error.message;
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    message.textContent = "Chưa có học sinh nào.";
-    return;
-  }
-
-  message.textContent = `Có ${data.length} học sinh.`;
-
-  data.forEach((student, index) => {
-    const item = document.createElement("div");
-    item.className = "student-item";
-
-    const studentInfo = document.createElement("span");
-    studentInfo.textContent =
-      `${index + 1}. ${student.full_name || "Chưa có họ tên"} | ${student.username || "Chưa có tên đăng nhập"} | Lớp ${student.class_name || "Chưa rõ"}`;
-
-    const deleteButton = document.createElement("button");
-    deleteButton.type = "button";
-    deleteButton.textContent = "Xóa học sinh";
-
-    deleteButton.addEventListener("click", async () => {
-      const confirmed = confirm(
-        `Mày có chắc chắn muốn xóa học sinh ${student.full_name} không?\n\nToàn bộ tài khoản, bài nộp, điểm, nhận xét và ảnh bài làm sẽ bị xóa.`
-      );
-
-      if (!confirmed) return;
-
-      deleteButton.disabled = true;
-      deleteButton.textContent = "Đang xóa...";
-
-      try {
-        const { data: result, error } =
-          await supabaseClient.functions.invoke("clever-api", {
-            body: {
-              action: "delete_student",
-              student_id: student.id
-            }
-          });
-
-        if (error || !result || !result.success) {
-          alert(
-            (result && result.error) ||
-            (error && error.message) ||
-            "Chưa xóa được học sinh."
-          );
-
-          deleteButton.disabled = false;
-          deleteButton.textContent = "Xóa học sinh";
-          return;
-        }
-
-        alert("Đã xóa học sinh và dữ liệu liên quan.");
-        loadStudents();
-
-      } catch (err) {
-        alert("Có lỗi xảy ra: " + err.message);
-        deleteButton.disabled = false;
-        deleteButton.textContent = "Xóa học sinh";
-      }
-    });
-
-    item.appendChild(studentInfo);
-    item.appendChild(deleteButton);
-    list.appendChild(item);
-  });
+if(updateError){
+result.textContent="Chưa lưu được: "+updateError.message;
+saveButton.disabled=false;
+saveButton.textContent="Lưu điểm và nhận xét";
+return;
 }
 
+result.textContent="Đã lưu điểm và nhận xét thành công!";
+saveButton.disabled=false;
+saveButton.textContent="Lưu điểm và nhận xét";
+});
 
-async function loadSubmissions() {
-    const filterStudent = document.getElementById("filterStudent");
-  const filterAssignment = document.getElementById("filterAssignment");
-  const list = document.getElementById("submissionList");
-  const message = document.getElementById("submissionMessage");
-  const refreshButton = document.getElementById("refreshSubmissions");
-
-  if (!list || !message || !supabaseClient) return;
-
-  if (refreshButton) {
-    refreshButton.onclick = loadSubmissions;
-  }
-    if (filterStudent) {
-    filterStudent.onchange = loadSubmissions;
-  }
-
-  if (filterAssignment) {
-    filterAssignment.onchange = loadSubmissions;
-  }
-
-  list.innerHTML = "";
-  message.textContent = "Đang tải bài nộp của học sinh...";
-
-  const { data: submissions, error } = await supabaseClient
-    .from("submissions")
-    .select("id, assignment_id, student_id, attempt, answer, image_paths, feedback, score, submitted_at")
-    .order("submitted_at", { ascending: false });
-
-  if (error) {
-    message.textContent = "Không tải được bài nộp: " + error.message;
-    return;
-  }
-
-  if (!submissions || submissions.length === 0) {
-    message.textContent = "Chưa có học sinh nào nộp bài.";
-    return;
-  }
-
-  const assignmentIds = [...new Set(submissions.map(s => s.assignment_id))];
-  const studentIds = [...new Set(submissions.map(s => s.student_id))];
-
-  const { data: assignments, error: assignmentError } = await supabaseClient
-    .from("assignments")
-    .select("id, title, class_name")
-    .in("id", assignmentIds);
-
-  if (assignmentError) {
-    message.textContent = "Không tải được thông tin bài tập: " + assignmentError.message;
-    return;
-  }
-
-  const { data: students, error: studentError } = await supabaseClient
-    .from("profiles")
-    .select("id, full_name, class_name")
-    .in("id", studentIds);
-
-  if (studentError) {
-    message.textContent = "Không tải được tên học sinh: " + studentError.message;
-    return;
-  }
-
-  const assignmentMap = new Map(
-    (assignments || []).map(a => [a.id, a])
-  );
-
-  const studentMap = new Map(
-    (students || []).map(s => [s.id, s])
-  );
-    if (filterStudent) {
-    const currentStudent = filterStudent.value;
-
-    filterStudent.innerHTML =
-      '<option value="">Tất cả học sinh</option>';
-
-    (students || []).forEach(student => {
-      const option = document.createElement("option");
-      option.value = student.id;
-      option.textContent = student.full_name;
-      filterStudent.appendChild(option);
-    });
-
-    filterStudent.value = currentStudent;
-  }
-
-  if (filterAssignment) {
-    const currentAssignment = filterAssignment.value;
-
-    filterAssignment.innerHTML =
-      '<option value="">Tất cả bài tập</option>';
-
-    (assignments || []).forEach(assignment => {
-      const option = document.createElement("option");
-      option.value = assignment.id;
-      option.textContent = assignment.title;
-      filterAssignment.appendChild(option);
-    });
-
-    filterAssignment.value = currentAssignment;
-  }
-
-  const selectedStudentId = filterStudent
-    ? filterStudent.value
-    : "";
-
-  const selectedAssignmentId = filterAssignment
-    ? filterAssignment.value
-    : "";
-
-  const filteredSubmissions = submissions.filter(submission => {
-    const matchStudent =
-      !selectedStudentId ||
-      submission.student_id === selectedStudentId;
-
-    const matchAssignment =
-      !selectedAssignmentId ||
-      submission.assignment_id === selectedAssignmentId;
-
-    return matchStudent && matchAssignment;
-  });
-
-  message.textContent =
-    `Hiển thị ${filteredSubmissions.length}/${submissions.length} bài nộp.`;
-
-  for (const submission of filteredSubmissions) {
-    const assignment = assignmentMap.get(submission.assignment_id);
-    const student = studentMap.get(submission.student_id);
-
-    const card = document.createElement("div");
-    card.style.cssText =
-      "background:#f8faf8;border:1px solid #e3ebe5;border-radius:14px;padding:20px;margin:16px 0;";
-
-    const heading = document.createElement("h3");
-    heading.textContent = student
-      ? student.full_name + " | Lớp " + (student.class_name || "Chưa rõ")
-      : "Học sinh chưa xác định";
-
-    const assignmentName = document.createElement("p");
-    assignmentName.textContent =
-      "Bài tập: " + (assignment ? assignment.title : "Không xác định");
-
-    const attemptInfo = document.createElement("p");
-    attemptInfo.textContent = `Lần nộp: ${submission.attempt || 1}/2`;
-    attemptInfo.style.cssText =
-      "color:#477b58;font-weight:bold;font-size:16px;";
-
-    const answer = document.createElement("p");
-    answer.style.cssText = "white-space:pre-wrap;";
-    answer.textContent = "Bài làm: " + (submission.answer || "Không có nội dung văn bản.");
-
-    const time = document.createElement("p");
-    time.textContent = submission.submitted_at
-      ? "Thời gian nộp: " + new Date(submission.submitted_at).toLocaleString("vi-VN")
-      : "";
-
-    card.appendChild(heading);
-    card.appendChild(assignmentName);
-    card.appendChild(attemptInfo);
-    card.appendChild(answer);
-    card.appendChild(time);
-
-    if (submission.image_paths && submission.image_paths.length > 0) {
-      const imageHeading = document.createElement("p");
-      imageHeading.textContent = "Ảnh bài làm:";
-      card.appendChild(imageHeading);
-
-      for (const path of submission.image_paths) {
-        const { data: imageData, error: imageError } =
-          await supabaseClient.storage
-            .from("student-submissions")
-            .createSignedUrl(path, 3600);
-
-        if (imageError || !imageData) {
-          const imageErrorText = document.createElement("p");
-          imageErrorText.textContent = "Không tải được ảnh: " + path;
-          card.appendChild(imageErrorText);
-          continue;
-        }
-
-        const image = document.createElement("img");
-        image.src = imageData.signedUrl;
-        image.alt = "Ảnh bài làm của học sinh";
-        image.style.cssText =
-          "display:block;max-width:100%;max-height:500px;object-fit:contain;margin:10px 0;border-radius:8px;";
-
-        card.appendChild(image);
-      }
-    }
-
-    const scoreLabel = document.createElement("label");
-    scoreLabel.textContent = "Điểm (thang 10)";
-
-    const scoreInput = document.createElement("input");
-    scoreInput.type = "number";
-    scoreInput.min = "0";
-    scoreInput.max = "10";
-    scoreInput.step = "0.25";
-    scoreInput.placeholder = "Nhập điểm";
-    scoreInput.value = submission.score ?? "";
-    scoreInput.style.cssText =
-      "display:block;width:100%;max-width:180px;padding:10px;margin:6px 0 12px;";
-
-    const feedbackLabel = document.createElement("label");
-    feedbackLabel.textContent = "Nhận xét của cô";
-
-    const feedbackInput = document.createElement("textarea");
-    feedbackInput.rows = 3;
-    feedbackInput.placeholder = "Nhập nhận xét cho học sinh...";
-    feedbackInput.value = submission.feedback || "";
-    feedbackInput.style.cssText =
-      "display:block;width:100%;padding:10px;margin:6px 0;border:1px solid #d8e2da;border-radius:9px;font:inherit;";
-
-    const saveButton = document.createElement("button");
-    saveButton.type = "button";
-    saveButton.textContent = "Lưu điểm và nhận xét";
-
-    const result = document.createElement("p");
-    result.className = "message";
-
-    saveButton.addEventListener("click", async () => {
-      const scoreText = scoreInput.value.trim();
-      const feedback = feedbackInput.value.trim();
-
-      let score = null;
-
-      if (scoreText !== "") {
-        score = Number(scoreText);
-
-        if (!Number.isFinite(score) || score < 0 || score > 10) {
-          result.textContent = "Điểm phải nằm trong khoảng từ 0 đến 10.";
-          return;
-        }
-      }
-
-      saveButton.disabled = true;
-      saveButton.textContent = "Đang lưu...";
-      result.textContent = "Đang lưu kết quả...";
-
-      const { error: updateError } = await supabaseClient
-        .from("submissions")
-        .update({
-          score: score,
-          feedback: feedback || null
-        })
-        .eq("id", submission.id);
-
-      if (updateError) {
-        result.textContent = "Chưa lưu được: " + updateError.message;
-        saveButton.disabled = false;
-        saveButton.textContent = "Lưu điểm và nhận xét";
-        return;
-      }
-
-      result.textContent = "Đã lưu điểm và nhận xét thành công!";
-      saveButton.disabled = false;
-      saveButton.textContent = "Lưu điểm và nhận xét";
-    });
-
-    card.appendChild(scoreLabel);
-    card.appendChild(scoreInput);
-    card.appendChild(feedbackLabel);
-    card.appendChild(feedbackInput);
-    card.appendChild(saveButton);
-    card.appendChild(result);
-
-    list.appendChild(card);
-  }
+card.append(scoreLabel,scoreInput,feedbackLabel,feedbackInput,saveButton,result);
+list.appendChild(card);
+}
 }
 
-const refreshSubmissionsButton =
-  document.getElementById("refreshSubmissions");
+document.getElementById("refreshSubmissions").addEventListener("click",loadSubmissions);
+document.getElementById("filterStudent").addEventListener("change",loadSubmissions);
+document.getElementById("filterAssignment").addEventListener("change",loadSubmissions);
 
-if (refreshSubmissionsButton) {
-  refreshSubmissionsButton.addEventListener("click", loadSubmissions);
+async function loadAssignments(className){
+const list=document.getElementById("studentAssignments");
+const message=document.getElementById("studentAssignmentMessage");
+
+if(!list||!message||!supabaseClient)return;
+
+list.innerHTML="";
+message.textContent="Đang tải bài tập...";
+
+if(!className){
+message.textContent="Tài khoản chưa được gán lớp. Em liên hệ cô Thương nhé.";
+return;
 }
 
-async function loadAssignments(className) {
-  const list = document.getElementById("studentAssignments");
-  const message = document.getElementById("studentAssignmentMessage");
+const {data:userData,error:userError}=await supabaseClient.auth.getUser();
 
-  if (!list || !message || !supabaseClient) return;
-
-  list.innerHTML = "";
-  message.textContent = "Đang tải bài tập...";
-
-  if (!className) {
-    message.textContent = "Tài khoản chưa được gán lớp. Em liên hệ cô Thương nhé.";
-    return;
-  }
-
-  const { data: userData, error: userError } =
-    await supabaseClient.auth.getUser();
-
-  if (userError || !userData || !userData.user) {
-    message.textContent = "Phiên đăng nhập đã hết hạn.";
-    return;
-  }
-
-  const student = userData.user;
-
-  const { data, error } = await supabaseClient
-    .from("assignments")
-    .select("id, title, body, created_at")
-    .eq("class_name", className)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    message.textContent = "Chưa tải được bài tập: " + error.message;
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    message.textContent = "Hiện chưa có bài tập nào được giao.";
-    return;
-  }
-
-  const { data: submissions, error: submissionError } =
-    await supabaseClient
-      .from("submissions")
-      .select("assignment_id, attempt, answer, image_paths, feedback, score, submitted_at")
-      .eq("student_id", student.id)
-      .order("attempt", { ascending: true });
-
-  if (submissionError) {
-    message.textContent = "Không tải được trạng thái bài nộp: " + submissionError.message;
-    return;
-  }
-
-  const submittedMap = new Map();
-
-  (submissions || []).forEach((item) => {
-    if (!submittedMap.has(item.assignment_id)) {
-      submittedMap.set(item.assignment_id, []);
-    }
-
-    submittedMap.get(item.assignment_id).push(item);
-  });
-
-  message.textContent = `Lớp ${className} có ${data.length} bài tập.`;
-
-  data.forEach((assignment, index) => {
-    const card = document.createElement("div");
-    card.className = "student-assignment-item";
-    card.style.cssText =
-      "background:#f8faf8;border:1px solid #e3ebe5;border-radius:14px;padding:20px;margin:16px 0;";
-
-    const title = document.createElement("h3");
-    title.textContent = `${index + 1}. ${assignment.title}`;
-
-    const body = document.createElement("p");
-    body.textContent = assignment.body || "";
-
-    card.appendChild(title);
-    card.appendChild(body);
-
-    const existingList = submittedMap.get(assignment.id) || [];
-
-    existingList.forEach((existing) => {
-      const status = document.createElement("p");
-      status.textContent = `✓ Em đã nộp bài lần ${existing.attempt || 1}.`;
-      status.style.color = "#477b58";
-      status.style.fontWeight = "bold";
-      card.appendChild(status);
-
-      if (existing.answer) {
-        const answer = document.createElement("p");
-        answer.style.whiteSpace = "pre-wrap";
-        answer.textContent = "Bài làm: " + existing.answer;
-        card.appendChild(answer);
-      }
-
-      if (existing.image_paths && existing.image_paths.length > 0) {
-        const imageInfo = document.createElement("p");
-        imageInfo.textContent =
-          `Đã đính kèm ${existing.image_paths.length} ảnh bài làm.`;
-        card.appendChild(imageInfo);
-      }
-
-      if (existing.score !== null) {
-        const score = document.createElement("p");
-        score.textContent = "Điểm: " + existing.score + "/10";
-        card.appendChild(score);
-      }
-
-      if (existing.feedback) {
-        const feedback = document.createElement("p");
-        feedback.textContent = "Nhận xét của cô: " + existing.feedback;
-        card.appendChild(feedback);
-      }
-    });
-
-    if (existingList.length >= 2) {
-      const finished = document.createElement("p");
-      finished.textContent =
-        "Em đã sử dụng hết 2 lần nộp bài. Không thể nộp thêm.";
-      finished.style.color = "#477b58";
-      finished.style.fontWeight = "bold";
-      card.appendChild(finished);
-
-    } else {
-      const attemptNumber = existingList.length + 1;
-
-      const answerLabel = document.createElement("label");
-      answerLabel.textContent =
-        `Bài làm của em (lần nộp ${attemptNumber}/2)`;
-
-      const answerInput = document.createElement("textarea");
-      answerInput.rows = 8;
-      answerInput.placeholder = "Nhập câu trả lời hoặc bài văn của em...";
-      answerInput.style.cssText =
-        "width:100%;padding:12px;border:1px solid #d8e2da;border-radius:9px;font:inherit;";
-
-      const imageLabel = document.createElement("label");
-      imageLabel.textContent = "Đính kèm ảnh bài viết tay (nếu có)";
-
-      const imageInput = document.createElement("input");
-      imageInput.type = "file";
-      imageInput.accept = "image/jpeg,image/png,image/webp";
-      imageInput.multiple = true;
-
-      const submitButton = document.createElement("button");
-      submitButton.type = "button";
-      submitButton.textContent =
-        attemptNumber === 1 ? "Nộp bài lần 1" : "Nộp lại lần 2";
-      submitButton.style.marginTop = "12px";
-
-      const result = document.createElement("p");
-      result.className = "message";
-
-      submitButton.addEventListener("click", async () => {
-        const answer = answerInput.value.trim();
-        const files = Array.from(imageInput.files || []);
-
-        if (!answer && files.length === 0) {
-          result.textContent = "Em hãy nhập bài làm hoặc chọn ảnh nhé.";
-          return;
-        }
-
-        if (files.some(file => file.size > 5 * 1024 * 1024)) {
-          result.textContent = "Mỗi ảnh không được vượt quá 5 MB.";
-          return;
-        }
-
-        if (files.some(file =>
-          !["image/jpeg", "image/png", "image/webp"].includes(file.type)
-        )) {
-          result.textContent = "Chỉ nhận ảnh JPG, PNG hoặc WebP.";
-          return;
-        }
-
-        submitButton.disabled = true;
-        submitButton.textContent = "Đang nộp bài...";
-        result.textContent = "Đang lưu bài làm...";
-
-        const imagePaths = [];
-        let uploadFailed = false;
-
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i];
-
-          const extension =
-            file.name.split(".").pop().toLowerCase()
-              .replace(/[^a-z0-9]/g, "") || "jpg";
-
-          const fileName =
-            Date.now() + "-" + i + "-" +
-            Math.random().toString(36).slice(2) + "." + extension;
-
-          const path =
-            assignment.id + "/" + student.id + "/" + fileName;
-
-          const { error: uploadError } = await supabaseClient
-            .storage
-            .from("student-submissions")
-            .upload(path, file, {
-              cacheControl: "3600",
-              upsert: false,
-              contentType: file.type
-            });
-
-          if (uploadError) {
-            result.textContent =
-              "Chưa tải được ảnh: " + uploadError.message;
-            uploadFailed = true;
-            break;
-          }
-
-          imagePaths.push(path);
-        }
-
-        if (uploadFailed) {
-          submitButton.disabled = false;
-          submitButton.textContent =
-            attemptNumber === 1 ? "Nộp bài lần 1" : "Nộp lại lần 2";
-          return;
-        }
-
-        const { error: saveError } = await supabaseClient
-          .from("submissions")
-          .insert({
-            assignment_id: assignment.id,
-            student_id: student.id,
-            answer: answer,
-            image_paths: imagePaths,
-            attempt: attemptNumber
-          });
-
-        if (saveError) {
-          result.textContent =
-            "Chưa lưu được bài nộp: " + saveError.message;
-          submitButton.disabled = false;
-          submitButton.textContent =
-            attemptNumber === 1 ? "Nộp bài lần 1" : "Nộp lại lần 2";
-          return;
-        }
-
-        await loadAssignments(className);
-
-        message.textContent =
-          `Em đã nộp bài lần ${attemptNumber} thành công!`;
-      });
-
-      card.appendChild(answerLabel);
-      card.appendChild(answerInput);
-      card.appendChild(imageLabel);
-      card.appendChild(imageInput);
-      card.appendChild(submitButton);
-      card.appendChild(result);
-    }
-
-    list.appendChild(card);
-  });
+if(userError||!userData||!userData.user){
+message.textContent="Phiên đăng nhập đã hết hạn.";
+return;
 }
 
-const refreshButton = document.getElementById("refreshStudents");
+const student=userData.user;
 
-if (refreshButton) {
-  refreshButton.addEventListener("click", loadStudents);
+const {data,error}=await supabaseClient
+.from("assignments")
+.select("id,title,body,created_at")
+.eq("class_name",className)
+.order("created_at",{ascending:false});
+
+if(error){
+message.textContent="Chưa tải được bài tập: "+error.message;
+return;
 }
 
-async function checkSession() {
-  if (!supabaseClient) return;
+if(!data||data.length===0){
+message.textContent="Hiện chưa có bài tập nào được giao.";
+return;
+}
 
-  const { data } = await supabaseClient.auth.getSession();
+const {data:submissions,error:submissionError}=await supabaseClient
+.from("submissions")
+.select("assignment_id,attempt,answer,image_paths,feedback,score,submitted_at")
+.eq("student_id",student.id)
+.order("attempt",{ascending:true});
 
-  if (data.session) {
-    await showUser(data.session.user);
-  }
+if(submissionError){
+message.textContent="Không tải được trạng thái bài nộp: "+submissionError.message;
+return;
+}
+
+const submittedMap=new Map();
+(submissions||[]).forEach(item=>{
+if(!submittedMap.has(item.assignment_id))submittedMap.set(item.assignment_id,[]);
+submittedMap.get(item.assignment_id).push(item);
+});
+
+message.textContent=`Lớp ${className} có ${data.length} bài tập.`;
+
+data.forEach((assignment,index)=>{
+const card=document.createElement("div");
+card.className="student-assignment-item";
+card.style.cssText="background:#fff;border:1px solid #e3ebe5;border-radius:14px;padding:20px;margin:16px 0;";
+
+const title=document.createElement("h3");
+title.textContent=`${index+1}. ${assignment.title}`;
+
+const body=document.createElement("p");
+body.textContent=assignment.body||"";
+card.append(title,body);
+
+const existingList=submittedMap.get(assignment.id)||[];
+
+existingList.forEach(existing=>{
+const status=document.createElement("p");
+status.textContent=`✓ Em đã nộp bài lần ${existing.attempt||1}.`;
+status.style.cssText="color:#477b58;font-weight:bold";
+card.appendChild(status);
+
+if(existing.answer){
+const answer=document.createElement("p");
+answer.style.whiteSpace="pre-wrap";
+answer.textContent="Bài làm: "+existing.answer;
+card.appendChild(answer);
+}
+
+if(existing.image_paths&&existing.image_paths.length){
+const imageInfo=document.createElement("p");
+imageInfo.textContent=`Đã đính kèm ${existing.image_paths.length} ảnh bài làm.`;
+card.appendChild(imageInfo);
+}
+
+if(existing.score!==null&&existing.score!==undefined){
+const score=document.createElement("p");
+score.textContent="Điểm: "+existing.score+"/10";
+card.appendChild(score);
+}
+
+if(existing.feedback){
+const feedback=document.createElement("p");
+feedback.textContent="Nhận xét của cô: "+existing.feedback;
+card.appendChild(feedback);
+}
+});
+
+if(existingList.length>=2){
+const finished=document.createElement("p");
+finished.textContent="Em đã sử dụng hết 2 lần nộp bài. Không thể nộp thêm.";
+finished.style.cssText="color:#477b58;font-weight:bold";
+card.appendChild(finished);
+}else{
+const attemptNumber=existingList.length+1;
+
+const answerLabel=document.createElement("label");
+answerLabel.textContent=`Bài làm của em (lần nộp ${attemptNumber}/2)`;
+
+const answerInput=document.createElement("textarea");
+answerInput.rows=8;
+answerInput.placeholder="Nhập câu trả lời hoặc bài văn của em...";
+
+const imageLabel=document.createElement("label");
+imageLabel.textContent="Đính kèm ảnh bài viết tay (nếu có)";
+
+const imageInput=document.createElement("input");
+imageInput.type="file";
+imageInput.accept="image/jpeg,image/png,image/webp";
+imageInput.multiple=true;
+
+const submitButton=document.createElement("button");
+submitButton.type="button";
+submitButton.textContent=attemptNumber===1?"Nộp bài lần 1":"Nộp lại lần 2";
+
+const result=document.createElement("p");
+result.className="message";
+
+submitButton.addEventListener("click",async()=>{
+const answer=answerInput.value.trim();
+const files=Array.from(imageInput.files||[]);
+
+if(!answer&&files.length===0){
+result.textContent="Em hãy nhập bài làm hoặc chọn ảnh nhé.";
+return;
+}
+
+if(files.some(file=>file.size>5*1024*1024)){
+result.textContent="Mỗi ảnh không được vượt quá 5 MB.";
+return;
+}
+
+if(files.some(file=>!["image/jpeg","image/png","image/webp"].includes(file.type))){
+result.textContent="Chỉ nhận ảnh JPG, PNG hoặc WebP.";
+return;
+}
+
+submitButton.disabled=true;
+submitButton.textContent="Đang nộp bài...";
+result.textContent="Đang lưu bài làm...";
+
+const imagePaths=[];
+let uploadFailed=false;
+
+for(let i=0;i<files.length;i++){
+const file=files[i];
+const extension=file.name.split(".").pop().toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
+const fileName=Date.now()+"-"+i+"-"+Math.random().toString(36).slice(2)+"."+extension;
+const path=assignment.id+"/"+student.id+"/"+fileName;
+
+const {error:uploadError}=await supabaseClient.storage
+.from("student-submissions")
+.upload(path,file,{
+cacheControl:"3600",
+upsert:false,
+contentType:file.type
+});
+
+if(uploadError){
+result.textContent="Chưa tải được ảnh: "+uploadError.message;
+uploadFailed=true;
+break;
+}
+imagePaths.push(path);
+}
+
+if(uploadFailed){
+submitButton.disabled=false;
+submitButton.textContent=attemptNumber===1?"Nộp bài lần 1":"Nộp lại lần 2";
+return;
+}
+
+const {error:saveError}=await supabaseClient.from("submissions").insert({
+assignment_id:assignment.id,
+student_id:student.id,
+answer,
+image_paths:imagePaths,
+attempt:attemptNumber
+});
+
+if(saveError){
+result.textContent="Chưa lưu được bài nộp: "+saveError.message;
+submitButton.disabled=false;
+submitButton.textContent=attemptNumber===1?"Nộp bài lần 1":"Nộp lại lần 2";
+return;
+}
+
+await loadAssignments(className);
+document.getElementById("studentAssignmentMessage").textContent=`Em đã nộp bài lần ${attemptNumber} thành công!`;
+});
+
+card.append(answerLabel,answerInput,imageLabel,imageInput,submitButton,result);
+}
+
+list.appendChild(card);
+});
+}
+
+async function checkSession(){
+if(!supabaseClient)return;
+const {data}=await supabaseClient.auth.getSession();
+if(data.session)await showUser(data.session.user);
 }
 
 checkSession();
-
-  </script>
+</script>
 </body>
 </html>
