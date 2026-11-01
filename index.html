@@ -839,6 +839,7 @@ async function loadSubmissions() {
 if (refreshSubmissionsButton) {
   refreshSubmissionsButton.addEventListener("click", loadSubmissions);
 }
+
 async function loadAssignments(className) {
   const list = document.getElementById("studentAssignments");
   const message = document.getElementById("studentAssignmentMessage");
@@ -882,8 +883,9 @@ async function loadAssignments(className) {
   const { data: submissions, error: submissionError } =
     await supabaseClient
       .from("submissions")
-      .select("assignment_id, answer, image_paths, feedback, score, submitted_at")
-      .eq("student_id", student.id);
+      .select("assignment_id, attempt, answer, image_paths, feedback, score, submitted_at")
+      .eq("student_id", student.id)
+      .order("attempt", { ascending: true });
 
   if (submissionError) {
     message.textContent = "Không tải được trạng thái bài nộp: " + submissionError.message;
@@ -893,7 +895,11 @@ async function loadAssignments(className) {
   const submittedMap = new Map();
 
   (submissions || []).forEach((item) => {
-    submittedMap.set(item.assignment_id, item);
+    if (!submittedMap.has(item.assignment_id)) {
+      submittedMap.set(item.assignment_id, []);
+    }
+
+    submittedMap.get(item.assignment_id).push(item);
   });
 
   message.textContent = `Lớp ${className} có ${data.length} bài tập.`;
@@ -908,22 +914,23 @@ async function loadAssignments(className) {
     title.textContent = `${index + 1}. ${assignment.title}`;
 
     const body = document.createElement("p");
-    body.textContent = assignment.body;
+    body.textContent = assignment.body || "";
 
     card.appendChild(title);
     card.appendChild(body);
 
-    const existing = submittedMap.get(assignment.id);
+    const existingList = submittedMap.get(assignment.id) || [];
 
-    if (existing) {
+    existingList.forEach((existing) => {
       const status = document.createElement("p");
-      status.textContent = "✓ Em đã nộp bài thành công.";
+      status.textContent = `✓ Em đã nộp bài lần ${existing.attempt || 1}.`;
       status.style.color = "#477b58";
       status.style.fontWeight = "bold";
       card.appendChild(status);
 
       if (existing.answer) {
         const answer = document.createElement("p");
+        answer.style.whiteSpace = "pre-wrap";
         answer.textContent = "Bài làm: " + existing.answer;
         card.appendChild(answer);
       }
@@ -946,9 +953,22 @@ async function loadAssignments(className) {
         feedback.textContent = "Nhận xét của cô: " + existing.feedback;
         card.appendChild(feedback);
       }
+    });
+
+    if (existingList.length >= 2) {
+      const finished = document.createElement("p");
+      finished.textContent =
+        "Em đã sử dụng hết 2 lần nộp bài. Không thể nộp thêm.";
+      finished.style.color = "#477b58";
+      finished.style.fontWeight = "bold";
+      card.appendChild(finished);
+
     } else {
+      const attemptNumber = existingList.length + 1;
+
       const answerLabel = document.createElement("label");
-      answerLabel.textContent = "Bài làm của em";
+      answerLabel.textContent =
+        `Bài làm của em (lần nộp ${attemptNumber}/2)`;
 
       const answerInput = document.createElement("textarea");
       answerInput.rows = 8;
@@ -966,7 +986,8 @@ async function loadAssignments(className) {
 
       const submitButton = document.createElement("button");
       submitButton.type = "button";
-      submitButton.textContent = "Nộp bài";
+      submitButton.textContent =
+        attemptNumber === 1 ? "Nộp bài lần 1" : "Nộp lại lần 2";
       submitButton.style.marginTop = "12px";
 
       const result = document.createElement("p");
@@ -981,21 +1002,14 @@ async function loadAssignments(className) {
           return;
         }
 
-        const tooLarge = files.some(
-          (file) => file.size > 5 * 1024 * 1024
-        );
-
-        const invalidType = files.some(
-          (file) =>
-            !["image/jpeg", "image/png", "image/webp"].includes(file.type)
-        );
-
-        if (tooLarge) {
+        if (files.some(file => file.size > 5 * 1024 * 1024)) {
           result.textContent = "Mỗi ảnh không được vượt quá 5 MB.";
           return;
         }
 
-        if (invalidType) {
+        if (files.some(file =>
+          !["image/jpeg", "image/png", "image/webp"].includes(file.type)
+        )) {
           result.textContent = "Chỉ nhận ảnh JPG, PNG hoặc WebP.";
           return;
         }
@@ -1009,14 +1023,17 @@ async function loadAssignments(className) {
 
         for (let i = 0; i < files.length; i++) {
           const file = files[i];
+
           const extension =
-            file.name.split(".").pop().toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+            file.name.split(".").pop().toLowerCase()
+              .replace(/[^a-z0-9]/g, "") || "jpg";
 
           const fileName =
             Date.now() + "-" + i + "-" +
             Math.random().toString(36).slice(2) + "." + extension;
 
-          const path = assignment.id + "/" + student.id + "/" + fileName;
+          const path =
+            assignment.id + "/" + student.id + "/" + fileName;
 
           const { error: uploadError } = await supabaseClient
             .storage
@@ -1039,7 +1056,8 @@ async function loadAssignments(className) {
 
         if (uploadFailed) {
           submitButton.disabled = false;
-          submitButton.textContent = "Nộp bài";
+          submitButton.textContent =
+            attemptNumber === 1 ? "Nộp bài lần 1" : "Nộp lại lần 2";
           return;
         }
 
@@ -1049,19 +1067,23 @@ async function loadAssignments(className) {
             assignment_id: assignment.id,
             student_id: student.id,
             answer: answer,
-            image_paths: imagePaths
+            image_paths: imagePaths,
+            attempt: attemptNumber
           });
 
         if (saveError) {
-          result.textContent = "Chưa lưu được bài nộp: " + saveError.message;
+          result.textContent =
+            "Chưa lưu được bài nộp: " + saveError.message;
           submitButton.disabled = false;
-          submitButton.textContent = "Nộp bài";
+          submitButton.textContent =
+            attemptNumber === 1 ? "Nộp bài lần 1" : "Nộp lại lần 2";
           return;
         }
 
         await loadAssignments(className);
 
-        message.textContent = "Em đã nộp bài thành công!";
+        message.textContent =
+          `Em đã nộp bài lần ${attemptNumber} thành công!`;
       });
 
       card.appendChild(answerLabel);
@@ -1093,6 +1115,7 @@ async function checkSession() {
 }
 
 checkSession();
+
   </script>
 </body>
 </html>
