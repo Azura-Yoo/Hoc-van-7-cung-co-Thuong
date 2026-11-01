@@ -1049,7 +1049,6 @@ createStudentForm.addEventListener("submit", async (event) => {
   }
 });
 
-
 const bulkButton = document.getElementById("createBulkStudents");
 
 bulkButton.addEventListener("click", async () => {
@@ -1081,14 +1080,12 @@ bulkButton.addEventListener("click", async () => {
     .filter(Boolean)
     .map(line => {
       const parts = line.split("|").map(x => x.trim());
-
       return {
         full_name: parts[0],
         class_name: (parts[1] || "").toUpperCase()
       };
     });
 
-  // KIỂM TRA DANH SÁCH
   const invalidStudents = students.filter(student =>
     !student.full_name ||
     !["7A", "7C"].includes(student.class_name)
@@ -1112,16 +1109,12 @@ bulkButton.addEventListener("click", async () => {
   bulkButton.textContent = "Đang tạo tài khoản...";
 
   const accountResults = [];
+  const accountRows = [];
   let successCount = 0;
   let failedCount = 0;
 
   try {
-    for (let i = 0; i < students.length; i++) {
-      const student = students[i];
-
-      message.textContent =
-        `Đang tạo tài khoản ${i + 1}/${students.length}: ${student.full_name}`;
-
+    for (const student of students) {
       try {
         const { data, error } =
           await supabaseClient.functions.invoke("clever-api", {
@@ -1134,18 +1127,23 @@ bulkButton.addEventListener("click", async () => {
 
         if (error || !data || !data.success) {
           failedCount++;
-
           accountResults.push(
             `THẤT BẠI: ${student.full_name} | Lớp ${student.class_name}\n` +
             `Lý do: ${(data && data.error) || (error && error.message) || "Không rõ lỗi"}`
           );
-
           continue;
         }
 
         successCount++;
 
-              accountResults.push(
+        accountRows.push([
+          data.full_name,
+          data.class_name,
+          data.username,
+          data.password
+        ]);
+
+        accountResults.push(
           `HỌC SINH: ${data.full_name}\n` +
           `LỚP: ${data.class_name}\n` +
           `TÊN ĐĂNG NHẬP: ${data.username}\n` +
@@ -1155,7 +1153,6 @@ bulkButton.addEventListener("click", async () => {
 
       } catch (err) {
         failedCount++;
-
         accountResults.push(
           `THẤT BẠI: ${student.full_name} | Lớp ${student.class_name}\n` +
           `Lý do: ${err.message}`
@@ -1167,6 +1164,39 @@ bulkButton.addEventListener("click", async () => {
       `Hoàn thành! Thành công: ${successCount} | Thất bại: ${failedCount}.`;
 
     results.textContent = accountResults.join("\n\n");
+
+    // Tạo file tải danh sách tài khoản
+    if (accountRows.length > 0) {
+      const csvRows = [
+        ["Họ và tên", "Lớp", "Tên đăng nhập", "Mật khẩu"],
+        ...accountRows
+      ];
+
+      const csvContent = "\uFEFF" + csvRows
+        .map(row => row.map(value =>
+          '"' + String(value ?? "").replace(/"/g, '""') + '"'
+        ).join(","))
+        .join("\r\n");
+
+      const blob = new Blob(
+        [csvContent],
+        { type: "text/csv;charset=utf-8;" }
+      );
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = "Danh_sach_tai_khoan_hoc_sinh.csv";
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+      message.textContent += " Đã tải file danh sách tài khoản.";
+    }
 
     if (successCount > 0) {
       await loadStudents();
@@ -1194,25 +1224,26 @@ createAssignmentForm.addEventListener("submit", async (event) => {
     return;
   }
 
-button.disabled=true;
-button.textContent="Đang giao bài...";
+  button.disabled = true;
+  button.textContent = "Đang giao bài...";
 
-const {data:userData}=await supabaseClient.auth.getUser();
-const user=userData.user;
+  const { data: userData } = await supabaseClient.auth.getUser();
+  const user = userData.user;
 
-if(!user){
-message.textContent="Phiên đăng nhập đã hết hạn. Cô vui lòng đăng nhập lại.";
-button.disabled=false;
-button.textContent="Giao bài tập";
-return;
-}
+  if (!user) {
+    message.textContent = "Phiên đăng nhập đã hết hạn. Cô vui lòng đăng nhập lại.";
+    button.disabled = false;
+    button.textContent = "Giao bài tập";
+    return;
+  }
 
-const {error}=await supabaseClient.from("assignments").insert({
-title,
-body,
-class_name:className,
-created_by:user.id
-});
+  const { error } = await supabaseClient.from("assignments").insert({
+    title,
+    body,
+    class_name: className,
+    created_by: user.id
+  });
+ 
 
 button.disabled=false;
 button.textContent="Giao bài tập";
