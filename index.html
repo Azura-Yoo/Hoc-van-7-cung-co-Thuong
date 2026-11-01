@@ -475,7 +475,6 @@ const email = loginId.includes("@")
         loginMessage.textContent = "Đăng nhập chưa thành công: " + error.message;
         return;
       }
-
       await showUser(data.user);
     });
 
