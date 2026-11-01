@@ -32,9 +32,53 @@ body:has(#homeSection:not(.hidden)){padding:24px 32px}
 #homeSection{width:100%;max-width:1400px;margin:0 auto;padding:32px;background:#fff;border-radius:20px;box-shadow:0 8px 30px rgba(40,70,50,.07)}
 #homeSection h1{color:#345d49;font-size:30px}
 #homeSection h2{color:#345d49;font-size:21px;margin:0 0 14px}
-#teacherPanel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin-top:28px}
-#teacherPanel>h2,#teacherPanel .assignment-section,#teacherPanel .submission-section{grid-column:1/-1}
-#teacherPanel .student-list,#teacherPanel form,#teacherPanel .assignment-section,#teacherPanel .submission-section{background:#f8faf8;border:1px solid #e3ebe5;border-radius:16px;padding:22px;min-width:0}
+#teacherPanel{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:22px;
+  margin-top:28px;
+}
+
+#teacherPanel>*{
+  grid-column:1/-1;
+  min-width:0;
+}
+
+#teacherPanel>h2{
+  grid-column:1/-1;
+}
+
+#teacherPanel #createStudentForm{
+  grid-column:1/-1;
+  max-width:700px;
+}
+
+#teacherPanel .student-list,
+#teacherPanel form,
+#teacherPanel .assignment-section,
+#teacherPanel .submission-section{
+  background:#f8faf8;
+  border:1px solid #e3ebe5;
+  border-radius:16px;
+  padding:22px;
+  min-width:0;
+}
+
+#teacherPanel h3{
+  color:#496b59;
+  margin-top:0;
+}
+
+#teacherPanel input,
+#teacherPanel select,
+#teacherPanel textarea{
+  margin:8px 0 14px;
+}
+
+#teacherPanel textarea{
+  min-height:110px;
+  resize:vertical;
+}
 #teacherPanel h3{color:#496b59;margin-top:0}
 #teacherPanel input,#teacherPanel select,#teacherPanel textarea{margin:8px 0 14px}
 #teacherPanel textarea{min-height:110px;resize:vertical}
