@@ -1257,8 +1257,6 @@ message.textContent="Đã giao bài tập thành công!";
 createAssignmentForm.reset();
 });
 
-
-
 async function loadStudents() {
   const list = document.getElementById("studentList");
   const message = document.getElementById("studentListMessage");
@@ -1266,6 +1264,8 @@ async function loadStudents() {
   if (!list || !message || !supabaseClient) return;
 
   list.textContent = "";
+  list.style.display = "block";
+  list.style.width = "100%";
   message.textContent = "Đang tải danh sách học sinh...";
 
   try {
@@ -1285,6 +1285,11 @@ async function loadStudents() {
       return;
     }
 
+    // Chuẩn hóa mã lớp để tránh sai khác do chữ hoa, chữ thường hoặc khoảng trắng.
+    data.forEach(student => {
+      student.class_name = (student.class_name || "").trim().toUpperCase();
+    });
+
     const classes = ["7A", "7C"];
     const otherClasses = [...new Set(
       data.map(s => s.class_name).filter(c => c && !classes.includes(c))
@@ -1301,12 +1306,35 @@ async function loadStudents() {
 
       const section = document.createElement("div");
       section.className = "student-class-section";
+      section.style.cssText = `
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        grid-column: 1 / -1;
+        clear: both;
+        margin: 20px 0;
+        padding: 18px;
+        background: #f8faf8;
+        border: 1px solid #dce8df;
+        border-radius: 14px;
+      `;
 
       const heading = document.createElement("div");
       heading.className = "student-class-heading";
+      heading.style.cssText = `
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        width: 100%;
+        margin-bottom: 14px;
+      `;
 
       const title = document.createElement("h3");
       title.textContent = `Lớp ${className} (${students.length} học sinh)`;
+      title.style.cssText = "margin:0;color:#315d43;";
 
       heading.appendChild(title);
 
@@ -1392,11 +1420,22 @@ async function loadStudents() {
       students.forEach((student, index) => {
         const item = document.createElement("div");
         item.className = "student-item";
+        item.style.cssText = `
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 10px;
+          width: 100%;
+          box-sizing: border-box;
+          padding: 12px 0;
+          border-bottom: 1px solid #e3ebe5;
+        `;
 
         const info = document.createElement("span");
         info.textContent =
           `${index + 1}. ${student.full_name || "Chưa có họ tên"} | ` +
           `${student.username || "Chưa có tên đăng nhập"}`;
+        info.style.cssText = "flex:1 1 240px;min-width:0;";
 
         // NÚT ĐẶT LẠI MẬT KHẨU
         const resetButton = document.createElement("button");
@@ -1502,8 +1541,6 @@ async function loadStudents() {
     message.textContent = "Có lỗi xảy ra: " + err.message;
   }
 }
-
-
 document.getElementById("refreshStudents").addEventListener("click",loadStudents);
 
 async function loadSubmissions(){
