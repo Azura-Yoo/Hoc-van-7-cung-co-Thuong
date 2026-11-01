@@ -647,25 +647,6 @@ async function loadAssignments(className) {
   });
 }
 
-
-  if (!data || data.length === 0) {
-    message.textContent = "Chưa có học sinh nào.";
-    return;
-  }
-
-  message.textContent = `Có ${data.length} học sinh.`;
-
-  data.forEach((student, index) => {
-    const item = document.createElement("div");
-    item.className = "student-item";
-    item.textContent =
-      `${index + 1}. ${student.full_name || "Chưa có họ tên"} | ${student.username || "Chưa có tên đăng nhập"} | Lớp ${student.class_name || "Chưa rõ"}`;
-
-    list.appendChild(item);
-  });
-}
-
-document.getElementById("refreshStudents")
   ?.addEventListener("click", loadStudents);
     async function checkSession() {
       if (!supabaseClient) return;
