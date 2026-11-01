@@ -348,7 +348,20 @@ body:has(#homeSection:not(.hidden)) {
     <div id="assignmentMessage" class="message"></div>
   </form>
 </div>
+<div class="submission-section">
+  <h2>Bài nộp của học sinh</h2>
+  <p class="sub">Theo dõi, xem bài làm và chấm điểm cho học sinh.</p>
 
+  <button type="button" id="refreshSubmissions">
+    Làm mới bài nộp
+  </button>
+
+  <div id="submissionMessage" class="message">
+    Nhấn làm mới để tải bài nộp.
+  </div>
+
+  <div id="submissionList"></div>
+</div>
 </div>      
     <div id="studentPanel" class="hidden">
   <h2>Bài tập của em</h2>
