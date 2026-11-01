@@ -1010,25 +1010,37 @@ results.innerHTML = "";
     return;
   }
 
-const used = new Set((existing || []).filter(s => s.username).map(s => s.username.toLowerCase()));
- const report = [];
+const used = new Set(
+  (existing || [])
+    .map(s => (s.username || "").toLowerCase())
+    .filter(Boolean)
+);
 
-  for (const student of students) {
-    const words = student.full_name.split(/\s+/);
-    if (words.length < 2) {
-      report.push({ ...student, ok: false, error: "Họ tên không hợp lệ" });
-      continue;
-    }
+const report = [];
 
-    const nameParts = words.slice(1);
-    const base = normalize(nameParts.join("")).toLowerCase() + student.class_name.toLowerCase();
+for (const student of students) {
+  const words = (student.full_name || "").trim().split(/\s+/);
 
-    let username = base;
-    let number = 2;
+  if (words.length < 2) {
+    report.push({
+      ...student,
+      ok: false,
+      error: "Họ tên không hợp lệ"
+    });
+    continue;
+  }
 
-    while (used.has(username.toLowerCase())) {
-      username = base + String(number).padStart(2, "0");
-      number++;
+  const nameParts = words.slice(1);
+  const base = normalize(nameParts.join("")).toLowerCase()
+    + (student.class_name || "").toLowerCase();
+
+  let username = base;
+  let number = 2;
+
+  while (used.has((username || "").toLowerCase())) {
+    username = base + String(number).padStart(2, "0");
+    number++;
+  }
     }
 
     const password = nameParts.map(part => {
