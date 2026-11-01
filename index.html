@@ -356,9 +356,32 @@ body:has(#homeSection:not(.hidden)) {
     Làm mới bài nộp
   </button>
 
-  <div id="submissionMessage" class="message">
-    Nhấn làm mới để tải bài nộp.
-  </div>
+ <div id="submissionMessage" class="message">
+  Nhấn làm mới để tải bài nộp.
+</div>
+
+<div class="submission-filters">
+  <label for="filterStudent">Lọc theo học sinh</label>
+  <select id="filterStudent">
+    <option value="">Tất cả học sinh</option>
+  </select>
+
+  <label for="filterAssignment">Lọc theo bài tập</label>
+  <select id="filterAssignment">
+    <option value="">Tất cả bài tập</option>
+  </select>
+</div>
+<div class="submission-filters">
+  <label for="filterStudent">Lọc theo học sinh</label>
+  <select id="filterStudent">
+    <option value="">Tất cả học sinh</option>
+  </select>
+
+  <label for="filterAssignment">Lọc theo bài tập</label>
+  <select id="filterAssignment">
+    <option value="">Tất cả bài tập</option>
+  </select>
+</div>
 
   <div id="submissionList"></div>
 </div>
@@ -635,6 +658,8 @@ async function loadStudents() {
 
 
 async function loadSubmissions() {
+    const filterStudent = document.getElementById("filterStudent");
+  const filterAssignment = document.getElementById("filterAssignment");
   const list = document.getElementById("submissionList");
   const message = document.getElementById("submissionMessage");
   const refreshButton = document.getElementById("refreshSubmissions");
@@ -643,6 +668,13 @@ async function loadSubmissions() {
 
   if (refreshButton) {
     refreshButton.onclick = loadSubmissions;
+  }
+    if (filterStudent) {
+    filterStudent.onchange = loadSubmissions;
+  }
+
+  if (filterAssignment) {
+    filterAssignment.onchange = loadSubmissions;
   }
 
   list.innerHTML = "";
@@ -693,10 +725,62 @@ async function loadSubmissions() {
   const studentMap = new Map(
     (students || []).map(s => [s.id, s])
   );
+    if (filterStudent) {
+    const currentStudent = filterStudent.value;
 
-  message.textContent = `Có ${submissions.length} bài nộp.`;
+    filterStudent.innerHTML =
+      '<option value="">Tất cả học sinh</option>';
 
-  for (const submission of submissions) {
+    (students || []).forEach(student => {
+      const option = document.createElement("option");
+      option.value = student.id;
+      option.textContent = student.full_name;
+      filterStudent.appendChild(option);
+    });
+
+    filterStudent.value = currentStudent;
+  }
+
+  if (filterAssignment) {
+    const currentAssignment = filterAssignment.value;
+
+    filterAssignment.innerHTML =
+      '<option value="">Tất cả bài tập</option>';
+
+    (assignments || []).forEach(assignment => {
+      const option = document.createElement("option");
+      option.value = assignment.id;
+      option.textContent = assignment.title;
+      filterAssignment.appendChild(option);
+    });
+
+    filterAssignment.value = currentAssignment;
+  }
+
+  const selectedStudentId = filterStudent
+    ? filterStudent.value
+    : "";
+
+  const selectedAssignmentId = filterAssignment
+    ? filterAssignment.value
+    : "";
+
+  const filteredSubmissions = submissions.filter(submission => {
+    const matchStudent =
+      !selectedStudentId ||
+      submission.student_id === selectedStudentId;
+
+    const matchAssignment =
+      !selectedAssignmentId ||
+      submission.assignment_id === selectedAssignmentId;
+
+    return matchStudent && matchAssignment;
+  });
+
+  message.textContent =
+    `Hiển thị ${filteredSubmissions.length}/${submissions.length} bài nộp.`;
+
+  for (const submission of filteredSubmissions) {
     const assignment = assignmentMap.get(submission.assignment_id);
     const student = studentMap.get(submission.student_id);
 
