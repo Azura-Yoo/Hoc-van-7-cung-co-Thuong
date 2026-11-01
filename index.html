@@ -649,8 +649,12 @@ async function loadAssignments(className) {
   });
 }
 
-  ?.addEventListener("click", loadStudents);
-    async function checkSession() {
+const refreshButton = document.getElementById("refreshStudents");
+
+if (refreshButton) {
+  refreshButton.addEventListener("click", loadStudents);
+}  
+  async function checkSession() {
       if (!supabaseClient) return;
       const { data } = await supabaseClient.auth.getSession();
       if (data.session) await showUser(data.session.user);
