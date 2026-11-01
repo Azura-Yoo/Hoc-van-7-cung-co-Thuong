@@ -131,7 +131,23 @@ body:has(#homeSection:not(.hidden)){padding:24px 32px}
  <button type="submit">Tạo tài khoản học sinh</button>
 <div id="createStudentMessage" class="message"></div>
 </form>
+<div class="bulk-account-section">
+  <h3>Cấp tài khoản hàng loạt</h3>
+  <p>Nhập mỗi học sinh trên một dòng theo mẫu: Họ và tên | Lớp</p>
+  <p>Ví dụ: Nguyễn Văn An | 7A</p>
 
+  <textarea
+    id="bulkStudentList"
+    rows="8"
+    placeholder="Nguyễn Văn An | 7A&#10;Lê Minh Tuấn | 7C"
+  ></textarea>
+
+  <button type="button" id="createBulkStudents">
+    Tạo tài khoản hàng loạt
+  </button>
+
+  <div id="bulkStudentMessage" class="message"></div>
+</div>
 <div class="student-list">
 <h3>Danh sách học sinh</h3>
 <button type="button" id="refreshStudents">Làm mới danh sách</button>
@@ -931,6 +947,127 @@ createStudentForm.reset();
 await loadStudents();
 });
 
+ const bulkButton = document.getElementById("createBulkStudents");
+
+bulkButton.addEventListener("click", async () => {
+  const input = document.getElementById("bulkStudentList").value.trim();
+  const message = document.getElementById("bulkStudentMessage");
+  const results = document.getElementById("bulkStudentResults");
+
+  message.textContent = "";
+  results.innerHTML = "";
+
+  if (!input) {
+    message.textContent = "Cô chưa nhập danh sách học sinh.";
+    return;
+  }
+
+  const students = input.split("\n")
+    .map(line => line.trim())
+    .filter(Boolean)
+    .map(line => {
+      const parts = line.split("|").map(x => x.trim());
+      return {
+        full_name: parts[0],
+        class_name: (parts[1] || "").toUpperCase()
+      };
+    });
+
+  if (students.some(s => !s.full_name || !["7A", "7C"].includes(s.class_name))) {
+    message.textContent = "Có dòng chưa đúng mẫu Họ tên | 7A hoặc 7C. Cô kiểm tra lại nhé.";
+    return;
+  }
+
+  bulkButton.disabled = true;
+  bulkButton.textContent = "Đang tạo tài khoản...";
+
+  const normalize = str => str.normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D");
+
+  const { data: existing, error: fetchError } = await supabaseClient
+    .from("profiles")
+    .select("username");
+
+  if (fetchError) {
+    message.textContent = "Không tải được danh sách tài khoản: " + fetchError.message;
+    bulkButton.disabled = false;
+    bulkButton.textContent = "Tạo tài khoản hàng loạt";
+    return;
+  }
+
+  const used = new Set((existing || []).map(s => s.username.toLowerCase()));
+  const report = [];
+
+  for (const student of students) {
+    const words = student.full_name.split(/\s+/);
+    if (words.length < 2) {
+      report.push({ ...student, ok: false, error: "Họ tên không hợp lệ" });
+      continue;
+    }
+
+    const nameParts = words.slice(1);
+    const base = normalize(nameParts.join("")).toLowerCase() + student.class_name.toLowerCase();
+
+    let username = base;
+    let number = 2;
+
+    while (used.has(username.toLowerCase())) {
+      username = base + String(number).padStart(2, "0");
+      number++;
+    }
+
+    const password = nameParts.map(part => {
+      const clean = normalize(part).toLowerCase();
+      return clean.charAt(0).toUpperCase() + clean.slice(1);
+    }).join("") + student.class_name + "@";
+
+    const { data, error } = await supabaseClient.functions.invoke(
+      "clever-api",
+      {
+        body: {
+          full_name: student.full_name,
+          username,
+          password,
+          class_name: student.class_name
+        }
+      }
+    );
+
+    if (!error && data && data.success) {
+      used.add(username.toLowerCase());
+      report.push({ ...student, username, password, ok: true });
+    } else {
+      report.push({
+        ...student,
+        username,
+        ok: false,
+        error: (data && data.error) || (error && error.message) || "Tạo tài khoản thất bại"
+      });
+    }
+  }
+
+  const success = report.filter(s => s.ok).length;
+  const failed = report.length - success;
+
+  message.textContent = `Đã tạo thành công ${success}/${report.length} tài khoản. Có ${failed} tài khoản chưa tạo được.`;
+
+  results.innerHTML = report.map(s => `
+    <p>
+      ${s.ok ? "✅" : "❌"} ${s.full_name} (${s.class_name})
+      ${s.ok
+        ? ` | Tài khoản: <strong>${s.username}</strong> | Mật khẩu: <strong>${s.password}</strong>`
+        : ` | Lỗi: ${s.error}`}
+    </p>
+  `).join("");
+
+  bulkButton.disabled = false;
+  bulkButton.textContent = "Tạo tài khoản hàng loạt";
+
+  await loadStudents();
+});
+ 
 const createAssignmentForm=document.getElementById("createAssignmentForm");
 
 createAssignmentForm.addEventListener("submit",async(event)=>{
