@@ -173,63 +173,26 @@ body:has(#homeSection:not(.hidden)){padding:24px 32px}
 <div id="teacherPanel" class="hidden">
 <h2>Quản lý học sinh</h2>
 
+
 <form id="createStudentForm">
-<h3>Cấp tài khoản mới</h3>
-<label for="studentName">Họ và tên học sinh</label>
-<input id="studentName" type="text" required>
-<label for="studentUsername">Tên đăng nhập</label>
-<input id="studentUsername" type="text" placeholder="Ví dụ: nguyenvana7a" required>
-<label for="studentPassword">Mật khẩu</label>
-<input id="studentPassword" type="password" minlength="8" required>
-<label for="studentClass">Lớp</label>
-<select id="studentClass" required>
-  <option value="7A">7A</option>
-  <option value="7C">7C</option>
-</select>
- <button type="submit">Tạo tài khoản học sinh</button>
-<div id="createStudentMessage" class="message"></div>
+  <h3>Cấp tài khoản mới</h3>
+
+  <label for="studentName">Họ và tên học sinh</label>
+  <input id="studentName" type="text" required>
+
+  <label for="studentClass">Lớp</label>
+  <select id="studentClass" required>
+    <option value="7A">7A</option>
+    <option value="7C">7C</option>
+  </select>
+
+  <p>Mật khẩu và tên đăng nhập sẽ được hệ thống tự động tạo theo họ tên và lớp.</p>
+
+  <button type="submit">Tạo tài khoản học sinh</button>
+  <div id="createStudentMessage" class="message"></div>
 </form>
-<div class="bulk-account-section">
-  <h3>Cấp tài khoản hàng loạt</h3>
-  <p>Nhập mỗi học sinh trên một dòng theo mẫu: Họ và tên | Lớp</p>
-  <p>Ví dụ: Nguyễn Văn An | 7A</p>
+ </div>
 
-  <textarea
-    id="bulkStudentList"
-    rows="8"
-    placeholder="Nguyễn Văn An | 7A&#10;Lê Minh Tuấn | 7C"
-  ></textarea>
-
-  <button type="button" id="createBulkStudents">
-    Tạo tài khoản hàng loạt
-  </button>
-
-  <div id="bulkStudentMessage" class="message"></div>
- <div id="bulkStudentResults"></div>
-</div>
-<div class="student-list">
-<h3>Danh sách học sinh</h3>
-<button type="button" id="refreshStudents">Làm mới danh sách</button>
-<div id="studentListMessage" class="message"></div>
-<div id="studentList"></div>
-</div>
-
-<div class="assignment-section">
-<h2>Giao bài tập</h2>
-<form id="createAssignmentForm">
-<label for="assignmentTitle">Tên bài tập</label>
-<input id="assignmentTitle" type="text" placeholder="Ví dụ: Ôn tập Tiếng Việt" required>
-<label for="assignmentBody">Nội dung yêu cầu</label>
-<textarea id="assignmentBody" rows="5" placeholder="Nhập nội dung bài tập..." required></textarea>
-<label for="assignmentClass">Lớp được giao</label>
-<select id="assignmentClass" required>
-  <option value="7A">7A</option>
-  <option value="7C">7C</option>
-</select>
- <button type="submit">Giao bài tập</button>
-<div id="assignmentMessage" class="message"></div>
-</form>
-</div>
 
 <div class="submission-section">
 <h2>Bài nộp của học sinh</h2>
@@ -974,60 +937,88 @@ loginMessage.textContent="Em đã đăng xuất.";
 
 const createStudentForm=document.getElementById("createStudentForm");
 
-createStudentForm.addEventListener("submit",async(event)=>{
-event.preventDefault();
 
-const message=document.getElementById("createStudentMessage");
-const button=createStudentForm.querySelector('button[type="submit"]');
+createStudentForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
 
-button.disabled=true;
-button.textContent="Đang tạo tài khoản...";
-message.textContent="";
+  const message = document.getElementById("createStudentMessage");
+  const button = createStudentForm.querySelector('button[type="submit"]');
 
-const student={
-full_name:document.getElementById("studentName").value.trim(),
-username:document.getElementById("studentUsername").value.trim(),
-password:document.getElementById("studentPassword").value,
-class_name:document.getElementById("studentClass").value
-};
+  if (!supabaseClient) {
+    message.textContent = "Chưa kết nối được hệ thống.";
+    return;
+  }
 
-const {data,error}=await supabaseClient.functions.invoke("clever-api",{body:student});
+  const full_name = document.getElementById("studentName").value.trim();
+  const class_name = document.getElementById("studentClass").value;
 
-button.disabled=false;
-button.textContent="Tạo tài khoản học sinh";
+  if (!full_name) {
+    message.textContent = "Cô chưa nhập họ tên học sinh.";
+    return;
+  }
 
-if(error||!data||!data.success){
-message.textContent=(data&&data.error)||(error&&error.message)||"Chưa tạo được tài khoản.";
-return;
-}
+  button.disabled = true;
+  button.textContent = "Đang tạo tài khoản...";
+  message.textContent = "";
 
-message.textContent=`Đã tạo tài khoản ${data.username} cho ${data.full_name}.`;
-createStudentForm.reset();
-await loadStudents();
+  try {
+    const { data, error } =
+      await supabaseClient.functions.invoke("clever-api", {
+        body: {
+          action: "create_student",
+          full_name,
+          class_name
+        }
+      });
+
+    if (error || !data || !data.success) {
+      message.textContent =
+        (data && data.error) ||
+        (error && error.message) ||
+        "Chưa tạo được tài khoản.";
+      return;
+    }
+
+    message.textContent =
+      `Đã tạo tài khoản cho ${data.full_name}.\n` +
+      `Tên đăng nhập: ${data.username}\n` +
+      `Mật khẩu: ${data.password}`;
+
+    createStudentForm.reset();
+
+    await loadStudents();
+
+  } catch (err) {
+    message.textContent = "Có lỗi xảy ra: " + err.message;
+
+  } finally {
+    button.disabled = false;
+    button.textContent = "Tạo tài khoản học sinh";
+  }
 });
 
- const bulkButton = document.getElementById("createBulkStudents");
+
+const bulkButton = document.getElementById("createBulkStudents");
 
 bulkButton.addEventListener("click", async () => {
   const input = document.getElementById("bulkStudentList").value.trim();
   const message = document.getElementById("bulkStudentMessage");
-let results = document.getElementById("bulkStudentResults");
+  let results = document.getElementById("bulkStudentResults");
 
-if (!message) {
-  alert("Không tìm thấy vùng thông báo cấp tài khoản.");
-  return;
-}
+  if (!message) {
+    alert("Không tìm thấy vùng thông báo cấp tài khoản.");
+    return;
+  }
 
-if (!results) {
-  results = document.createElement("div");
-  results.id = "bulkStudentResults";
-  message.insertAdjacentElement("afterend", results);
-}
+  if (!results) {
+    results = document.createElement("div");
+    results.id = "bulkStudentResults";
+    message.insertAdjacentElement("afterend", results);
+  }
 
-message.textContent = "";
-results.innerHTML = "";
- 
- 
+  message.textContent = "";
+  results.textContent = "";
+
   if (!input) {
     message.textContent = "Cô chưa nhập danh sách học sinh.";
     return;
@@ -1038,11 +1029,102 @@ results.innerHTML = "";
     .filter(Boolean)
     .map(line => {
       const parts = line.split("|").map(x => x.trim());
+
       return {
         full_name: parts[0],
         class_name: (parts[1] || "").toUpperCase()
       };
     });
+
+  // KIỂM TRA DANH SÁCH
+  const invalidStudents = students.filter(student =>
+    !student.full_name ||
+    !["7A", "7C"].includes(student.class_name)
+  );
+
+  if (invalidStudents.length > 0) {
+    message.textContent =
+      "Có dòng chưa hợp lệ. Hãy kiểm tra họ tên và mã lớp 7A hoặc 7C.";
+    return;
+  }
+
+  if (!confirm(
+    `Cô chuẩn bị tạo ${students.length} tài khoản học sinh.\n\n` +
+    "Hệ thống sẽ tự tạo tên đăng nhập và mật khẩu mặc định.\n\n" +
+    "Em xác nhận tiếp tục nhé?"
+  )) {
+    return;
+  }
+
+  bulkButton.disabled = true;
+  bulkButton.textContent = "Đang tạo tài khoản...";
+
+  const accountResults = [];
+  let successCount = 0;
+  let failedCount = 0;
+
+  try {
+    for (let i = 0; i < students.length; i++) {
+      const student = students[i];
+
+      message.textContent =
+        `Đang tạo tài khoản ${i + 1}/${students.length}: ${student.full_name}`;
+
+      try {
+        const { data, error } =
+          await supabaseClient.functions.invoke("clever-api", {
+            body: {
+              action: "create_student",
+              full_name: student.full_name,
+              class_name: student.class_name
+            }
+          });
+
+        if (error || !data || !data.success) {
+          failedCount++;
+
+          accountResults.push(
+            `THẤT BẠI: ${student.full_name} | Lớp ${student.class_name}\n` +
+            `Lý do: ${(data && data.error) || (error && error.message) || "Không rõ lỗi"}`
+          );
+
+          continue;
+        }
+
+        successCount++;
+
+        accountResults.push(
+          `HỌC SINH: ${data.full_name}\n` +
+          `LỚP: ${data.class_name}\n` +
+          `TÊN ĐĂNG NHẬP: ${data.username}\n` +
+          `MẬT KHẨU: ${data.password}\n` +
+          `------------------------------`
+        );
+
+      } catch (err) {
+        failedCount++;
+
+        accountResults.push(
+          `THẤT BẠI: ${student.full_name} | Lớp ${student.class_name}\n` +
+          `Lý do: ${err.message}`
+        );
+      }
+    }
+
+    message.textContent =
+      `Hoàn thành! Thành công: ${successCount} | Thất bại: ${failedCount}.`;
+
+    results.textContent = accountResults.join("\n\n");
+
+    if (successCount > 0) {
+      await loadStudents();
+    }
+
+  } finally {
+    bulkButton.disabled = false;
+    bulkButton.textContent = "Tạo tài khoản hàng loạt";
+  }
+});
 
   if (students.some(s => !s.full_name || !["7A", "7C"].includes(s.class_name))) {
     message.textContent = "Có dòng chưa đúng mẫu Họ tên | 7A hoặc 7C. Cô kiểm tra lại nhé.";
@@ -1201,6 +1283,7 @@ createAssignmentForm.reset();
 });
 
 
+
 async function loadStudents() {
   const list = document.getElementById("studentList");
   const message = document.getElementById("studentListMessage");
@@ -1215,7 +1298,6 @@ async function loadStudents() {
       .from("profiles")
       .select("id, full_name, username, class_name")
       .eq("role", "student")
-      .order("class_name", { ascending: true })
       .order("full_name", { ascending: true });
 
     if (error) {
@@ -1228,124 +1310,224 @@ async function loadStudents() {
       return;
     }
 
-    message.textContent = `Có ${data.length} học sinh.`;
+    const classes = ["7A", "7C"];
+    const otherClasses = [...new Set(
+      data.map(s => s.class_name).filter(c => c && !classes.includes(c))
+    )].sort();
 
-    data.forEach((student, index) => {
-      const item = document.createElement("div");
-      item.className = "student-item";
+    const allClasses = [...classes, ...otherClasses];
 
-      const info = document.createElement("span");
-      info.textContent =
-        `${index + 1}. ${student.full_name || "Chưa có họ tên"} | ` +
-        `${student.username || "Chưa có tên đăng nhập"} | ` +
-        `Lớp ${student.class_name || "Chưa rõ"}`;
+    message.textContent = `Tổng cộng ${data.length} học sinh.`;
 
-      // NÚT ĐẶT LẠI MẬT KHẨU
-      const resetButton = document.createElement("button");
-      resetButton.type = "button";
-      resetButton.textContent = "Đặt lại mật khẩu";
+    allClasses.forEach(className => {
+      const students = data.filter(
+        student => student.class_name === className
+      );
 
-      resetButton.addEventListener("click", async () => {
-        const confirmed = confirm(
-          `Đặt lại mật khẩu cho ${student.full_name}?\n\n` +
-          "Mật khẩu mới sẽ trở về mật khẩu mặc định theo họ tên và lớp."
-        );
+      const section = document.createElement("div");
+      section.className = "student-class-section";
 
-        if (!confirmed) return;
+      const heading = document.createElement("div");
+      heading.className = "student-class-heading";
 
-        resetButton.disabled = true;
-        resetButton.textContent = "Đang xử lý...";
+      const title = document.createElement("h3");
+      title.textContent = `Lớp ${className} (${students.length} học sinh)`;
 
-        try {
-          const { data: result, error } =
-            await supabaseClient.functions.invoke("clever-api", {
-              body: {
-                action: "reset_password",
-                student_id: student.id
-              }
-            });
+      heading.appendChild(title);
 
-          if (error || !result || !result.success) {
-            alert(
-              (result && result.error) ||
-              (error && error.message) ||
-              "Không đặt lại được mật khẩu."
-            );
-            return;
-          }
+      // NÚT XÓA TOÀN BỘ HỌC SINH TRONG LỚP
+      if (["7A", "7C"].includes(className) && students.length > 0) {
+        const deleteClassButton = document.createElement("button");
+        deleteClassButton.type = "button";
+        deleteClassButton.textContent = "Xóa toàn bộ lớp";
+        deleteClassButton.className = "delete-class-button";
 
-          alert(
-            "ĐÃ ĐẶT LẠI MẬT KHẨU\n\n" +
-            "Học sinh: " + result.student_name + "\n" +
-            "Lớp: " + result.class_name + "\n" +
-            "Tên đăng nhập: " + student.username + "\n" +
-            "Mật khẩu mới: " + result.password
+        deleteClassButton.addEventListener("click", async () => {
+          const firstConfirm = confirm(
+            `CẢNH BÁO!\n\n` +
+            `Mày đang chuẩn bị xóa toàn bộ ${students.length} học sinh lớp ${className}.\n\n` +
+            `Tài khoản, bài nộp, điểm, nhận xét và ảnh bài làm liên quan cũng sẽ bị xóa.\n\n` +
+            `Lớp còn lại không bị ảnh hưởng.\n\n` +
+            `Mày có chắc chắn muốn tiếp tục không?`
           );
 
-        } catch (err) {
-          alert("Có lỗi xảy ra: " + err.message);
-        } finally {
-          resetButton.disabled = false;
-          resetButton.textContent = "Đặt lại mật khẩu";
-        }
-      });
+          if (!firstConfirm) return;
 
-      // NÚT XÓA HỌC SINH
-      const deleteButton = document.createElement("button");
-      deleteButton.type = "button";
-      deleteButton.textContent = "Xóa học sinh";
+          const secondConfirm = prompt(
+            `Để xác nhận xóa lớp ${className}, hãy nhập chính xác:\n\nXOA ${className}`
+          );
 
-      deleteButton.addEventListener("click", async () => {
-        const confirmed = confirm(
-          `Mày có chắc chắn muốn xóa học sinh ${student.full_name} không?\n\n` +
-          "Toàn bộ tài khoản, bài nộp, điểm, nhận xét và ảnh bài làm sẽ bị xóa."
-        );
-
-        if (!confirmed) return;
-
-        deleteButton.disabled = true;
-        deleteButton.textContent = "Đang xóa...";
-
-        try {
-          const { data: result, error } =
-            await supabaseClient.functions.invoke("clever-api", {
-              body: {
-                action: "delete_student",
-                student_id: student.id
-              }
-            });
-
-          if (error || !result || !result.success) {
-            alert(
-              (result && result.error) ||
-              (error && error.message) ||
-              "Chưa xóa được học sinh."
-            );
+          if (secondConfirm !== `XOA ${className}`) {
+            alert("Đã hủy thao tác. Không có học sinh nào bị xóa.");
             return;
           }
 
-          alert("Đã xóa học sinh và dữ liệu liên quan.");
-          await loadStudents();
+          deleteClassButton.disabled = true;
+          deleteClassButton.textContent = "Đang xóa...";
 
-        } catch (err) {
-          alert("Có lỗi xảy ra: " + err.message);
-        } finally {
-          deleteButton.disabled = false;
-          deleteButton.textContent = "Xóa học sinh";
-        }
+          try {
+            const { data: result, error } =
+              await supabaseClient.functions.invoke("clever-api", {
+                body: {
+                  action: "delete_class",
+                  class_name: className
+                }
+              });
+
+            if (error || !result || !result.success) {
+              const failedNames = result?.failed
+                ? "\n\nChi tiết:\n" + result.failed.join("\n")
+                : "";
+
+              alert(
+                (result && result.error) ||
+                (result && result.message) ||
+                (error && error.message) ||
+                "Không xóa được danh sách." +
+                failedNames
+              );
+              return;
+            }
+
+            alert(
+              `Đã xóa ${result.deleted} học sinh lớp ${className}.`
+            );
+
+            await loadStudents();
+
+          } catch (err) {
+            alert("Có lỗi xảy ra: " + err.message);
+          } finally {
+            deleteClassButton.disabled = false;
+            deleteClassButton.textContent = "Xóa toàn bộ lớp";
+          }
+        });
+
+        heading.appendChild(deleteClassButton);
+      }
+
+      section.appendChild(heading);
+
+      if (students.length === 0) {
+        const empty = document.createElement("p");
+        empty.textContent = "Chưa có học sinh trong lớp này.";
+        section.appendChild(empty);
+      }
+
+      students.forEach((student, index) => {
+        const item = document.createElement("div");
+        item.className = "student-item";
+
+        const info = document.createElement("span");
+        info.textContent =
+          `${index + 1}. ${student.full_name || "Chưa có họ tên"} | ` +
+          `${student.username || "Chưa có tên đăng nhập"}`;
+
+        // NÚT ĐẶT LẠI MẬT KHẨU
+        const resetButton = document.createElement("button");
+        resetButton.type = "button";
+        resetButton.textContent = "Đặt lại mật khẩu";
+
+        resetButton.addEventListener("click", async () => {
+          if (!confirm(
+            `Đặt lại mật khẩu cho ${student.full_name}?`
+          )) return;
+
+          resetButton.disabled = true;
+          resetButton.textContent = "Đang xử lý...";
+
+          try {
+            const { data: result, error } =
+              await supabaseClient.functions.invoke("clever-api", {
+                body: {
+                  action: "reset_password",
+                  student_id: student.id
+                }
+              });
+
+            if (error || !result || !result.success) {
+              alert(
+                (result && result.error) ||
+                (error && error.message) ||
+                "Không đặt lại được mật khẩu."
+              );
+              return;
+            }
+
+            alert(
+              "ĐÃ ĐẶT LẠI MẬT KHẨU\n\n" +
+              "Học sinh: " + result.student_name + "\n" +
+              "Lớp: " + result.class_name + "\n" +
+              "Tên đăng nhập: " + student.username + "\n" +
+              "Mật khẩu mới: " + result.password
+            );
+
+          } catch (err) {
+            alert("Có lỗi xảy ra: " + err.message);
+          } finally {
+            resetButton.disabled = false;
+            resetButton.textContent = "Đặt lại mật khẩu";
+          }
+        });
+
+        // NÚT XÓA TỪNG HỌC SINH
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.textContent = "Xóa học sinh";
+
+        deleteButton.addEventListener("click", async () => {
+          if (!confirm(
+            `Mày có chắc chắn muốn xóa học sinh ${student.full_name} không?\n\n` +
+            "Toàn bộ tài khoản và dữ liệu liên quan sẽ bị xóa."
+          )) return;
+
+          deleteButton.disabled = true;
+          deleteButton.textContent = "Đang xóa...";
+
+          try {
+            const { data: result, error } =
+              await supabaseClient.functions.invoke("clever-api", {
+                body: {
+                  action: "delete_student",
+                  student_id: student.id
+                }
+              });
+
+            if (error || !result || !result.success) {
+              alert(
+                (result && result.error) ||
+                (error && error.message) ||
+                "Chưa xóa được học sinh."
+              );
+              return;
+            }
+
+            alert("Đã xóa học sinh và dữ liệu liên quan.");
+            await loadStudents();
+
+          } catch (err) {
+            alert("Có lỗi xảy ra: " + err.message);
+          } finally {
+            deleteButton.disabled = false;
+            deleteButton.textContent = "Xóa học sinh";
+          }
+        });
+
+        item.appendChild(info);
+        item.appendChild(resetButton);
+        item.appendChild(deleteButton);
+
+        section.appendChild(item);
       });
 
-      item.appendChild(info);
-      item.appendChild(resetButton);
-      item.appendChild(deleteButton);
-
-      list.appendChild(item);
+      list.appendChild(section);
     });
 
   } catch (err) {
     message.textContent = "Có lỗi xảy ra: " + err.message;
   }
 }
+
 
 document.getElementById("refreshStudents").addEventListener("click",loadStudents);
 
