@@ -953,13 +953,22 @@ await loadStudents();
 bulkButton.addEventListener("click", async () => {
   const input = document.getElementById("bulkStudentList").value.trim();
   const message = document.getElementById("bulkStudentMessage");
-const results = document.getElementById("bulkStudentResults") || document.createElement("div");
- 
-  message.textContent = "";
-if (!results.isConnected) {
-  document.getElementById("bulkStudentMessage").after(results);
+let results = document.getElementById("bulkStudentResults");
+
+if (!message) {
+  alert("Không tìm thấy vùng thông báo cấp tài khoản.");
+  return;
 }
+
+if (!results) {
+  results = document.createElement("div");
+  results.id = "bulkStudentResults";
+  message.insertAdjacentElement("afterend", results);
+}
+
+message.textContent = "";
 results.innerHTML = "";
+ 
  
   if (!input) {
     message.textContent = "Cô chưa nhập danh sách học sinh.";
