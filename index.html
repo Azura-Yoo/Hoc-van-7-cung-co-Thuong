@@ -434,7 +434,7 @@ body:has(#homeSection:not(.hidden)) {
 </div>
 
 <!-- KHO ÔN TẬP NGỮ VĂN 7 -->
-<section id="revisionPanel">
+<section id="revisionPanel" class="hidden">
   <h2>Ôn tập Ngữ văn 7</h2>
   <p class="sub">
     Cùng cô Thương ôn luyện kiến thức và thực hành theo từng bài học.
@@ -648,7 +648,11 @@ document.getElementById("dashboardMessage").textContent =
 
 const teacherPanel = document.getElementById("teacherPanel");
 const studentPanel = document.getElementById("studentPanel");
+const revisionPanel = document.getElementById("revisionPanel");
 
+if (revisionPanel) {
+  revisionPanel.classList.remove("hidden");
+}
 if (teacherPanel) {
   teacherPanel.classList.toggle("hidden", data.role !== "teacher");
 }
