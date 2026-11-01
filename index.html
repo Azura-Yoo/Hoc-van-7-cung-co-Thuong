@@ -124,8 +124,11 @@ body:has(#homeSection:not(.hidden)){padding:24px 32px}
 <label for="studentPassword">Mật khẩu</label>
 <input id="studentPassword" type="password" minlength="8" required>
 <label for="studentClass">Lớp</label>
-<select id="studentClass" required><option value="7A">7A</option></select>
-<button type="submit">Tạo tài khoản học sinh</button>
+<select id="studentClass" required>
+  <option value="7A">7A</option>
+  <option value="7C">7C</option>
+</select>
+ <button type="submit">Tạo tài khoản học sinh</button>
 <div id="createStudentMessage" class="message"></div>
 </form>
 
@@ -144,8 +147,11 @@ body:has(#homeSection:not(.hidden)){padding:24px 32px}
 <label for="assignmentBody">Nội dung yêu cầu</label>
 <textarea id="assignmentBody" rows="5" placeholder="Nhập nội dung bài tập..." required></textarea>
 <label for="assignmentClass">Lớp được giao</label>
-<select id="assignmentClass" required><option value="7A">7A</option></select>
-<button type="submit">Giao bài tập</button>
+<select id="assignmentClass" required>
+  <option value="7A">7A</option>
+  <option value="7C">7C</option>
+</select>
+ <button type="submit">Giao bài tập</button>
 <div id="assignmentMessage" class="message"></div>
 </form>
 </div>
