@@ -447,6 +447,7 @@ if (studentPanel) {
 
 if (data.role === "teacher") {
   await loadStudents();
+  await loadSubmissions();
 }
 
 if (data.role === "student") {
@@ -632,7 +633,206 @@ async function loadStudents() {
   });
 }
 
+async function loadSubmissions() {
+  const list = document.getElementById("submissionList");
+  const message = document.getElementById("submissionMessage");
+  const refreshButton = document.getElementById("refreshSubmissions");
 
+  if (!list || !message || !supabaseClient) return;
+
+  if (refreshButton) {
+    refreshButton.onclick = loadSubmissions;
+  }
+
+  list.innerHTML = "";
+  message.textContent = "Đang tải bài nộp của học sinh...";
+
+  const { data: submissions, error } = await supabaseClient
+    .from("submissions")
+    .select("id, assignment_id, student_id, answer, image_paths, feedback, score, submitted_at")
+    .order("submitted_at", { ascending: false });
+
+  if (error) {
+    message.textContent = "Không tải được bài nộp: " + error.message;
+    return;
+  }
+
+  if (!submissions || submissions.length === 0) {
+    message.textContent = "Chưa có học sinh nào nộp bài.";
+    return;
+  }
+
+  const assignmentIds = [...new Set(submissions.map(s => s.assignment_id))];
+  const studentIds = [...new Set(submissions.map(s => s.student_id))];
+
+  const { data: assignments, error: assignmentError } = await supabaseClient
+    .from("assignments")
+    .select("id, title, class_name")
+    .in("id", assignmentIds);
+
+  if (assignmentError) {
+    message.textContent = "Không tải được thông tin bài tập: " + assignmentError.message;
+    return;
+  }
+
+  const { data: students, error: studentError } = await supabaseClient
+    .from("profiles")
+    .select("id, full_name, class_name")
+    .in("id", studentIds);
+
+  if (studentError) {
+    message.textContent = "Không tải được tên học sinh: " + studentError.message;
+    return;
+  }
+
+  const assignmentMap = new Map(
+    (assignments || []).map(a => [a.id, a])
+  );
+
+  const studentMap = new Map(
+    (students || []).map(s => [s.id, s])
+  );
+
+  message.textContent = `Có ${submissions.length} bài nộp.`;
+
+  for (const submission of submissions) {
+    const assignment = assignmentMap.get(submission.assignment_id);
+    const student = studentMap.get(submission.student_id);
+
+    const card = document.createElement("div");
+    card.style.cssText =
+      "background:#f8faf8;border:1px solid #e3ebe5;border-radius:14px;padding:20px;margin:16px 0;";
+
+    const heading = document.createElement("h3");
+    heading.textContent = student
+      ? student.full_name + " | Lớp " + (student.class_name || "Chưa rõ")
+      : "Học sinh chưa xác định";
+
+    const assignmentName = document.createElement("p");
+    assignmentName.textContent =
+      "Bài tập: " + (assignment ? assignment.title : "Không xác định");
+
+    const answer = document.createElement("p");
+    answer.style.cssText = "white-space:pre-wrap;";
+    answer.textContent = "Bài làm: " + (submission.answer || "Không có nội dung văn bản.");
+
+    const time = document.createElement("p");
+    time.textContent = submission.submitted_at
+      ? "Thời gian nộp: " + new Date(submission.submitted_at).toLocaleString("vi-VN")
+      : "";
+
+    card.appendChild(heading);
+    card.appendChild(assignmentName);
+    card.appendChild(answer);
+    card.appendChild(time);
+
+    if (submission.image_paths && submission.image_paths.length > 0) {
+      const imageHeading = document.createElement("p");
+      imageHeading.textContent = "Ảnh bài làm:";
+      card.appendChild(imageHeading);
+
+      for (const path of submission.image_paths) {
+        const { data: imageData, error: imageError } =
+          await supabaseClient.storage
+            .from("student-submissions")
+            .createSignedUrl(path, 3600);
+
+        if (imageError || !imageData) {
+          const imageErrorText = document.createElement("p");
+          imageErrorText.textContent = "Không tải được ảnh: " + path;
+          card.appendChild(imageErrorText);
+          continue;
+        }
+
+        const image = document.createElement("img");
+        image.src = imageData.signedUrl;
+        image.alt = "Ảnh bài làm của học sinh";
+        image.style.cssText =
+          "display:block;max-width:100%;max-height:500px;object-fit:contain;margin:10px 0;border-radius:8px;";
+
+        card.appendChild(image);
+      }
+    }
+
+    const scoreLabel = document.createElement("label");
+    scoreLabel.textContent = "Điểm (thang 10)";
+
+    const scoreInput = document.createElement("input");
+    scoreInput.type = "number";
+    scoreInput.min = "0";
+    scoreInput.max = "10";
+    scoreInput.step = "0.25";
+    scoreInput.placeholder = "Nhập điểm";
+    scoreInput.value = submission.score ?? "";
+    scoreInput.style.cssText =
+      "display:block;width:100%;max-width:180px;padding:10px;margin:6px 0 12px;";
+
+    const feedbackLabel = document.createElement("label");
+    feedbackLabel.textContent = "Nhận xét của cô";
+
+    const feedbackInput = document.createElement("textarea");
+    feedbackInput.rows = 3;
+    feedbackInput.placeholder = "Nhập nhận xét cho học sinh...";
+    feedbackInput.value = submission.feedback || "";
+    feedbackInput.style.cssText =
+      "display:block;width:100%;padding:10px;margin:6px 0;border:1px solid #d8e2da;border-radius:9px;font:inherit;";
+
+    const saveButton = document.createElement("button");
+    saveButton.type = "button";
+    saveButton.textContent = "Lưu điểm và nhận xét";
+
+    const result = document.createElement("p");
+    result.className = "message";
+
+    saveButton.addEventListener("click", async () => {
+      const scoreText = scoreInput.value.trim();
+      const feedback = feedbackInput.value.trim();
+
+      let score = null;
+
+      if (scoreText !== "") {
+        score = Number(scoreText);
+
+        if (!Number.isFinite(score) || score < 0 || score > 10) {
+          result.textContent = "Điểm phải nằm trong khoảng từ 0 đến 10.";
+          return;
+        }
+      }
+
+      saveButton.disabled = true;
+      saveButton.textContent = "Đang lưu...";
+      result.textContent = "Đang lưu kết quả...";
+
+      const { error: updateError } = await supabaseClient
+        .from("submissions")
+        .update({
+          score: score,
+          feedback: feedback || null
+        })
+        .eq("id", submission.id);
+
+      if (updateError) {
+        result.textContent = "Chưa lưu được: " + updateError.message;
+        saveButton.disabled = false;
+        saveButton.textContent = "Lưu điểm và nhận xét";
+        return;
+      }
+
+      result.textContent = "Đã lưu điểm và nhận xét thành công!";
+      saveButton.disabled = false;
+      saveButton.textContent = "Lưu điểm và nhận xét";
+    });
+
+    card.appendChild(scoreLabel);
+    card.appendChild(scoreInput);
+    card.appendChild(feedbackLabel);
+    card.appendChild(feedbackInput);
+    card.appendChild(saveButton);
+    card.appendChild(result);
+
+    list.appendChild(card);
+  }
+}
 async function loadAssignments(className) {
   const list = document.getElementById("studentAssignments");
   const message = document.getElementById("studentAssignmentMessage");
