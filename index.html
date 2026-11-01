@@ -633,6 +633,7 @@ async function loadStudents() {
   });
 }
 
+
 async function loadSubmissions() {
   const list = document.getElementById("submissionList");
   const message = document.getElementById("submissionMessage");
@@ -649,7 +650,7 @@ async function loadSubmissions() {
 
   const { data: submissions, error } = await supabaseClient
     .from("submissions")
-    .select("id, assignment_id, student_id, answer, image_paths, feedback, score, submitted_at")
+    .select("id, assignment_id, student_id, attempt, answer, image_paths, feedback, score, submitted_at")
     .order("submitted_at", { ascending: false });
 
   if (error) {
@@ -712,6 +713,11 @@ async function loadSubmissions() {
     assignmentName.textContent =
       "Bài tập: " + (assignment ? assignment.title : "Không xác định");
 
+    const attemptInfo = document.createElement("p");
+    attemptInfo.textContent = `Lần nộp: ${submission.attempt || 1}/2`;
+    attemptInfo.style.cssText =
+      "color:#477b58;font-weight:bold;font-size:16px;";
+
     const answer = document.createElement("p");
     answer.style.cssText = "white-space:pre-wrap;";
     answer.textContent = "Bài làm: " + (submission.answer || "Không có nội dung văn bản.");
@@ -723,6 +729,7 @@ async function loadSubmissions() {
 
     card.appendChild(heading);
     card.appendChild(assignmentName);
+    card.appendChild(attemptInfo);
     card.appendChild(answer);
     card.appendChild(time);
 
@@ -833,7 +840,8 @@ async function loadSubmissions() {
     list.appendChild(card);
   }
 }
-    const refreshSubmissionsButton =
+
+const refreshSubmissionsButton =
   document.getElementById("refreshSubmissions");
 
 if (refreshSubmissionsButton) {
