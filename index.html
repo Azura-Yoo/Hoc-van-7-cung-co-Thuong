@@ -619,7 +619,7 @@ async function loadStudents() {
 
   const { data, error } = await supabaseClient
     .from("profiles")
-    .select("full_name, username, class_name")
+.select("id, full_name, username, class_name")
     .eq("role", "student")
     .order("full_name", { ascending: true });
 
@@ -635,7 +635,7 @@ async function loadStudents() {
 
   message.textContent = `Có ${data.length} học sinh.`;
 
-  data.forEach((student, index) => {
+ data.forEach((student, index) => {
     const item = document.createElement("div");
     item.className = "student-item";
     item.textContent =
@@ -643,7 +643,6 @@ async function loadStudents() {
 
     list.appendChild(item);
   });
-}
 
 
 async function loadSubmissions() {
