@@ -81,6 +81,35 @@ body:has(#homeSection:not(.hidden)){padding:24px 32px}
  .submission-filters{grid-template-columns:1fr}
  .revision-table{font-size:13px}
 }
+ 
+/* Thu gọn danh sách học sinh */
+.student-list {
+  max-height: 380px;
+  display: flex;
+  flex-direction: column;
+}
+
+#studentList {
+  max-height: 280px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+  scrollbar-width: thin;
+}
+
+#studentList::-webkit-scrollbar {
+  width: 6px;
+}
+
+#studentList::-webkit-scrollbar-thumb {
+  background: #c5c5c5;
+  border-radius: 10px;
+}
+
+#studentList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 </style>
 </head>
 
