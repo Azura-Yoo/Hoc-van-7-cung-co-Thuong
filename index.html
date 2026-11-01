@@ -436,6 +436,8 @@ if (data.role === "teacher") {
 }
 
 if (data.role === "student") {
+  const message = document.getElementById("studentAssignmentMessage");
+  message.textContent = "Đã gọi hàm tải bài tập...";
   await loadAssignments(data.class_name);
 }
 
