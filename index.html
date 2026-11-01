@@ -1162,20 +1162,19 @@ bulkButton.addEventListener("click", async () => {
         );
       }
     }
+message.textContent =
+  `Hoàn thành! Thành công: ${successCount} | Thất bại: ${failedCount}.`;
 
-    message.textContent =
-      `Hoàn thành! Thành công: ${successCount} | Thất bại: ${failedCount}.`;
+results.textContent = accountResults.join("\n\n");
 
-    results.textContent = accountResults.join("\n\n");
+if (successCount > 0) {
+  await loadStudents();
+}
 
-    if (successCount > 0) {
-      await loadStudents();
-    }
-
-  } finally {
-    bulkButton.disabled = false;
-    bulkButton.textContent = "Tạo tài khoản hàng loạt";
-  }
+} finally {
+  bulkButton.disabled = false;
+  bulkButton.textContent = "Tạo tài khoản hàng loạt";
+}
 });
 
 const report = [];
@@ -1190,7 +1189,6 @@ for (const student of students) {
           class_name: student.class_name
         }
       });
-
     if (error || !data || !data.success) {
       report.push({
         ...student,
