@@ -653,6 +653,8 @@ const revisionPanel = document.getElementById("revisionPanel");
 if (revisionPanel) {
   revisionPanel.classList.remove("hidden");
 }
+      console.log("REVISION PANEL:", revisionPanel);
+console.log("REVISION DISPLAY:", revisionPanel ? getComputedStyle(revisionPanel).display : "KHÔNG TÌM THẤY");
 if (teacherPanel) {
   teacherPanel.classList.toggle("hidden", data.role !== "teacher");
 }
