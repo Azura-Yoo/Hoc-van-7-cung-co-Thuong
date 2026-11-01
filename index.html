@@ -110,6 +110,35 @@ body:has(#homeSection:not(.hidden)){padding:24px 32px}
   background: transparent;
 }
 
+/* Thu gọn kết quả cấp tài khoản hàng loạt */
+#bulkStudentResults {
+  max-height: 220px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 12px;
+  margin-top: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  scrollbar-width: thin;
+}
+
+#bulkStudentResults p {
+  margin: 5px 0;
+  padding: 5px 0;
+  border-bottom: 1px solid #eeeeee;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+#bulkStudentResults::-webkit-scrollbar {
+  width: 6px;
+}
+
+#bulkStudentResults::-webkit-scrollbar-thumb {
+  background: #c5c5c5;
+  border-radius: 10px;
+}
+
 </style>
 </head>
 
