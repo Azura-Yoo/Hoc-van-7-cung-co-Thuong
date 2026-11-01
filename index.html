@@ -515,11 +515,11 @@ console.log("FUNCTION ERROR:", error);
     button.disabled = false;
     button.textContent = "Tạo tài khoản học sinh";
 
-    if (error || !data?.success) {
-      message.textContent =
-        data?.error || error?.message || "Chưa tạo được tài khoản.";
-      return;
-    }
+if (error || !data || !data.success) {
+  message.textContent =
+    (data && data.error) || (error && error.message) || "Chưa tạo được tài khoản.";
+  return;
+}
 
     message.textContent =
       `Đã tạo tài khoản ${data.username} cho ${data.full_name}.`;
