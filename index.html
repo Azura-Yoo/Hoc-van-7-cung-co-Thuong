@@ -999,16 +999,17 @@ results.innerHTML = "";
     .replace(/đ/g, "d")
     .replace(/Đ/g, "D");
 
-  const { data: existing, error: fetchError } = await supabaseClient
-    .from("profiles")
-    .select("username");
 
-  if (fetchError) {
-    message.textContent = "Không tải được danh sách tài khoản: " + fetchError.message;
-    bulkButton.disabled = false;
-    bulkButton.textContent = "Tạo tài khoản hàng loạt";
-    return;
-  }
+const { data: existing, error: fetchError } = await supabaseClient
+  .from("profiles")
+  .select("username");
+
+if (fetchError) {
+  message.textContent = "Không tải được danh sách tài khoản: " + fetchError.message;
+  bulkButton.disabled = false;
+  bulkButton.textContent = "Tạo tài khoản hàng loạt";
+  return;
+}
 
 const used = new Set(
   (existing || [])
@@ -1031,47 +1032,47 @@ for (const student of students) {
   }
 
   const nameParts = words.slice(1);
+
   const base = normalize(nameParts.join("")).toLowerCase()
     + (student.class_name || "").toLowerCase();
 
   let username = base;
   let number = 2;
 
-  while (used.has((username || "").toLowerCase())) {
+  while (used.has(username.toLowerCase())) {
     username = base + String(number).padStart(2, "0");
     number++;
   }
-    }
 
-    const password = nameParts.map(part => {
-      const clean = normalize(part).toLowerCase();
-      return clean.charAt(0).toUpperCase() + clean.slice(1);
-    }).join("") + student.class_name + "@";
+  const password = nameParts.map(part => {
+    const clean = normalize(part).toLowerCase();
+    return clean.charAt(0).toUpperCase() + clean.slice(1);
+  }).join("") + student.class_name + "@";
 
-    const { data, error } = await supabaseClient.functions.invoke(
-      "clever-api",
-      {
-        body: {
-          full_name: student.full_name,
-          username,
-          password,
-          class_name: student.class_name
-        }
-      }
-    );
-
-    if (!error && data && data.success) {
-      used.add(username.toLowerCase());
-      report.push({ ...student, username, password, ok: true });
-    } else {
-      report.push({
-        ...student,
+  const { data, error } = await supabaseClient.functions.invoke(
+    "clever-api",
+    {
+      body: {
+        full_name: student.full_name,
         username,
-        ok: false,
-        error: (data && data.error) || (error && error.message) || "Tạo tài khoản thất bại"
-      });
+        password,
+        class_name: student.class_name
+      }
     }
+  );
+
+  if (!error && data && data.success) {
+    used.add(username.toLowerCase());
+    report.push({ ...student, username, password, ok: true });
+  } else {
+    report.push({
+      ...student,
+      username,
+      ok: false,
+      error: (data && data.error) || (error && error.message) || "Tạo tài khoản thất bại"
+    });
   }
+}
 
   const success = report.filter(s => s.ok).length;
   const failed = report.length - success;
