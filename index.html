@@ -953,11 +953,14 @@ await loadStudents();
 bulkButton.addEventListener("click", async () => {
   const input = document.getElementById("bulkStudentList").value.trim();
   const message = document.getElementById("bulkStudentMessage");
-  const results = document.getElementById("bulkStudentResults");
-
+const results = document.getElementById("bulkStudentResults") || document.createElement("div");
+ 
   message.textContent = "";
-  results.innerHTML = "";
-
+if (!results.isConnected) {
+  document.getElementById("bulkStudentMessage").after(results);
+}
+results.innerHTML = "";
+ 
   if (!input) {
     message.textContent = "Cô chưa nhập danh sách học sinh.";
     return;
