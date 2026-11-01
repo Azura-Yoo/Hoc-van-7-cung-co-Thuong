@@ -1010,8 +1010,8 @@ results.innerHTML = "";
     return;
   }
 
-  const used = new Set((existing || []).map(s => s.username.toLowerCase()));
-  const report = [];
+const used = new Set((existing || []).filter(s => s.username).map(s => s.username.toLowerCase()));
+ const report = [];
 
   for (const student of students) {
     const words = student.full_name.split(/\s+/);
