@@ -581,6 +581,7 @@ if (createAssignmentForm) {
     createAssignmentForm.reset();
   });
 }
+
 async function loadStudents() {
   const list = document.getElementById("studentList");
   const message = document.getElementById("studentListMessage");
@@ -600,7 +601,24 @@ async function loadStudents() {
     message.textContent = "Không tải được danh sách học sinh: " + error.message;
     return;
   }
-  
+
+  if (!data || data.length === 0) {
+    message.textContent = "Chưa có học sinh nào.";
+    return;
+  }
+
+  message.textContent = `Có ${data.length} học sinh.`;
+
+  data.forEach((student, index) => {
+    const item = document.createElement("div");
+    item.className = "student-item";
+    item.textContent =
+      `${index + 1}. ${student.full_name || "Chưa có họ tên"} | ${student.username || "Chưa có tên đăng nhập"} | Lớp ${student.class_name || "Chưa rõ"}`;
+
+    list.appendChild(item);
+  });
+}
+
 async function loadAssignments(className) {
   const list = document.getElementById("studentAssignments");
   const message = document.getElementById("studentAssignmentMessage");
@@ -653,14 +671,19 @@ const refreshButton = document.getElementById("refreshStudents");
 
 if (refreshButton) {
   refreshButton.addEventListener("click", loadStudents);
-}  
-  async function checkSession() {
-      if (!supabaseClient) return;
-      const { data } = await supabaseClient.auth.getSession();
-      if (data.session) await showUser(data.session.user);
-    }
+}
 
-    checkSession();
+async function checkSession() {
+  if (!supabaseClient) return;
+
+  const { data } = await supabaseClient.auth.getSession();
+
+  if (data.session) {
+    await showUser(data.session.user);
+  }
+}
+
+checkSession();
   </script>
 </body>
 </html>
