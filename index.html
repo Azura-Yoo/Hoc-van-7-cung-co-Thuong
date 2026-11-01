@@ -1145,7 +1145,7 @@ bulkButton.addEventListener("click", async () => {
 
         successCount++;
 
-        accountResults.push(
+              accountResults.push(
           `HỌC SINH: ${data.full_name}\n` +
           `LỚP: ${data.class_name}\n` +
           `TÊN ĐĂNG NHẬP: ${data.username}\n` +
@@ -1162,97 +1162,37 @@ bulkButton.addEventListener("click", async () => {
         );
       }
     }
-message.textContent =
-  `Hoàn thành! Thành công: ${successCount} | Thất bại: ${failedCount}.`;
 
-results.textContent = accountResults.join("\n\n");
+    message.textContent =
+      `Hoàn thành! Thành công: ${successCount} | Thất bại: ${failedCount}.`;
 
-if (successCount > 0) {
-  await loadStudents();
-}
+    results.textContent = accountResults.join("\n\n");
 
-} finally {
-  bulkButton.disabled = false;
-  bulkButton.textContent = "Tạo tài khoản hàng loạt";
-}
-});
-
-const report = [];
-
-for (const student of students) {
-  try {
-    const { data, error } =
-      await supabaseClient.functions.invoke("clever-api", {
-        body: {
-          action: "create_student",
-          full_name: student.full_name,
-          class_name: student.class_name
-        }
-      });
-    if (error || !data || !data.success) {
-      report.push({
-        ...student,
-        ok: false,
-        error: (data && data.error) ||
-               (error && error.message) ||
-               "Không tạo được tài khoản"
-      });
-
-      continue;
+    if (successCount > 0) {
+      await loadStudents();
     }
 
-    report.push({
-      ...student,
-      ok: true,
-      username: data.username,
-      password: data.password
-    });
-
-  } catch (err) {
-    report.push({
-      ...student,
-      ok: false,
-      error: err.message
-    });
+  } finally {
+    bulkButton.disabled = false;
+    bulkButton.textContent = "Tạo tài khoản hàng loạt";
   }
-}
-
-  const success = report.filter(s => s.ok).length;
-const failed = report.length - success;
-
-message.textContent =
-  `Đã tạo thành công ${success}/${report.length} tài khoản. Có ${failed} tài khoản chưa tạo được.`;
-
-results.innerHTML = report.map(s => `
-  <p>
-    ${s.ok ? "✅" : "❌"} ${s.full_name} (${s.class_name})
-    ${s.ok
-      ? ` | Tài khoản: <strong>${s.username}</strong> | Mật khẩu: <strong>${s.password}</strong>`
-      : ` | Lỗi: ${s.error}`}
-  </p>
-`).join("");
-
-bulkButton.disabled = false;
-bulkButton.textContent = "Tạo tài khoản hàng loạt";
-
-await loadStudents();
 });
- 
-const createAssignmentForm=document.getElementById("createAssignmentForm");
 
-createAssignmentForm.addEventListener("submit",async(event)=>{
-event.preventDefault();
+const createAssignmentForm = document.getElementById("createAssignmentForm");
 
-const message=document.getElementById("assignmentMessage");
-const button=createAssignmentForm.querySelector('button[type="submit"]');
-const title=document.getElementById("assignmentTitle").value.trim();
-const body=document.getElementById("assignmentBody").value.trim();
-const className=document.getElementById("assignmentClass").value;
+createAssignmentForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
 
-if(!title||!body||!className){
-message.textContent="Cô vui lòng nhập đầy đủ thông tin.";
-return;
-}
+  const message = document.getElementById("assignmentMessage");
+  const button = createAssignmentForm.querySelector('button[type="submit"]');
+  const title = document.getElementById("assignmentTitle").value.trim();
+  const body = document.getElementById("assignmentBody").value.trim();
+  const className = document.getElementById("assignmentClass").value;
+
+  if (!title || !body || !className) {
+    message.textContent = "Cô vui lòng nhập đầy đủ thông tin.";
+    return;
+  }
 
 button.disabled=true;
 button.textContent="Đang giao bài...";
