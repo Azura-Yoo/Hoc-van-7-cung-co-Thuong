@@ -833,6 +833,12 @@ async function loadSubmissions() {
     list.appendChild(card);
   }
 }
+    const refreshSubmissionsButton =
+  document.getElementById("refreshSubmissions");
+
+if (refreshSubmissionsButton) {
+  refreshSubmissionsButton.addEventListener("click", loadSubmissions);
+}
 async function loadAssignments(className) {
   const list = document.getElementById("studentAssignments");
   const message = document.getElementById("studentAssignmentMessage");
