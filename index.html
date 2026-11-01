@@ -1126,31 +1126,6 @@ bulkButton.addEventListener("click", async () => {
   }
 });
 
-  if (students.some(s => !s.full_name || !["7A", "7C"].includes(s.class_name))) {
-    message.textContent = "Có dòng chưa đúng mẫu Họ tên | 7A hoặc 7C. Cô kiểm tra lại nhé.";
-    return;
-  }
-
-  bulkButton.disabled = true;
-  bulkButton.textContent = "Đang tạo tài khoản...";
-
-  const normalize = str => str.normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
-    .replace(/Đ/g, "D");
-
-
-const { data: existing, error: fetchError } = await supabaseClient
-  .from("profiles")
-  .select("username");
-
-if (fetchError) {
-  message.textContent = "Không tải được danh sách tài khoản: " + fetchError.message;
-  bulkButton.disabled = false;
-  bulkButton.textContent = "Tạo tài khoản hàng loạt";
-  return;
-}
-
 const used = new Set(
   (existing || [])
     .map(s => (s.username || "").toLowerCase())
