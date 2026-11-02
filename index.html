@@ -870,7 +870,7 @@ body:has(#homeSection:not(.hidden)){padding:24px 32px}
 <h3>Ôn tập giữa học kì I</h3>
 <p class="sub">Hệ thống kiến thức trọng tâm và hướng dẫn cách làm bài kiểm tra giữa học kì I. Phần đọc hiểu sử dụng ngữ liệu ngoài SGK.</p>
 
-<details open>
+<details>
 <summary>A. Đọc hiểu truyện</summary>
 <div class="revision-content">
 
@@ -1649,7 +1649,7 @@ body:has(#homeSection:not(.hidden)){padding:24px 32px}
 <p class="sub">Hệ thống kiến thức trọng tâm và hướng dẫn cách làm bài kiểm tra cuối học kì I. Nội dung bám sát phạm vi ôn tập Bài 3, Bài 4, Bài 5 và phần kiến thức đã học ở giữa học kì I.</p>
 
 <!-- A. ĐỌC HIỂU -->
-<details open>
+<details>
 <summary>A. Đọc hiểu truyện và tản văn</summary>
 <div class="revision-content">
 
@@ -3035,123 +3035,304 @@ async function loadStudents() {
 }
 document.getElementById("refreshStudents").addEventListener("click",loadStudents);
 
-async function loadSubmissions(){
+
 const filterStudent=document.getElementById("filterStudent");
 const filterAssignment=document.getElementById("filterAssignment");
 const list=document.getElementById("submissionList");
 const message=document.getElementById("submissionMessage");
+
+async function loadSubmissions(){
 if(!list||!message||!supabaseClient)return;
+
 list.innerHTML="";
 message.textContent="Đang tải bài nộp của học sinh...";
+
 const r=await supabaseClient.from("submissions").select("id, assignment_id, student_id, attempt, answer, image_paths, feedback, score, submitted_at").order("submitted_at",{ascending:false});
-if(r.error){message.textContent="Không tải được bài nộp: "+r.error.message;return;}
+
+if(r.error){
+message.textContent="Không tải được bài nộp: "+r.error.message;
+return;
+}
+
 const submissions=r.data||[];
-if(!submissions.length){message.textContent="Chưa có học sinh nào nộp bài.";return;}
+
+if(!submissions.length){
+message.textContent="Chưa có học sinh nào nộp bài.";
+return;
+}
+
 const assignmentIds=Array.from(new Set(submissions.map(x=>x.assignment_id)));
 const studentIds=Array.from(new Set(submissions.map(x=>x.student_id)));
-const ar=await supabaseClient.from("assignments").select("id,title,class_name").in("id",assignmentIds);
-if(ar.error){message.textContent="Không tải được thông tin bài tập: "+ar.error.message;return;}
+
+const ar=await supabaseClient.from("assignments").select("id,title,body,class_name").in("id",assignmentIds);
+
+if(ar.error){
+message.textContent="Không tải được thông tin bài tập: "+ar.error.message;
+return;
+}
+
 const sr=await supabaseClient.from("profiles").select("id,full_name,class_name").in("id",studentIds);
-if(sr.error){message.textContent="Không tải được tên học sinh: "+sr.error.message;return;}
-const assignments=ar.data||[],students=sr.data||[];
+
+if(sr.error){
+message.textContent="Không tải được tên học sinh: "+sr.error.message;
+return;
+}
+
+const assignments=ar.data||[];
+const students=sr.data||[];
+
 const assignmentMap=new Map(assignments.map(x=>[x.id,x]));
 const studentMap=new Map(students.map(x=>[x.id,x]));
-const keepStudent=filterStudent.value,keepAssignment=filterAssignment.value;
+
+const keepStudent=filterStudent.value;
+const keepAssignment=filterAssignment.value;
+
 filterStudent.innerHTML='<option value="">Tất cả học sinh</option>';
-students.forEach(x=>{const o=document.createElement("option");o.value=x.id;o.textContent=x.full_name||"Chưa rõ tên";filterStudent.appendChild(o);});
+
+students.forEach(x=>{
+const o=document.createElement("option");
+o.value=x.id;
+o.textContent=x.full_name||"Chưa rõ tên";
+filterStudent.appendChild(o);
+});
+
 filterStudent.value=keepStudent;
+
 filterAssignment.innerHTML='<option value="">Tất cả bài tập</option>';
-assignments.forEach(x=>{const o=document.createElement("option");o.value=x.id;o.textContent=x.title||"Bài tập chưa có tên";filterAssignment.appendChild(o);});
+
+assignments.forEach(x=>{
+const o=document.createElement("option");
+o.value=x.id;
+o.textContent=x.title||"Bài tập chưa có tên";
+filterAssignment.appendChild(o);
+});
+
 filterAssignment.value=keepAssignment;
-const filtered=submissions.filter(x=>(!filterStudent.value||x.student_id===filterStudent.value)&&(!filterAssignment.value||x.assignment_id===filterAssignment.value));
+
+const filtered=submissions.filter(x=>
+(!filterStudent.value||x.student_id===filterStudent.value)&&
+(!filterAssignment.value||x.assignment_id===filterAssignment.value)
+);
+
 message.textContent="Hiển thị "+filtered.length+"/"+submissions.length+" lượt nộp. Đã gom theo lớp và bài tập.";
-if(!filtered.length){message.textContent="Không có bài nộp phù hợp với bộ lọc.";return;}
+
+if(!filtered.length){
+message.textContent="Không có bài nộp phù hợp với bộ lọc.";
+return;
+}
+
 const grouped={};
+
 filtered.forEach(sub=>{
-const a=assignmentMap.get(sub.assignment_id),p=studentMap.get(sub.student_id);
+const a=assignmentMap.get(sub.assignment_id);
+const p=studentMap.get(sub.student_id);
 const cn=(a&&a.class_name)||(p&&p.class_name)||"Chưa xác định lớp";
-const ak=sub.assignment_id||"unknown-assignment",sk=sub.student_id||"unknown-student";
+const ak=sub.assignment_id||"unknown-assignment";
+const sk=sub.student_id||"unknown-student";
+
 if(!grouped[cn])grouped[cn]={};
 if(!grouped[cn][ak])grouped[cn][ak]={assignment:a,students:{}};
 if(!grouped[cn][ak].students[sk])grouped[cn][ak].students[sk]={student:p,submissions:[]};
+
 grouped[cn][ak].students[sk].submissions.push(sub);
 });
+
 Object.keys(grouped).sort().forEach(cn=>{
 const classDetails=document.createElement("details");
 classDetails.style.cssText="background:#f8faf8;border:1px solid #dce8df;border-radius:14px;padding:12px 16px;margin:14px 0;";
+
 const classSummary=document.createElement("summary");
 let classCount=0;
-Object.keys(grouped[cn]).forEach(k=>Object.keys(grouped[cn][k].students).forEach(sk=>classCount+=grouped[cn][k].students[sk].submissions.length));
+
+Object.keys(grouped[cn]).forEach(k=>
+Object.keys(grouped[cn][k].students).forEach(sk=>
+classCount+=grouped[cn][k].students[sk].submissions.length
+));
+
 classSummary.textContent="LỚP "+cn+" • "+Object.keys(grouped[cn]).length+" bài tập • "+classCount+" lượt nộp";
 classSummary.style.cssText="cursor:pointer;font-weight:700;color:#355b45;padding:5px 0;";
 classDetails.appendChild(classSummary);
+
 Object.keys(grouped[cn]).sort((x,y)=>{
-const ax=grouped[cn][x].assignment,ay=grouped[cn][y].assignment;
+const ax=grouped[cn][x].assignment;
+const ay=grouped[cn][y].assignment;
 return ((ax&&ax.title)||"").localeCompare((ay&&ay.title)||"");
 }).forEach(ak=>{
+
 const ag=grouped[cn][ak];
+
 const assignmentDetails=document.createElement("details");
 assignmentDetails.style.cssText="background:#fff;border:1px solid #e3ebe5;border-radius:11px;padding:10px 13px;margin:10px 0;";
+
 const assignmentSummary=document.createElement("summary");
 const studentKeys=Object.keys(ag.students);
-let count=0;studentKeys.forEach(k=>count+=ag.students[k].submissions.length);
+
+let count=0;
+studentKeys.forEach(k=>count+=ag.students[k].submissions.length);
+
 assignmentSummary.textContent=((ag.assignment&&ag.assignment.title)||"Bài tập chưa xác định")+" • "+studentKeys.length+" học sinh • "+count+" lượt nộp";
 assignmentSummary.style.cssText="cursor:pointer;font-weight:600;color:#496b59;padding:4px 0;";
 assignmentDetails.appendChild(assignmentSummary);
-studentKeys.sort((x,y)=>((ag.students[x].student&&ag.students[x].student.full_name)||"").localeCompare((ag.students[y].student&&ag.students[y].student.full_name)||"")).forEach(sk=>{
-const sg=ag.students[sk],studentName=(sg.student&&sg.student.full_name)||"Học sinh chưa xác định";
+
+// HIỂN THỊ ĐỀ BÀI NGAY KHI MỞ TÊN BÀI TẬP
+const assignmentContent=document.createElement("div");
+assignmentContent.style.cssText="background:#f0f6f1;border:1px solid #dce8df;border-radius:10px;padding:15px;margin:12px 0 16px;";
+
+const assignmentHeading=document.createElement("h4");
+assignmentHeading.textContent="NỘI DUNG ĐỀ BÀI";
+assignmentHeading.style.cssText="color:#355b45;margin:0 0 10px;";
+assignmentContent.appendChild(assignmentHeading);
+
+const assignmentBody=document.createElement("div");
+assignmentBody.textContent=ag.assignment?.body||"Chưa có nội dung đề bài.";
+assignmentBody.style.cssText="white-space:pre-wrap;line-height:1.8;color:#35443d;";
+assignmentContent.appendChild(assignmentBody);
+
+assignmentDetails.appendChild(assignmentContent);
+
+// DANH SÁCH HỌC SINH ĐÃ NỘP BÀI
+studentKeys.sort((x,y)=>
+((ag.students[x].student&&ag.students[x].student.full_name)||"").localeCompare(
+((ag.students[y].student&&ag.students[y].student.full_name)||"")
+)
+).forEach(sk=>{
+
+const sg=ag.students[sk];
+const studentName=(sg.student&&sg.student.full_name)||"Học sinh chưa xác định";
+
 const studentDetails=document.createElement("details");
 studentDetails.style.cssText="border-top:1px solid #edf1ed;padding:9px 4px;margin-top:8px;";
+
 const studentSummary=document.createElement("summary");
 studentSummary.textContent=studentName+" • "+sg.submissions.length+" lượt nộp";
 studentSummary.style.cssText="cursor:pointer;color:#35443d;font-weight:600;";
 studentDetails.appendChild(studentSummary);
+
 sg.submissions.sort((x,y)=>(x.attempt||1)-(y.attempt||1)).forEach(async sub=>{
+
 const attemptDetails=document.createElement("details");
 attemptDetails.style.cssText="background:#fbfcfb;border:1px solid #e7eee8;border-radius:9px;padding:10px;margin:9px 0;";
+
 const attemptSummary=document.createElement("summary");
 attemptSummary.textContent="Lần nộp "+(sub.attempt||1)+"/2"+(sub.score!==null&&sub.score!==undefined?" • Điểm: "+sub.score+"/10":" • Chưa chấm");
 attemptSummary.style.cssText="cursor:pointer;color:#477b58;font-weight:600;";
 attemptDetails.appendChild(attemptSummary);
-const answer=document.createElement("p");answer.style.whiteSpace="pre-wrap";answer.textContent=sub.answer||"Học sinh không nhập nội dung văn bản.";attemptDetails.appendChild(answer);
-const time=document.createElement("p");time.textContent=sub.submitted_at?"Thời gian nộp: "+new Date(sub.submitted_at).toLocaleString("vi-VN"):"";attemptDetails.appendChild(time);
+
+// BÀI LÀM CỦA HỌC SINH
+const answer=document.createElement("p");
+answer.style.whiteSpace="pre-wrap";
+answer.textContent=sub.answer||"Học sinh không nhập nội dung văn bản.";
+attemptDetails.appendChild(answer);
+
+const time=document.createElement("p");
+time.textContent=sub.submitted_at?"Thời gian nộp: "+new Date(sub.submitted_at).toLocaleString("vi-VN"):"";
+attemptDetails.appendChild(time);
+
 const paths=Array.isArray(sub.image_paths)?sub.image_paths:[];
+
 if(paths.length){
-const h=document.createElement("p");h.textContent="Tệp đính kèm ("+paths.length+"):";attemptDetails.appendChild(h);
+const h=document.createElement("p");
+h.textContent="Tệp đính kèm ("+paths.length+"):";
+attemptDetails.appendChild(h);
+
 for(const path of paths){
+
 const signed=await supabaseClient.storage.from("student-submissions").createSignedUrl(path,3600);
-if(signed.error||!signed.data){const e=document.createElement("p");e.textContent="Không mở được tệp: "+path;attemptDetails.appendChild(e);continue;}
+
+if(signed.error||!signed.data){
+const e=document.createElement("p");
+e.textContent="Không mở được tệp: "+path;
+attemptDetails.appendChild(e);
+continue;
+}
+
 const fileName=String(path).split("/").pop()||"Tệp bài làm";
+
 if(/\.(jpg|jpeg|png|webp|gif)$/i.test(fileName)){
-const img=document.createElement("img");img.src=signed.data.signedUrl;img.alt="Ảnh bài làm";img.style.cssText="display:block;max-width:100%;max-height:500px;margin:10px 0;border-radius:8px;";attemptDetails.appendChild(img);
+const img=document.createElement("img");
+img.src=signed.data.signedUrl;
+img.alt="Ảnh bài làm";
+img.style.cssText="display:block;max-width:100%;max-height:500px;margin:10px 0;border-radius:8px;";
+attemptDetails.appendChild(img);
 }else{
-const link=document.createElement("a");link.href=signed.data.signedUrl;link.target="_blank";link.rel="noopener noreferrer";link.textContent="Mở/tải tệp: "+fileName;attemptDetails.appendChild(link);
+const link=document.createElement("a");
+link.href=signed.data.signedUrl;
+link.target="_blank";
+link.rel="noopener noreferrer";
+link.textContent="Mở/tải tệp: "+fileName;
+attemptDetails.appendChild(link);
 }
 }
 }
-const scoreLabel=document.createElement("label");scoreLabel.textContent="Điểm (thang 10)";
-const scoreInput=document.createElement("input");scoreInput.type="number";scoreInput.min="0";scoreInput.max="10";scoreInput.step="0.25";scoreInput.value=sub.score??"";scoreInput.style.maxWidth="180px";
-const feedbackLabel=document.createElement("label");feedbackLabel.textContent="Nhận xét của cô";
-const feedbackInput=document.createElement("textarea");feedbackInput.rows=3;feedbackInput.value=sub.feedback||"";
-const saveButton=document.createElement("button");saveButton.type="button";saveButton.textContent="Lưu điểm và nhận xét";
-const result=document.createElement("p");result.className="message";
+
+const scoreLabel=document.createElement("label");
+scoreLabel.textContent="Điểm (thang 10)";
+
+const scoreInput=document.createElement("input");
+scoreInput.type="number";
+scoreInput.min="0";
+scoreInput.max="10";
+scoreInput.step="0.25";
+scoreInput.value=sub.score??"";
+scoreInput.style.maxWidth="180px";
+
+const feedbackLabel=document.createElement("label");
+feedbackLabel.textContent="Nhận xét của cô";
+
+const feedbackInput=document.createElement("textarea");
+feedbackInput.rows=3;
+feedbackInput.value=sub.feedback||"";
+
+const saveButton=document.createElement("button");
+saveButton.type="button";
+saveButton.textContent="Lưu điểm và nhận xét";
+
+const result=document.createElement("p");
+result.className="message";
+
 saveButton.addEventListener("click",async()=>{
-const t=scoreInput.value.trim(),feedback=feedbackInput.value.trim();let score=null;
-if(t!==""){score=Number(t);if(!Number.isFinite(score)||score<0||score>10){result.textContent="Điểm phải nằm trong khoảng từ 0 đến 10.";return;}}
-saveButton.disabled=true;saveButton.textContent="Đang lưu...";
+const t=scoreInput.value.trim();
+const feedback=feedbackInput.value.trim();
+let score=null;
+
+if(t!==""){
+score=Number(t);
+if(!Number.isFinite(score)||score<0||score>10){
+result.textContent="Điểm phải nằm trong khoảng từ 0 đến 10.";
+return;
+}
+}
+
+saveButton.disabled=true;
+saveButton.textContent="Đang lưu...";
+
 const update=await supabaseClient.from("submissions").update({score,feedback:feedback||null}).eq("id",sub.id);
-if(update.error){result.textContent="Chưa lưu được: "+update.error.message;saveButton.disabled=false;saveButton.textContent="Lưu điểm và nhận xét";return;}
-result.textContent="Đã lưu điểm và nhận xét thành công!";saveButton.disabled=false;saveButton.textContent="Lưu điểm và nhận xét";
+
+if(update.error){
+result.textContent="Chưa lưu được: "+update.error.message;
+saveButton.disabled=false;
+saveButton.textContent="Lưu điểm và nhận xét";
+return;
+}
+
+result.textContent="Đã lưu điểm và nhận xét thành công!";
+saveButton.disabled=false;
+saveButton.textContent="Lưu điểm và nhận xét";
 });
+
 attemptDetails.append(scoreLabel,scoreInput,feedbackLabel,feedbackInput,saveButton,result);
 studentDetails.appendChild(attemptDetails);
 });
+
 assignmentDetails.appendChild(studentDetails);
 });
+
 classDetails.appendChild(assignmentDetails);
 });
+
 list.appendChild(classDetails);
-});}
+});
+}
 
 document.getElementById("filterAssignment").addEventListener("change",loadSubmissions);
 
