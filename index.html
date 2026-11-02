@@ -3040,191 +3040,119 @@ const filterStudent=document.getElementById("filterStudent");
 const filterAssignment=document.getElementById("filterAssignment");
 const list=document.getElementById("submissionList");
 const message=document.getElementById("submissionMessage");
-
 if(!list||!message||!supabaseClient)return;
-
 list.innerHTML="";
 message.textContent="Đang tải bài nộp của học sinh...";
-
-const {data:submissions,error}=await supabaseClient
-.from("submissions")
-.select("id, assignment_id, student_id, attempt, answer, image_paths, feedback, score, submitted_at")
-.order("submitted_at",{ascending:false});
-
-if(error){
-message.textContent="Không tải được bài nộp: "+error.message;
-return;
-}
-
-if(!submissions||submissions.length===0){
-message.textContent="Chưa có học sinh nào nộp bài.";
-return;
-}
-
-const assignmentIds=[...new Set(submissions.map(s=>s.assignment_id))];
-const studentIds=[...new Set(submissions.map(s=>s.student_id))];
-
-const {data:assignments,error:assignmentError}=await supabaseClient
-.from("assignments").select("id,title,class_name").in("id",assignmentIds);
-
-if(assignmentError){
-message.textContent="Không tải được thông tin bài tập: "+assignmentError.message;
-return;
-}
-
-const {data:students,error:studentError}=await supabaseClient
-.from("profiles").select("id,full_name,class_name").in("id",studentIds);
-
-if(studentError){
-message.textContent="Không tải được tên học sinh: "+studentError.message;
-return;
-}
-
-const assignmentMap=new Map((assignments||[]).map(a=>[a.id,a]));
-const studentMap=new Map((students||[]).map(s=>[s.id,s]));
-
-const currentStudent=filterStudent.value;
+const r=await supabaseClient.from("submissions").select("id, assignment_id, student_id, attempt, answer, image_paths, feedback, score, submitted_at").order("submitted_at",{ascending:false});
+if(r.error){message.textContent="Không tải được bài nộp: "+r.error.message;return;}
+const submissions=r.data||[];
+if(!submissions.length){message.textContent="Chưa có học sinh nào nộp bài.";return;}
+const assignmentIds=Array.from(new Set(submissions.map(x=>x.assignment_id)));
+const studentIds=Array.from(new Set(submissions.map(x=>x.student_id)));
+const ar=await supabaseClient.from("assignments").select("id,title,class_name").in("id",assignmentIds);
+if(ar.error){message.textContent="Không tải được thông tin bài tập: "+ar.error.message;return;}
+const sr=await supabaseClient.from("profiles").select("id,full_name,class_name").in("id",studentIds);
+if(sr.error){message.textContent="Không tải được tên học sinh: "+sr.error.message;return;}
+const assignments=ar.data||[],students=sr.data||[];
+const assignmentMap=new Map(assignments.map(x=>[x.id,x]));
+const studentMap=new Map(students.map(x=>[x.id,x]));
+const keepStudent=filterStudent.value,keepAssignment=filterAssignment.value;
 filterStudent.innerHTML='<option value="">Tất cả học sinh</option>';
-(students||[]).forEach(student=>{
-const option=document.createElement("option");
-option.value=student.id;
-option.textContent=student.full_name;
-filterStudent.appendChild(option);
-});
-filterStudent.value=currentStudent;
-
-const currentAssignment=filterAssignment.value;
+students.forEach(x=>{const o=document.createElement("option");o.value=x.id;o.textContent=x.full_name||"Chưa rõ tên";filterStudent.appendChild(o);});
+filterStudent.value=keepStudent;
 filterAssignment.innerHTML='<option value="">Tất cả bài tập</option>';
-(assignments||[]).forEach(assignment=>{
-const option=document.createElement("option");
-option.value=assignment.id;
-option.textContent=assignment.title;
-filterAssignment.appendChild(option);
+assignments.forEach(x=>{const o=document.createElement("option");o.value=x.id;o.textContent=x.title||"Bài tập chưa có tên";filterAssignment.appendChild(o);});
+filterAssignment.value=keepAssignment;
+const filtered=submissions.filter(x=>(!filterStudent.value||x.student_id===filterStudent.value)&&(!filterAssignment.value||x.assignment_id===filterAssignment.value));
+message.textContent="Hiển thị "+filtered.length+"/"+submissions.length+" lượt nộp. Đã gom theo lớp và bài tập.";
+if(!filtered.length){message.textContent="Không có bài nộp phù hợp với bộ lọc.";return;}
+const grouped={};
+filtered.forEach(sub=>{
+const a=assignmentMap.get(sub.assignment_id),p=studentMap.get(sub.student_id);
+const cn=(a&&a.class_name)||(p&&p.class_name)||"Chưa xác định lớp";
+const ak=sub.assignment_id||"unknown-assignment",sk=sub.student_id||"unknown-student";
+if(!grouped[cn])grouped[cn]={};
+if(!grouped[cn][ak])grouped[cn][ak]={assignment:a,students:{}};
+if(!grouped[cn][ak].students[sk])grouped[cn][ak].students[sk]={student:p,submissions:[]};
+grouped[cn][ak].students[sk].submissions.push(sub);
 });
-filterAssignment.value=currentAssignment;
-
-const selectedStudentId=filterStudent.value;
-const selectedAssignmentId=filterAssignment.value;
-
-const filtered=submissions.filter(s=>
-(!selectedStudentId||s.student_id===selectedStudentId)&&
-(!selectedAssignmentId||s.assignment_id===selectedAssignmentId)
-);
-
-message.textContent=`Hiển thị ${filtered.length}/${submissions.length} bài nộp.`;
-
-for(const submission of filtered){
-const assignment=assignmentMap.get(submission.assignment_id);
-const student=studentMap.get(submission.student_id);
-
-const card=document.createElement("div");
-card.style.cssText="background:#f8faf8;border:1px solid #e3ebe5;border-radius:14px;padding:20px;margin:16px 0;";
-
-const heading=document.createElement("h3");
-heading.textContent=student?`${student.full_name} | Lớp ${student.class_name||"Chưa rõ"}`:"Học sinh chưa xác định";
-
-const assignmentName=document.createElement("p");
-assignmentName.textContent="Bài tập: "+(assignment?assignment.title:"Không xác định");
-
-const attemptInfo=document.createElement("p");
-attemptInfo.textContent=`Lần nộp: ${submission.attempt||1}/2`;
-attemptInfo.style.cssText="color:#477b58;font-weight:bold";
-
-const answer=document.createElement("p");
-answer.style.whiteSpace="pre-wrap";
-answer.textContent="Bài làm: "+(submission.answer||"Không có nội dung văn bản.");
-
-const time=document.createElement("p");
-time.textContent=submission.submitted_at?"Thời gian nộp: "+new Date(submission.submitted_at).toLocaleString("vi-VN"):"";
-
-card.append(heading,assignmentName,attemptInfo,answer,time);
-
-if(submission.image_paths&&submission.image_paths.length){
-const imageHeading=document.createElement("p");
-imageHeading.textContent="Ảnh bài làm:";
-card.appendChild(imageHeading);
-
-for(const path of submission.image_paths){
-const {data:imageData,error:imageError}=await supabaseClient.storage.from("student-submissions").createSignedUrl(path,3600);
-if(imageError||!imageData){
-const errorText=document.createElement("p");
-errorText.textContent="Không tải được ảnh: "+path;
-card.appendChild(errorText);
-continue;
-}
-const image=document.createElement("img");
-image.src=imageData.signedUrl;
-image.alt="Ảnh bài làm của học sinh";
-image.style.cssText="display:block;max-width:100%;max-height:500px;object-fit:contain;margin:10px 0;border-radius:8px";
-card.appendChild(image);
+Object.keys(grouped).sort().forEach(cn=>{
+const classDetails=document.createElement("details");
+classDetails.style.cssText="background:#f8faf8;border:1px solid #dce8df;border-radius:14px;padding:12px 16px;margin:14px 0;";
+const classSummary=document.createElement("summary");
+let classCount=0;
+Object.keys(grouped[cn]).forEach(k=>Object.keys(grouped[cn][k].students).forEach(sk=>classCount+=grouped[cn][k].students[sk].submissions.length));
+classSummary.textContent="LỚP "+cn+" • "+Object.keys(grouped[cn]).length+" bài tập • "+classCount+" lượt nộp";
+classSummary.style.cssText="cursor:pointer;font-weight:700;color:#355b45;padding:5px 0;";
+classDetails.appendChild(classSummary);
+Object.keys(grouped[cn]).sort((x,y)=>{
+const ax=grouped[cn][x].assignment,ay=grouped[cn][y].assignment;
+return ((ax&&ax.title)||"").localeCompare((ay&&ay.title)||"");
+}).forEach(ak=>{
+const ag=grouped[cn][ak];
+const assignmentDetails=document.createElement("details");
+assignmentDetails.style.cssText="background:#fff;border:1px solid #e3ebe5;border-radius:11px;padding:10px 13px;margin:10px 0;";
+const assignmentSummary=document.createElement("summary");
+const studentKeys=Object.keys(ag.students);
+let count=0;studentKeys.forEach(k=>count+=ag.students[k].submissions.length);
+assignmentSummary.textContent=((ag.assignment&&ag.assignment.title)||"Bài tập chưa xác định")+" • "+studentKeys.length+" học sinh • "+count+" lượt nộp";
+assignmentSummary.style.cssText="cursor:pointer;font-weight:600;color:#496b59;padding:4px 0;";
+assignmentDetails.appendChild(assignmentSummary);
+studentKeys.sort((x,y)=>((ag.students[x].student&&ag.students[x].student.full_name)||"").localeCompare((ag.students[y].student&&ag.students[y].student.full_name)||"")).forEach(sk=>{
+const sg=ag.students[sk],studentName=(sg.student&&sg.student.full_name)||"Học sinh chưa xác định";
+const studentDetails=document.createElement("details");
+studentDetails.style.cssText="border-top:1px solid #edf1ed;padding:9px 4px;margin-top:8px;";
+const studentSummary=document.createElement("summary");
+studentSummary.textContent=studentName+" • "+sg.submissions.length+" lượt nộp";
+studentSummary.style.cssText="cursor:pointer;color:#35443d;font-weight:600;";
+studentDetails.appendChild(studentSummary);
+sg.submissions.sort((x,y)=>(x.attempt||1)-(y.attempt||1)).forEach(async sub=>{
+const attemptDetails=document.createElement("details");
+attemptDetails.style.cssText="background:#fbfcfb;border:1px solid #e7eee8;border-radius:9px;padding:10px;margin:9px 0;";
+const attemptSummary=document.createElement("summary");
+attemptSummary.textContent="Lần nộp "+(sub.attempt||1)+"/2"+(sub.score!==null&&sub.score!==undefined?" • Điểm: "+sub.score+"/10":" • Chưa chấm");
+attemptSummary.style.cssText="cursor:pointer;color:#477b58;font-weight:600;";
+attemptDetails.appendChild(attemptSummary);
+const answer=document.createElement("p");answer.style.whiteSpace="pre-wrap";answer.textContent=sub.answer||"Học sinh không nhập nội dung văn bản.";attemptDetails.appendChild(answer);
+const time=document.createElement("p");time.textContent=sub.submitted_at?"Thời gian nộp: "+new Date(sub.submitted_at).toLocaleString("vi-VN"):"";attemptDetails.appendChild(time);
+const paths=Array.isArray(sub.image_paths)?sub.image_paths:[];
+if(paths.length){
+const h=document.createElement("p");h.textContent="Tệp đính kèm ("+paths.length+"):";attemptDetails.appendChild(h);
+for(const path of paths){
+const signed=await supabaseClient.storage.from("student-submissions").createSignedUrl(path,3600);
+if(signed.error||!signed.data){const e=document.createElement("p");e.textContent="Không mở được tệp: "+path;attemptDetails.appendChild(e);continue;}
+const fileName=String(path).split("/").pop()||"Tệp bài làm";
+if(/\.(jpg|jpeg|png|webp|gif)$/i.test(fileName)){
+const img=document.createElement("img");img.src=signed.data.signedUrl;img.alt="Ảnh bài làm";img.style.cssText="display:block;max-width:100%;max-height:500px;margin:10px 0;border-radius:8px;";attemptDetails.appendChild(img);
+}else{
+const link=document.createElement("a");link.href=signed.data.signedUrl;link.target="_blank";link.rel="noopener noreferrer";link.textContent="Mở/tải tệp: "+fileName;attemptDetails.appendChild(link);
 }
 }
-
-const scoreLabel=document.createElement("label");
-scoreLabel.textContent="Điểm (thang 10)";
-const scoreInput=document.createElement("input");
-scoreInput.type="number";
-scoreInput.min="0";
-scoreInput.max="10";
-scoreInput.step="0.25";
-scoreInput.placeholder="Nhập điểm";
-scoreInput.value=submission.score??"";
-scoreInput.style.maxWidth="180px";
-
-const feedbackLabel=document.createElement("label");
-feedbackLabel.textContent="Nhận xét của cô";
-const feedbackInput=document.createElement("textarea");
-feedbackInput.rows=3;
-feedbackInput.placeholder="Nhập nhận xét cho học sinh...";
-feedbackInput.value=submission.feedback||"";
-
-const saveButton=document.createElement("button");
-saveButton.type="button";
-saveButton.textContent="Lưu điểm và nhận xét";
-
-const result=document.createElement("p");
-result.className="message";
-
+}
+const scoreLabel=document.createElement("label");scoreLabel.textContent="Điểm (thang 10)";
+const scoreInput=document.createElement("input");scoreInput.type="number";scoreInput.min="0";scoreInput.max="10";scoreInput.step="0.25";scoreInput.value=sub.score??"";scoreInput.style.maxWidth="180px";
+const feedbackLabel=document.createElement("label");feedbackLabel.textContent="Nhận xét của cô";
+const feedbackInput=document.createElement("textarea");feedbackInput.rows=3;feedbackInput.value=sub.feedback||"";
+const saveButton=document.createElement("button");saveButton.type="button";saveButton.textContent="Lưu điểm và nhận xét";
+const result=document.createElement("p");result.className="message";
 saveButton.addEventListener("click",async()=>{
-const scoreText=scoreInput.value.trim();
-const feedback=feedbackInput.value.trim();
-let score=null;
-
-if(scoreText!==""){
-score=Number(scoreText);
-if(!Number.isFinite(score)||score<0||score>10){
-result.textContent="Điểm phải nằm trong khoảng từ 0 đến 10.";
-return;
-}
-}
-
-saveButton.disabled=true;
-saveButton.textContent="Đang lưu...";
-
-const {error:updateError}=await supabaseClient.from("submissions").update({
-score,
-feedback:feedback||null
-}).eq("id",submission.id);
-
-if(updateError){
-result.textContent="Chưa lưu được: "+updateError.message;
-saveButton.disabled=false;
-saveButton.textContent="Lưu điểm và nhận xét";
-return;
-}
-
-result.textContent="Đã lưu điểm và nhận xét thành công!";
-saveButton.disabled=false;
-saveButton.textContent="Lưu điểm và nhận xét";
+const t=scoreInput.value.trim(),feedback=feedbackInput.value.trim();let score=null;
+if(t!==""){score=Number(t);if(!Number.isFinite(score)||score<0||score>10){result.textContent="Điểm phải nằm trong khoảng từ 0 đến 10.";return;}}
+saveButton.disabled=true;saveButton.textContent="Đang lưu...";
+const update=await supabaseClient.from("submissions").update({score,feedback:feedback||null}).eq("id",sub.id);
+if(update.error){result.textContent="Chưa lưu được: "+update.error.message;saveButton.disabled=false;saveButton.textContent="Lưu điểm và nhận xét";return;}
+result.textContent="Đã lưu điểm và nhận xét thành công!";saveButton.disabled=false;saveButton.textContent="Lưu điểm và nhận xét";
 });
+attemptDetails.append(scoreLabel,scoreInput,feedbackLabel,feedbackInput,saveButton,result);
+studentDetails.appendChild(attemptDetails);
+});
+assignmentDetails.appendChild(studentDetails);
+});
+classDetails.appendChild(assignmentDetails);
+});
+list.appendChild(classDetails);
+});}
 
-card.append(scoreLabel,scoreInput,feedbackLabel,feedbackInput,saveButton,result);
-list.appendChild(card);
-}
-}
-
-document.getElementById("refreshSubmissions").addEventListener("click",loadSubmissions);
-document.getElementById("filterStudent").addEventListener("change",loadSubmissions);
 document.getElementById("filterAssignment").addEventListener("change",loadSubmissions);
 
 async function loadAssignments(className){
@@ -3314,7 +3242,7 @@ card.appendChild(answer);
 
 if(existing.image_paths&&existing.image_paths.length){
 const imageInfo=document.createElement("p");
-imageInfo.textContent=`Đã đính kèm ${existing.image_paths.length} ảnh bài làm.`;
+imageInfo.textContent=`Đã đính kèm ${existing.image_paths.length} tệp bài làm.`;
 card.appendChild(imageInfo);
 }
 
@@ -3346,95 +3274,49 @@ const answerInput=document.createElement("textarea");
 answerInput.rows=8;
 answerInput.placeholder="Nhập câu trả lời hoặc bài văn của em...";
 
-const imageLabel=document.createElement("label");
-imageLabel.textContent="Đính kèm ảnh bài viết tay (nếu có)";
-
-const imageInput=document.createElement("input");
-imageInput.type="file";
-imageInput.accept="image/jpeg,image/png,image/webp";
-imageInput.multiple=true;
-
+const fileLabel=document.createElement("label");
+fileLabel.textContent="Đính kèm bài làm (Word, PDF hoặc ảnh)";
+const fileInput=document.createElement("input");
+fileInput.type="file";
+fileInput.accept=".doc,.docx,.pdf,.jpg,.jpeg,.png,.webp,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,image/jpeg,image/png,image/webp";
+fileInput.multiple=true;
 const submitButton=document.createElement("button");
 submitButton.type="button";
 submitButton.textContent=attemptNumber===1?"Nộp bài lần 1":"Nộp lại lần 2";
-
 const result=document.createElement("p");
 result.className="message";
-
 submitButton.addEventListener("click",async()=>{
 const answer=answerInput.value.trim();
-const files=Array.from(imageInput.files||[]);
-
-if(!answer&&files.length===0){
-result.textContent="Em hãy nhập bài làm hoặc chọn ảnh nhé.";
-return;
-}
-
-if(files.some(file=>file.size>5*1024*1024)){
-result.textContent="Mỗi ảnh không được vượt quá 5 MB.";
-return;
-}
-
-if(files.some(file=>!["image/jpeg","image/png","image/webp"].includes(file.type))){
-result.textContent="Chỉ nhận ảnh JPG, PNG hoặc WebP.";
-return;
-}
-
-submitButton.disabled=true;
-submitButton.textContent="Đang nộp bài...";
-result.textContent="Đang lưu bài làm...";
-
-const imagePaths=[];
-let uploadFailed=false;
-
+const files=Array.from(fileInput.files||[]);
+const allowedExtensions=["doc","docx","pdf","jpg","jpeg","png","webp"];
+const mimeByExtension={doc:"application/msword",docx:"application/vnd.openxmlformats-officedocument.wordprocessingml.document",pdf:"application/pdf",jpg:"image/jpeg",jpeg:"image/jpeg",png:"image/png",webp:"image/webp"};
+if(!answer&&files.length===0){result.textContent="Em hãy nhập bài làm hoặc chọn tệp đính kèm nhé.";return;}
+if(files.some(file=>file.size>10*1024*1024)){result.textContent="Mỗi tệp không được vượt quá 10 MB.";return;}
+if(files.some(file=>!allowedExtensions.includes(file.name.split(".").pop().toLowerCase()))){result.textContent="Chỉ nhận file Word (.doc, .docx), PDF hoặc ảnh JPG, PNG, WebP.";return;}
+submitButton.disabled=true;submitButton.textContent="Đang nộp bài...";result.textContent="Đang tải tệp và lưu bài làm...";
+const imagePaths=[];let uploadFailed=false;
 for(let i=0;i<files.length;i++){
-const file=files[i];
-const extension=file.name.split(".").pop().toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
+const file=files[i],extension=file.name.split(".").pop().toLowerCase();
 const fileName=Date.now()+"-"+i+"-"+Math.random().toString(36).slice(2)+"."+extension;
 const path=assignment.id+"/"+student.id+"/"+fileName;
-
-const {error:uploadError}=await supabaseClient.storage
-.from("student-submissions")
-.upload(path,file,{
-cacheControl:"3600",
-upsert:false,
-contentType:file.type
-});
-
-if(uploadError){
-result.textContent="Chưa tải được ảnh: "+uploadError.message;
-uploadFailed=true;
-break;
-}
+const upload=await supabaseClient.storage.from("student-submissions").upload(path,file,{cacheControl:"3600",upsert:false,contentType:file.type||mimeByExtension[extension]});
+if(upload.error){result.textContent="Chưa tải được tệp "+file.name+": "+upload.error.message;uploadFailed=true;break;}
 imagePaths.push(path);
 }
-
 if(uploadFailed){
-submitButton.disabled=false;
-submitButton.textContent=attemptNumber===1?"Nộp bài lần 1":"Nộp lại lần 2";
-return;
+if(imagePaths.length)await supabaseClient.storage.from("student-submissions").remove(imagePaths);
+submitButton.disabled=false;submitButton.textContent=attemptNumber===1?"Nộp bài lần 1":"Nộp lại lần 2";return;
 }
-
-const {error:saveError}=await supabaseClient.from("submissions").insert({
-assignment_id:assignment.id,
-student_id:student.id,
-answer,
-image_paths:imagePaths,
-attempt:attemptNumber
-});
-
-if(saveError){
-result.textContent="Chưa lưu được bài nộp: "+saveError.message;
-submitButton.disabled=false;
-submitButton.textContent=attemptNumber===1?"Nộp bài lần 1":"Nộp lại lần 2";
-return;
+const saved=await supabaseClient.from("submissions").insert({assignment_id:assignment.id,student_id:student.id,answer,image_paths:imagePaths,attempt:attemptNumber});
+if(saved.error){
+if(imagePaths.length)await supabaseClient.storage.from("student-submissions").remove(imagePaths);
+result.textContent="Chưa lưu được bài nộp: "+saved.error.message;
+submitButton.disabled=false;submitButton.textContent=attemptNumber===1?"Nộp bài lần 1":"Nộp lại lần 2";return;
 }
-
 await loadAssignments(className);
-document.getElementById("studentAssignmentMessage").textContent=`Em đã nộp bài lần ${attemptNumber} thành công!`;
+document.getElementById("studentAssignmentMessage").textContent="Em đã nộp bài lần "+attemptNumber+" thành công!";
 });
-
-card.append(answerLabel,answerInput,imageLabel,imageInput,submitButton,result);
+card.append(answerLabel,answerInput,fileLabel,fileInput,submitButton,result);
 }
 
 list.appendChild(card);
