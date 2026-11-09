@@ -76,6 +76,9 @@ drop policy if exists "activities_students_read_published_class" on public.learn
 drop policy if exists "activities_teachers_manage" on public.learning_activities;
 drop policy if exists "questions_students_read_published" on public.learning_questions;
 drop policy if exists "questions_teachers_manage" on public.learning_questions;
+drop policy if exists "questions_teachers_insert" on public.learning_questions;
+drop policy if exists "questions_teachers_update" on public.learning_questions;
+drop policy if exists "questions_teachers_delete" on public.learning_questions;
 drop policy if exists "attempts_students_read_own" on public.learning_attempts;
 drop policy if exists "attempts_students_insert_own" on public.learning_attempts;
 drop policy if exists "attempts_teachers_read" on public.learning_attempts;
