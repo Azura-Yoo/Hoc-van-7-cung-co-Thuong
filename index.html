@@ -309,6 +309,24 @@ body:has(#homeSection:not(.hidden)){padding:24px 32px}
 
 <div id="teacherPanel" class="hidden">
 
+  <section id="platformAdminPanel" class="hidden" style="margin:0 0 28px;padding:20px;border:1px solid #d8e3d9;border-radius:16px;background:#f7faf6;">
+    <h2>Quản trị Văn học số</h2>
+    <p>Tạo tài khoản và không gian riêng cho giáo viên tham gia nền tảng.</p>
+    <form id="createTeacherForm">
+      <label for="teacherName">Họ tên giáo viên</label>
+      <input id="teacherName" type="text" placeholder="Ví dụ: Cô Lan" required>
+      <label for="teacherEmail">Email đăng nhập</label>
+      <input id="teacherEmail" type="email" placeholder="giaovien@example.com" required>
+      <label for="teacherSlug">Đường dẫn riêng</label>
+      <input id="teacherSlug" type="text" placeholder="co-lan" pattern="[a-z0-9]+(-[a-z0-9]+)*" required>
+      <label for="teacherClasses">Các lớp được phân công</label>
+      <input id="teacherClasses" type="text" placeholder="6A, 7A, 8A, 9A" required>
+      <button type="submit">Tạo không gian giáo viên</button>
+      <div id="createTeacherMessage" class="message"></div>
+      <div id="createTeacherResult" class="note" style="white-space:pre-wrap"></div>
+    </form>
+  </section>
+
   <h2>Quản lý học sinh</h2>
 
   <form id="createStudentForm">
@@ -2533,7 +2551,7 @@ if(!supabaseClient||!user)return;
 
 const {data,error}=await supabaseClient
 .from("profiles")
-.select("full_name, role, class_name, teacher_id")
+.select("full_name, role, class_name, teacher_id, is_platform_admin")
 .eq("id",user.id)
 .single();
 
@@ -2594,6 +2612,7 @@ const studentPanel=document.getElementById("studentPanel");
 
 teacherPanel.classList.toggle("hidden",data.role!=="teacher");
 studentPanel.classList.toggle("hidden",data.role!=="student");
+document.getElementById("platformAdminPanel").classList.toggle("hidden",data.is_platform_admin!==true);
 
 if(data.role==="teacher"){
 await loadTeacherClasses(user.id);
@@ -2642,6 +2661,35 @@ homeSection.classList.add("hidden");
 loginSection.classList.remove("hidden");
 loginMessage.textContent="Em đã đăng xuất.";
 });
+
+const createTeacherForm=document.getElementById("createTeacherForm");
+if(createTeacherForm){
+  createTeacherForm.addEventListener("submit",async(event)=>{
+    event.preventDefault();
+    const message=document.getElementById("createTeacherMessage");
+    const result=document.getElementById("createTeacherResult");
+    const button=createTeacherForm.querySelector('button[type="submit"]');
+    button.disabled=true;button.textContent="Đang tạo không gian...";message.textContent="";result.textContent="";
+    const payload={
+      action:"create_teacher",
+      full_name:document.getElementById("teacherName").value.trim(),
+      email:document.getElementById("teacherEmail").value.trim(),
+      slug:document.getElementById("teacherSlug").value.trim().toLowerCase(),
+      classes:document.getElementById("teacherClasses").value.split(",").map(value=>value.trim()).filter(Boolean)
+    };
+    try{
+      const {data,error}=await supabaseClient.functions.invoke("clever-api",{body:payload});
+      if(error||!data?.success)throw new Error(data?.error||error?.message||"Không tạo được không gian giáo viên.");
+      message.textContent="Đã tạo không gian giáo viên thành công.";
+      result.textContent="Giáo viên: "+data.teacher_name+"\\nEmail: "+data.email+"\\nMật khẩu khởi tạo: "+data.initial_password+"\\nCác lớp: "+data.classes.join(", ")+"\\nĐường dẫn: "+window.location.origin+data.space_url;
+      createTeacherForm.reset();
+    }catch(error){
+      message.textContent=error instanceof Error?error.message:String(error);
+    }finally{
+      button.disabled=false;button.textContent="Tạo không gian giáo viên";
+    }
+  });
+}
 
 const createStudentForm=document.getElementById("createStudentForm");
 
