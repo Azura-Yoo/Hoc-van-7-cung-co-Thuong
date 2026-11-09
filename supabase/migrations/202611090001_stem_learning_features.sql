@@ -109,22 +109,23 @@ with check (exists (select 1 from public.profiles p where p.id = auth.uid() and 
 
 -- Students can read question prompts/options, but never the answer key.
 -- The frontend reads this table only through a security-invoker view below.
-create policy "questions_students_read_published"
-on public.learning_questions for select to authenticated
-using (
-  exists (
-    select 1 from public.learning_activities a
-    where a.id = activity_id
-      and a.is_published = true
-      and a.class_name = (select p.class_name from public.profiles p where p.id = auth.uid())
-  )
-  or exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'teacher')
-);
+-- Keep answer keys inaccessible from the browser. Writes are teacher-only;
+-- the Edge Function uses the service role after validating the caller.
+revoke all on public.learning_questions from anon, authenticated;
+grant insert, update, delete on public.learning_questions to authenticated;
 
-create policy "questions_teachers_manage"
-on public.learning_questions for all to authenticated
+create policy "questions_teachers_insert"
+on public.learning_questions for insert to authenticated
+with check (exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'teacher'));
+
+create policy "questions_teachers_update"
+on public.learning_questions for update to authenticated
 using (exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'teacher'))
 with check (exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'teacher'));
+
+create policy "questions_teachers_delete"
+on public.learning_questions for delete to authenticated
+using (exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'teacher'));
 
 create policy "attempts_students_read_own"
 on public.learning_attempts for select to authenticated
@@ -157,8 +158,14 @@ using (exists (select 1 from public.profiles p where p.id = auth.uid() and p.rol
 
 -- A safe student-facing view that omits correct_answer.
 create or replace view public.learning_questions_public
-with (security_invoker = true) as
-select id, activity_id, prompt, options, points, position
-from public.learning_questions;
+with (security_barrier = true) as
+select q.id, q.activity_id, q.prompt, q.options, q.points, q.position
+from public.learning_questions q
+join public.learning_activities a on a.id = q.activity_id
+where exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'teacher')
+   or (
+     a.is_published = true
+     and a.class_name = (select p.class_name from public.profiles p where p.id = auth.uid())
+   );
 
 grant select on public.learning_questions_public to authenticated;
