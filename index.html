@@ -2479,8 +2479,9 @@ const loginSection = document.getElementById("loginSection");
 const publicLanding = document.getElementById("publicLanding");
 const loginSpaceTitle = document.getElementById("loginSpaceTitle");
 const routeMatch = window.location.pathname.match(/^\/([a-z0-9-]+)\/hoc-van-([6-9])\/?$/i);
-let activeTeacherSlug = routeMatch ? routeMatch[1].toLowerCase() : null;
-let activeGrade = routeMatch ? Number(routeMatch[2]) : null;
+const routeParams = new URLSearchParams(window.location.search);
+let activeTeacherSlug = (routeParams.get("teacher") || (routeMatch ? routeMatch[1] : "")).toLowerCase() || null;
+let activeGrade = Number(routeParams.get("grade") || (routeMatch ? routeMatch[2] : 0)) || null;
 
 function openLogin() {
   publicLanding.classList.add("hidden");
@@ -2496,7 +2497,7 @@ function enterGradeSpace(grade) {
   }
   activeGrade = grade;
   activeTeacherSlug = "co-thuong";
-  window.history.pushState({}, "", "/" + activeTeacherSlug + "/hoc-van-" + grade);
+  window.history.pushState({}, "", "/?teacher=" + encodeURIComponent(activeTeacherSlug) + "&grade=" + grade);
   openLogin();
 }
 
@@ -2565,7 +2566,7 @@ if(data.role==="teacher" && activeGrade){
 if(data.role==="student"){
   const gradeMatch=String(data.class_name||"").match(/^([6-9])/);
   const studentGrade=gradeMatch?Number(gradeMatch[1]):null;
-  if(!activeGrade){
+  if(!activeGrade || !activeTeacherSlug){
     await supabaseClient.auth.signOut();
     loginMessage.textContent="Em hãy chọn đúng không gian Học Văn theo khối lớp của mình rồi đăng nhập nhé.";
     return;
