@@ -73,7 +73,6 @@ alter table public.learning_portfolio enable row level security;
 grant select, insert, update, delete on public.learning_resources to authenticated;
 grant select, insert, update, delete on public.learning_activities to authenticated;
 grant insert, update, delete on public.learning_questions to authenticated;
-grant select (id, activity_id, prompt, options, points, position) on public.learning_questions to authenticated;
 grant select, insert on public.learning_attempts to authenticated;
 grant select, insert, update, delete on public.learning_portfolio to authenticated;
 
@@ -124,6 +123,7 @@ with check (exists (select 1 from public.profiles p where p.id = auth.uid() and 
 -- Keep answer keys inaccessible from the browser. Writes are teacher-only;
 -- the Edge Function uses the service role after validating the caller.
 revoke all on public.learning_questions from anon, authenticated;
+grant select (id, activity_id, prompt, options, points, position) on public.learning_questions to authenticated;
 grant insert, update, delete on public.learning_questions to authenticated;
 
 create policy "questions_students_read_published"
