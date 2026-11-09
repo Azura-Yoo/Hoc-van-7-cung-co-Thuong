@@ -73,7 +73,7 @@ alter table public.learning_portfolio enable row level security;
 grant select, insert, update, delete on public.learning_resources to authenticated;
 grant select, insert, update, delete on public.learning_activities to authenticated;
 grant insert, update, delete on public.learning_questions to authenticated;
-grant select, insert on public.learning_attempts to authenticated;
+grant select on public.learning_attempts to authenticated;
 grant select, insert, update, delete on public.learning_portfolio to authenticated;
 
 
