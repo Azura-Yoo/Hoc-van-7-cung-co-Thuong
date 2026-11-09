@@ -2492,7 +2492,7 @@ function openLogin() {
 
 function enterGradeSpace(grade) {
   if (grade !== 7) {
-    loginMessage.textContent = "Không gian Học Văn " + grade + " cùng cô Thương đang được chuẩn bị. Mày hãy quay lại sau nhé.";
+    loginMessage.textContent = "Không gian Học Văn " + grade + " cùng cô Thương đang được chuẩn bị. Em hãy quay lại sau nhé.";
     return;
   }
   activeGrade = grade;
@@ -2544,11 +2544,13 @@ return;
 
 // Mỗi website nhỏ phải khớp với không gian được gắn cho tài khoản.
 if(activeTeacherSlug){
-  const {data:space,error:spaceError}=await supabaseClient.from("teacher_spaces").select("slug").eq("teacher_id",data.teacher_id).maybeSingle();
+  const {data:space,error:spaceError}=await supabaseClient.from("teacher_spaces").select("slug, display_name").eq("teacher_id",data.teacher_id).maybeSingle();
   if(spaceError||!space||space.slug!==activeTeacherSlug){
     await supabaseClient.auth.signOut();
     loginMessage.textContent="Tài khoản này không thuộc không gian giáo viên đang mở."; 
     return;
+  } else if (loginSpaceTitle && activeGrade) {
+    loginSpaceTitle.textContent = "Học Văn " + activeGrade + " cùng " + (space.display_name || "giáo viên");
   }
 }
 
@@ -2583,7 +2585,7 @@ homeSection.classList.remove("hidden");
 
 document.getElementById("userName").textContent=data.full_name||user.email;
 document.getElementById("userRole").textContent=data.role==="teacher"?"Tài khoản giáo viên":"Tài khoản học sinh";
-document.getElementById("dashboardMessage").textContent=data.role==="teacher"?"Chào cô Thương! Chúc cô có những giờ học thật vui.":"Chào em! Cùng hoàn thành tốt những bài tập cô giao nhé.";
+document.getElementById("dashboardMessage").textContent=data.role==="teacher"?("Chào "+(data.full_name||"thầy cô")+"! Chúc thầy cô có những giờ học thật vui."):"Chào em! Cùng hoàn thành tốt những bài tập cô giao nhé.";
 
 document.getElementById("revisionPanel").classList.remove("hidden");
 
@@ -2594,6 +2596,7 @@ teacherPanel.classList.toggle("hidden",data.role!=="teacher");
 studentPanel.classList.toggle("hidden",data.role!=="student");
 
 if(data.role==="teacher"){
+await loadTeacherClasses(user.id);
 await loadStudents();
 await loadSubmissions();
 }
@@ -2912,6 +2915,28 @@ message.textContent="Đã giao bài tập thành công!";
 createAssignmentForm.reset();
 });
 
+async function loadTeacherClasses(teacherId) {
+  const {data,error}=await supabaseClient.from("teacher_classes").select("class_name").eq("teacher_id",teacherId).order("class_name");
+  if(error){
+    const message=document.getElementById("studentListMessage");
+    if(message)message.textContent="Không tải được danh sách lớp: "+error.message;
+    return;
+  }
+  const classes=[...new Set((data||[]).map(item=>String(item.class_name||"").trim().toUpperCase()).filter(Boolean))];
+  ["studentClass","assignmentClass"].forEach(id=>{
+    const select=document.getElementById(id);
+    if(!select)return;
+    const previous=select.value;
+    select.innerHTML="";
+    if(!classes.length){
+      const option=document.createElement("option");option.value="";option.textContent="Chưa được phân công lớp";select.appendChild(option);select.disabled=true;return;
+    }
+    select.disabled=false;
+    classes.forEach(className=>{const option=document.createElement("option");option.value=className;option.textContent=className;select.appendChild(option);});
+    if(classes.includes(previous))select.value=previous;
+  });
+}
+
 async function loadStudents() {
   const list = document.getElementById("studentList");
   const message = document.getElementById("studentListMessage");
@@ -2945,12 +2970,9 @@ async function loadStudents() {
       student.class_name = (student.class_name || "").trim().toUpperCase();
     });
 
-    const classes = ["7A", "7C"];
-    const otherClasses = [...new Set(
-      data.map(s => s.class_name).filter(c => c && !classes.includes(c))
-    )].sort();
-
-    const allClasses = [...classes, ...otherClasses];
+    const classResult = await supabaseClient.from("teacher_classes").select("class_name").order("class_name");
+    const assignedClasses = classResult.error ? [] : (classResult.data || []).map(item => String(item.class_name || "").trim().toUpperCase()).filter(Boolean);
+    const allClasses = [...new Set([...assignedClasses, ...data.map(s => s.class_name).filter(Boolean)])].sort();
 
     message.textContent = `Tổng cộng ${data.length} học sinh.`;
 
