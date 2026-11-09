@@ -9,7 +9,7 @@ if (inlineScripts.length === 0) {
 }
 
 inlineScripts.forEach((match, index) => {
-  new vm.Script(match[1], { filename: \`index.html:inline-script-\${index + 1}\` });
+  new vm.Script(match[1], { filename: `index.html:inline-script-${index + 1}` });
 });
 
 const required = [
@@ -22,7 +22,7 @@ const required = [
 ];
 
 for (const item of required) {
-  if (!html.includes(item)) throw new Error(\`Thiếu thành phần bắt buộc: \${item}\`);
+  if (!html.includes(item)) throw new Error(`Thiếu thành phần bắt buộc: ${item}`);
 }
 
-console.log(\`OK: đã phân tích cú pháp \${inlineScripts.length} script và kiểm tra các điểm phân quyền cốt lõi.\`);
+console.log(`OK: đã phân tích cú pháp ${inlineScripts.length} script và kiểm tra các điểm phân quyền cốt lõi.`);
