@@ -2449,6 +2449,7 @@ await loadSubmissions();
 if(data.role==="student"){
 await loadAssignments(data.class_name);
 }
+if(window.initStemFeatures) await window.initStemFeatures(data);
 }
 
 document.getElementById("loginForm").addEventListener("submit",async(event)=>{
@@ -3553,5 +3554,6 @@ if(data.session)await showUser(data.session.user);
 
 checkSession();
 </script>
+<script src="./stem-features.js"></script>
 </body>
 </html>
