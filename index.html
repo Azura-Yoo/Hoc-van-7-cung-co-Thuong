@@ -2681,7 +2681,7 @@ if(createTeacherForm){
       const {data,error}=await supabaseClient.functions.invoke("clever-api",{body:payload});
       if(error||!data?.success)throw new Error(data?.error||error?.message||"Không tạo được không gian giáo viên.");
       message.textContent="Đã tạo không gian giáo viên thành công.";
-      result.textContent="Giáo viên: "+data.teacher_name+"\\nEmail: "+data.email+"\\nMật khẩu khởi tạo: "+data.initial_password+"\\nCác lớp: "+data.classes.join(", ")+"\\nĐường dẫn: "+window.location.origin+data.space_url;
+      result.textContent="Giáo viên: "+data.teacher_name+"\nEmail: "+data.email+"\nMật khẩu khởi tạo: "+data.initial_password+"\nCác lớp: "+data.classes.join(", ")+"\nĐường dẫn các khối:\n"+(data.space_urls||[]).map(item=>"Khối "+item.grade+": "+window.location.origin+item.url).join("\n");
       createTeacherForm.reset();
     }catch(error){
       message.textContent=error instanceof Error?error.message:String(error);
