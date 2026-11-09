@@ -2478,8 +2478,9 @@ const SUPABASE_KEY="sb_publishable_NcGKpKd7YSw9CnofZh1XCw_4qfOm71i";
 const loginSection = document.getElementById("loginSection");
 const publicLanding = document.getElementById("publicLanding");
 const loginSpaceTitle = document.getElementById("loginSpaceTitle");
-const routeMatch = window.location.pathname.match(/\/co-thuong\/hoc-van-([6-9])\/?$/i);
-let activeGrade = routeMatch ? Number(routeMatch[1]) : null;
+const routeMatch = window.location.pathname.match(/^\/([a-z0-9-]+)\/hoc-van-([6-9])\/?$/i);
+let activeTeacherSlug = routeMatch ? routeMatch[1].toLowerCase() : null;
+let activeGrade = routeMatch ? Number(routeMatch[2]) : null;
 
 function openLogin() {
   publicLanding.classList.add("hidden");
@@ -2494,7 +2495,8 @@ function enterGradeSpace(grade) {
     return;
   }
   activeGrade = grade;
-  window.history.pushState({}, "", "/co-thuong/hoc-van-" + grade);
+  activeTeacherSlug = "co-thuong";
+  window.history.pushState({}, "", "/" + activeTeacherSlug + "/hoc-van-" + grade);
   openLogin();
 }
 
@@ -2511,6 +2513,7 @@ document.getElementById("backToLanding").addEventListener("click", () => {
   loginSection.classList.add("hidden");
   publicLanding.classList.remove("hidden");
   activeGrade = null;
+  activeTeacherSlug = null;
   window.history.pushState({}, "", "/");
 });
 const homeSection=document.getElementById("homeSection");
@@ -2529,7 +2532,7 @@ if(!supabaseClient||!user)return;
 
 const {data,error}=await supabaseClient
 .from("profiles")
-.select("full_name, role, class_name")
+.select("full_name, role, class_name, teacher_id")
 .eq("id",user.id)
 .single();
 
@@ -2538,7 +2541,27 @@ loginMessage.textContent="Tài khoản chưa có hồ sơ được cấp. Vui l�
 return;
 }
 
+// Mỗi website nhỏ phải khớp với không gian được gắn cho tài khoản.
+if(activeTeacherSlug){
+  const {data:space,error:spaceError}=await supabaseClient.from("teacher_spaces").select("slug").eq("teacher_id",data.teacher_id).maybeSingle();
+  if(spaceError||!space||space.slug!==activeTeacherSlug){
+    await supabaseClient.auth.signOut();
+    loginMessage.textContent="Tài khoản này không thuộc không gian giáo viên đang mở."; 
+    return;
+  }
+}
+
 // Kiểm tra khối lớp ở cả lần đăng nhập mới và khi khôi phục phiên.
+if(data.role==="teacher" && activeGrade){
+  const {data:teacherClasses,error:classesError}=await supabaseClient.from("teacher_classes").select("class_name").eq("teacher_id",user.id);
+  const hasGrade=!classesError&&(teacherClasses||[]).some(item=>String(item.class_name||"").startsWith(String(activeGrade)));
+  if(!hasGrade){
+    await supabaseClient.auth.signOut();
+    loginMessage.textContent="Không gian khối " + activeGrade + " chưa được phân công cho tài khoản giáo viên này."; 
+    return;
+  }
+}
+
 if(data.role==="student"){
   const gradeMatch=String(data.class_name||"").match(/^([6-9])/);
   const studentGrade=gradeMatch?Number(gradeMatch[1]):null;
