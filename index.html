@@ -292,6 +292,14 @@ body:has(#homeSection:not(.hidden)){padding:24px 32px}
       <label for="assignmentBody">Nội dung bài tập</label>
       <textarea id="assignmentBody" required></textarea>
 
+      <label for="assignmentAnswerType">Hình thức học sinh nộp bài</label>
+      <select id="assignmentAnswerType" required>
+        <option value="short">Trả lời ngắn</option>
+        <option value="long" selected>Trả lời dài</option>
+        <option value="file">Bắt buộc tải tệp</option>
+      </select>
+      <p class="sub">Nếu chọn tải tệp, học sinh phải đính kèm ít nhất 1 tệp và được chọn tối đa 10 tệp mỗi lần nộp.</p>
+
       <button type="submit">Giao bài tập</button>
       <div id="assignmentMessage" class="message"></div>
     </form>
@@ -2710,8 +2718,9 @@ createAssignmentForm.addEventListener("submit", async (event) => {
   const title = document.getElementById("assignmentTitle").value.trim();
   const body = document.getElementById("assignmentBody").value.trim();
   const className = document.getElementById("assignmentClass").value;
+  const answerType = document.getElementById("assignmentAnswerType").value;
 
-  if (!title || !body || !className) {
+  if (!title || !body || !className || !answerType) {
     message.textContent = "Cô vui lòng nhập đầy đủ thông tin.";
     return;
   }
@@ -2733,6 +2742,7 @@ createAssignmentForm.addEventListener("submit", async (event) => {
     title,
     body,
     class_name: className,
+    answer_type: answerType,
     created_by: user.id
   });
  
@@ -3361,7 +3371,7 @@ const student=userData.user;
 
 const {data,error}=await supabaseClient
 .from("assignments")
-.select("id,title,body,created_at")
+.select("id,title,body,answer_type,created_at")
 .eq("class_name",className)
 .order("created_at",{ascending:false});
 
@@ -3447,35 +3457,60 @@ finished.style.cssText="color:#477b58;font-weight:bold";
 card.appendChild(finished);
 }else{
 const attemptNumber=existingList.length+1;
-
+const answerType=assignment.answer_type||"mixed";
 const answerLabel=document.createElement("label");
-answerLabel.textContent=`Bài làm của em (lần nộp ${attemptNumber}/2)`;
+const answerInput=answerType==="file"?null:document.createElement("textarea");
+if(answerInput){
+answerLabel.textContent=answerType==="short"
+?`Câu trả lời ngắn (lần nộp ${attemptNumber}/2)`
+:`Bài làm của em (lần nộp ${attemptNumber}/2)`;
+answerInput.rows=answerType==="short"?3:8;
+answerInput.placeholder=answerType==="short"?"Nhập câu trả lời ngắn của em...":"Nhập bài làm của em...";
+}
 
-const answerInput=document.createElement("textarea");
-answerInput.rows=8;
-answerInput.placeholder="Nhập câu trả lời hoặc bài văn của em...";
-
-const fileLabel=document.createElement("label");
-fileLabel.textContent="Đính kèm bài làm (Word, PDF hoặc ảnh)";
-const fileInput=document.createElement("input");
+const needsFiles=answerType==="file"||answerType==="mixed";
+let fileLabel=null;
+let fileInput=null;
+if(needsFiles){
+fileLabel=document.createElement("label");
+fileLabel.textContent=answerType==="file"?"Tải tệp bài làm (bắt buộc, tối đa 10 tệp)":"Đính kèm bài làm (tối đa 10 tệp)";
+fileInput=document.createElement("input");
 fileInput.type="file";
 fileInput.accept=".doc,.docx,.pdf,.jpg,.jpeg,.png,.webp,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,image/jpeg,image/png,image/webp";
 fileInput.multiple=true;
+}
+
 const submitButton=document.createElement("button");
 submitButton.type="button";
 submitButton.textContent=attemptNumber===1?"Nộp bài lần 1":"Nộp lại lần 2";
 const result=document.createElement("p");
 result.className="message";
+if(fileInput){
+fileInput.addEventListener("change",()=>{
+if(fileInput.files.length>10){
+fileInput.value="";
+result.textContent="Mỗi lần nộp bài chỉ được chọn tối đa 10 tệp. Em hãy chọn lại nhé.";
+}else{
+result.textContent=fileInput.files.length?`Đã chọn ${fileInput.files.length}/10 tệp.`:"";
+}
+});
+}
 submitButton.addEventListener("click",async()=>{
-const answer=answerInput.value.trim();
-const files=Array.from(fileInput.files||[]);
+const answer=answerInput?answerInput.value.trim():"";
+const files=fileInput?Array.from(fileInput.files||[]):[];
 const allowedExtensions=["doc","docx","pdf","jpg","jpeg","png","webp"];
 const mimeByExtension={doc:"application/msword",docx:"application/vnd.openxmlformats-officedocument.wordprocessingml.document",pdf:"application/pdf",jpg:"image/jpeg",jpeg:"image/jpeg",png:"image/png",webp:"image/webp"};
-if(!answer&&files.length===0){result.textContent="Em hãy nhập bài làm hoặc chọn tệp đính kèm nhé.";return;}
+if(files.length>10){result.textContent="Mỗi lần nộp bài chỉ được đính kèm tối đa 10 tệp.";return;}
+if(answerType==="file"&&files.length===0){result.textContent="Đây là bài tập bắt buộc tải tệp. Em hãy chọn ít nhất 1 tệp nhé.";return;}
+if((answerType==="short"||answerType==="long")&&!answer){result.textContent="Em hãy nhập câu trả lời trước khi nộp bài nhé.";return;}
+if(answerType==="mixed"&&!answer&&files.length===0){result.textContent="Em hãy nhập bài làm hoặc chọn tệp đính kèm nhé.";return;}
 if(files.some(file=>file.size>10*1024*1024)){result.textContent="Mỗi tệp không được vượt quá 10 MB.";return;}
 if(files.some(file=>!allowedExtensions.includes(file.name.split(".").pop().toLowerCase()))){result.textContent="Chỉ nhận file Word (.doc, .docx), PDF hoặc ảnh JPG, PNG, WebP.";return;}
-submitButton.disabled=true;submitButton.textContent="Đang nộp bài...";result.textContent="Đang tải tệp và lưu bài làm...";
-const imagePaths=[];let uploadFailed=false;
+submitButton.disabled=true;
+submitButton.textContent="Đang nộp bài...";
+result.textContent="Đang tải tệp và lưu bài làm...";
+const imagePaths=[];
+let uploadFailed=false;
 for(let i=0;i<files.length;i++){
 const file=files[i],extension=file.name.split(".").pop().toLowerCase();
 const fileName=Date.now()+"-"+i+"-"+Math.random().toString(36).slice(2)+"."+extension;
@@ -3486,18 +3521,24 @@ imagePaths.push(path);
 }
 if(uploadFailed){
 if(imagePaths.length)await supabaseClient.storage.from("student-submissions").remove(imagePaths);
-submitButton.disabled=false;submitButton.textContent=attemptNumber===1?"Nộp bài lần 1":"Nộp lại lần 2";return;
+submitButton.disabled=false;
+submitButton.textContent=attemptNumber===1?"Nộp bài lần 1":"Nộp lại lần 2";
+return;
 }
 const saved=await supabaseClient.from("submissions").insert({assignment_id:assignment.id,student_id:student.id,answer,image_paths:imagePaths,attempt:attemptNumber});
 if(saved.error){
 if(imagePaths.length)await supabaseClient.storage.from("student-submissions").remove(imagePaths);
 result.textContent="Chưa lưu được bài nộp: "+saved.error.message;
-submitButton.disabled=false;submitButton.textContent=attemptNumber===1?"Nộp bài lần 1":"Nộp lại lần 2";return;
+submitButton.disabled=false;
+submitButton.textContent=attemptNumber===1?"Nộp bài lần 1":"Nộp lại lần 2";
+return;
 }
 await loadAssignments(className);
 document.getElementById("studentAssignmentMessage").textContent="Em đã nộp bài lần "+attemptNumber+" thành công!";
 });
-card.append(answerLabel,answerInput,fileLabel,fileInput,submitButton,result);
+if(answerInput)card.append(answerLabel,answerInput);
+if(fileInput)card.append(fileLabel,fileInput);
+card.append(submitButton,result);
 }
 
 list.appendChild(card);
