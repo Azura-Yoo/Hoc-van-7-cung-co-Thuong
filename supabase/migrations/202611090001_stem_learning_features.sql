@@ -73,6 +73,7 @@ alter table public.learning_portfolio enable row level security;
 grant select, insert, update, delete on public.learning_resources to authenticated;
 grant select, insert, update, delete on public.learning_activities to authenticated;
 grant insert, update, delete on public.learning_questions to authenticated;
+grant select (id, activity_id, prompt, options, points, position) on public.learning_questions to authenticated;
 grant select, insert on public.learning_attempts to authenticated;
 grant select, insert, update, delete on public.learning_portfolio to authenticated;
 
@@ -125,6 +126,20 @@ with check (exists (select 1 from public.profiles p where p.id = auth.uid() and 
 revoke all on public.learning_questions from anon, authenticated;
 grant insert, update, delete on public.learning_questions to authenticated;
 
+create policy "questions_students_read_published"
+on public.learning_questions for select to authenticated
+using (
+  exists (
+    select 1 from public.learning_activities a
+    join public.profiles p on p.id = auth.uid()
+    where a.id = activity_id
+      and p.role = 'student'
+      and a.is_published = true
+      and a.class_name = p.class_name
+  )
+  or exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'teacher')
+);
+
 create policy "questions_teachers_insert"
 on public.learning_questions for insert to authenticated
 with check (exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'teacher'));
@@ -169,7 +184,7 @@ using (exists (select 1 from public.profiles p where p.id = auth.uid() and p.rol
 
 -- A safe student-facing view that omits correct_answer.
 create or replace view public.learning_questions_public
-with (security_barrier = true) as
+with (security_invoker = true, security_barrier = true) as
 select q.id, q.activity_id, q.prompt, q.options, q.points, q.position
 from public.learning_questions q
 join public.learning_activities a on a.id = q.activity_id
