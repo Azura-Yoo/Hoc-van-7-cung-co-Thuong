@@ -224,7 +224,8 @@ body:has(#homeSection:not(.hidden)){padding:24px 32px}
 </head>
 
 <body>
-<main class="container">\n<section id="publicLanding" class="public-landing">
+<main class="container">
+<section id="publicLanding" class="public-landing">
   <header class="vh-header">
     <a class="vh-brand" href="#" aria-label="Văn học số - Trang chủ">
       <span class="vh-brand-mark">文</span>
@@ -236,7 +237,7 @@ body:has(#homeSection:not(.hidden)){padding:24px 32px}
     <button class="vh-login-btn" type="button" data-open-login>Đăng nhập <span>↗</span></button>
   </header>
 
-  <main id="vh-home">
+  <div id="vh-home">
     <section class="vh-hero">
       <div class="vh-hero-copy">
         <div class="vh-eyebrow"><span></span> NỀN TẢNG HỌC TẬP NGỮ VĂN TRỰC TUYẾN</div>
@@ -265,7 +266,7 @@ body:has(#homeSection:not(.hidden)){padding:24px 32px}
       <div class="vh-section-heading"><div><div class="vh-eyebrow">CHỌN HÀNH TRÌNH CỦA BẠN</div><h2>Không gian học tập</h2></div><p>Mỗi khối lớp là một hành trình riêng, được thiết kế để học sinh học chắc kiến thức và phát triển năng lực ngôn ngữ.</p></div>
       <div class="vh-grade-grid">
         <article class="vh-grade-card vh-grade-6"><div class="vh-grade-top"><span>KHỐI LỚP</span><b>06</b></div><h3>Học Văn 6<br>cùng cô Thương</h3><p>Khám phá thế giới văn học từ những điều gần gũi.</p><span class="vh-coming">SẮP RA MẮT</span></article>
-        <article class="vh-grade-card vh-grade-7 vh-current-grade"><div class="vh-grade-top"><span>KHỐI LỚP</span><b>07</b></div><div class="vh-current-label">ĐANG HOẠT ĐỘNG</div><h3>Học Văn 7<br>cùng cô Thương</h3><p>Học liệu, bài tập, ôn tập và đồng hành cùng cô Thương.</p><button type="button" class="vh-card-link" data-open-login>Vào không gian lớp 7 <span>↗</span></button></article>
+        <article class="vh-grade-card vh-grade-7 vh-current-grade"><div class="vh-grade-top"><span>KHỐI LỚP</span><b>07</b></div><div class="vh-current-label">ĐANG HOẠT ĐỘNG</div><h3>Học Văn 7<br>cùng cô Thương</h3><p>Học liệu, bài tập, ôn tập và đồng hành cùng cô Thương.</p><button type="button" class="vh-card-link" data-grade-entry="7">Vào không gian lớp 7 <span>↗</span></button></article>
         <article class="vh-grade-card vh-grade-8"><div class="vh-grade-top"><span>KHỐI LỚP</span><b>08</b></div><h3>Học Văn 8<br>cùng cô Thương</h3><p>Mở rộng tư duy đọc hiểu và làm chủ kỹ năng viết.</p><span class="vh-coming">SẮP RA MẮT</span></article>
         <article class="vh-grade-card vh-grade-9"><div class="vh-grade-top"><span>KHỐI LỚP</span><b>09</b></div><h3>Học Văn 9<br>cùng cô Thương</h3><p>Ôn luyện chuyên sâu, tự tin chinh phục kỳ thi vào 10.</p><span class="vh-coming">SẮP RA MẮT</span></article>
       </div>
@@ -274,16 +275,17 @@ body:has(#homeSection:not(.hidden)){padding:24px 32px}
     <section class="vh-about" id="vh-about">
       <div class="vh-about-symbol">“</div><div><div class="vh-eyebrow">VỀ VĂN HỌC SỐ</div><h2>Không chỉ học một môn học.<br><em>Là học cách cảm nhận thế giới.</em></h2><p>Văn học số hướng đến một môi trường học Ngữ văn gần gũi, bài bản và giàu cảm hứng. Giáo viên có không gian tổ chức dạy học riêng; học sinh có hành trình học tập rõ ràng; công nghệ trở thành công cụ hỗ trợ, không thay thế vai trò của người thầy.</p><button type="button" class="vh-outline-btn" data-open-login>Dành cho giáo viên <span>→</span></button></div>
     </section>
-  </main>
+  </div>
   <footer class="vh-footer"><a class="vh-brand" href="#"><span class="vh-brand-mark">文</span><span><strong>VĂN HỌC SỐ</strong><small>Không gian học tập Ngữ văn</small></span></a><span>Đọc sâu hơn · Viết tốt hơn · Trưởng thành hơn</span><small>© 2026 Văn học số</small></footer>
 </section>
 
 
 
 <section id="loginSection" class="hidden">
-<div class="brand">\n<button type="button" class="logout" id="backToLanding" style="margin:0 0 18px">← Về trang chủ</button>
+<div class="brand">
+<button type="button" class="logout" id="backToLanding" style="margin:0 0 18px">← Về trang chủ</button>
 <div class="book">📚</div>
-<h1>Văn 7 cùng cô Thương</h1>
+<h1 id="loginSpaceTitle">Đăng nhập Văn học số</h1>
 <div class="sub">Cùng học Văn, cùng khám phá và trưởng thành.</div>
 </div>
 
@@ -2473,7 +2475,44 @@ body:has(#homeSection:not(.hidden)){padding:24px 32px}
 const SUPABASE_URL="https://xhgxxbjdidpkizxvrsfo.supabase.co";
 const SUPABASE_KEY="sb_publishable_NcGKpKd7YSw9CnofZh1XCw_4qfOm71i";
 
-const loginSection=document.getElementById("loginSection");\nconst publicLanding=document.getElementById("publicLanding");\nfunction openLogin(){publicLanding.classList.add("hidden");loginSection.classList.remove("hidden");document.getElementById("email").focus();}\ndocument.querySelectorAll("[data-open-login]").forEach(button=>button.addEventListener("click",openLogin));\ndocument.getElementById("backToLanding").addEventListener("click",()=>{loginSection.classList.add("hidden");publicLanding.classList.remove("hidden");});
+const loginSection = document.getElementById("loginSection");
+const publicLanding = document.getElementById("publicLanding");
+const loginSpaceTitle = document.getElementById("loginSpaceTitle");
+const routeMatch = window.location.pathname.match(/\/co-thuong\/hoc-van-([6-9])\/?$/i);
+let activeGrade = routeMatch ? Number(routeMatch[1]) : null;
+
+function openLogin() {
+  publicLanding.classList.add("hidden");
+  loginSection.classList.remove("hidden");
+  if (loginSpaceTitle) loginSpaceTitle.textContent = activeGrade ? ("Học Văn " + activeGrade + " cùng cô Thương") : "Đăng nhập Văn học số";
+  document.getElementById("email").focus();
+}
+
+function enterGradeSpace(grade) {
+  if (grade !== 7) {
+    loginMessage.textContent = "Không gian Học Văn " + grade + " cùng cô Thương đang được chuẩn bị. Mày hãy quay lại sau nhé.";
+    return;
+  }
+  activeGrade = grade;
+  window.history.pushState({}, "", "/co-thuong/hoc-van-" + grade);
+  openLogin();
+}
+
+document.querySelectorAll("[data-open-login]").forEach(button => button.addEventListener("click", openLogin));
+document.querySelectorAll("[data-grade-entry]").forEach(button => button.addEventListener("click", () => enterGradeSpace(Number(button.dataset.gradeEntry))));
+
+if (activeGrade) {
+  publicLanding.classList.add("hidden");
+  loginSection.classList.remove("hidden");
+  if (loginSpaceTitle) loginSpaceTitle.textContent = "Học Văn " + activeGrade + " cùng cô Thương";
+}
+
+document.getElementById("backToLanding").addEventListener("click", () => {
+  loginSection.classList.add("hidden");
+  publicLanding.classList.remove("hidden");
+  activeGrade = null;
+  window.history.pushState({}, "", "/");
+});
 const homeSection=document.getElementById("homeSection");
 const loginMessage=document.getElementById("loginMessage");
 
@@ -2497,6 +2536,22 @@ const {data,error}=await supabaseClient
 if(error||!data){
 loginMessage.textContent="Tài khoản chưa có hồ sơ được cấp. Vui lòng liên hệ cô Thương.";
 return;
+}
+
+// Kiểm tra khối lớp ở cả lần đăng nhập mới và khi khôi phục phiên.
+if(data.role==="student"){
+  const gradeMatch=String(data.class_name||"").match(/^([6-9])/);
+  const studentGrade=gradeMatch?Number(gradeMatch[1]):null;
+  if(!activeGrade){
+    await supabaseClient.auth.signOut();
+    loginMessage.textContent="Em hãy chọn đúng không gian Học Văn theo khối lớp của mình rồi đăng nhập nhé.";
+    return;
+  }
+  if(studentGrade!==activeGrade){
+    await supabaseClient.auth.signOut();
+    loginMessage.textContent="Tài khoản lớp " + (data.class_name||"chưa rõ lớp") + " không thuộc không gian Học Văn " + activeGrade + ". Em hãy vào đúng khối lớp nhé.";
+    return;
+  }
 }
 
 loginSection.classList.add("hidden");
