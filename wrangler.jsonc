@@ -1,0 +1,9 @@
+{
+  "$schema": "https://developers.cloudflare.com/workers/wrangler/config-schema.json",
+  "name": "hoc-van-7-cung-co-thuong",
+  "compatibility_date": "2026-11-09",
+  "assets": {
+    "directory": "./"
+  },
+  "previews": {}
+}

@@ -4,11 +4,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Văn 7 cùng cô Thương</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23eaf2eb'/%3E%3Ctext x='50' y='72' font-size='65' text-anchor='middle'%3E📚%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Noto+Serif:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<title>Văn học số | Không gian học tập Ngữ văn</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23f6f0e5'/%3E%3Ctext x='50' y='72' font-size='65' text-anchor='middle'%3E📚%3C/text%3E%3C/svg%3E">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+/* VAN HOC SO - public cream landing page */
+body:has(#publicLanding:not(.hidden)){padding:0;background:#f6f0e5;color:#39352d;font-family:"Be Vietnam Pro","Segoe UI",Arial,sans-serif}
+.container:has(#publicLanding:not(.hidden)){width:100%;max-width:none;margin:0;padding:0;background:transparent;box-shadow:none;border-radius:0}
+#publicLanding{--vh-cream:#f6f0e5;--vh-paper:#fffaf1;--vh-ink:#38352e;--vh-muted:#777064;--vh-green:#53664c;--vh-deep:#344638;--vh-gold:#b58b55;display:block;min-height:100vh;background:var(--vh-cream);color:var(--vh-ink);overflow:hidden}
+.vh-header{height:88px;max-width:1240px;margin:auto;padding:0 34px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(80,69,51,.13)}
+.vh-brand{display:flex;align-items:center;gap:12px;color:inherit;text-decoration:none}.vh-brand-mark{width:42px;height:42px;display:grid;place-items:center;background:#53664c;color:#fffaf1;border-radius:50%;font-family:"Noto Serif",serif;font-size:24px}.vh-brand strong{display:block;font-family:"Noto Serif",serif;letter-spacing:2px;font-size:17px}.vh-brand small{display:block;margin-top:3px;color:#82796a;font-size:10px;letter-spacing:.7px}
+.vh-nav{display:flex;align-items:center;gap:34px}.vh-nav a,.vh-text-link{color:#5e594f;text-decoration:none;font-size:13px}.vh-nav a:hover,.vh-text-link:hover{color:#9b7444}
+.vh-login-btn,.vh-primary-btn,.vh-outline-btn{margin:0;border-radius:4px;padding:13px 20px;background:#53664c;color:#fffaf1;font-size:12px;letter-spacing:.3px}.vh-login-btn span,.vh-primary-btn span,.vh-outline-btn span{margin-left:12px}.vh-login-btn:hover,.vh-primary-btn:hover{background:#344638}
+.vh-hero{max-width:1240px;min-height:560px;margin:auto;padding:72px 50px 68px;display:grid;grid-template-columns:1.04fr .96fr;align-items:center;gap:42px}.vh-eyebrow{font-size:10px;letter-spacing:2px;font-weight:700;color:#8b795e}.vh-eyebrow>span{display:inline-block;width:22px;height:1px;background:#b58b55;vertical-align:middle;margin-right:9px}
+.vh-hero h1{font-family:"Noto Serif","Times New Roman",serif;font-size:clamp(48px,6vw,76px);line-height:1.06;letter-spacing:-2px;font-weight:500;color:#38352e;margin:24px 0}.vh-hero h1 em,.vh-about h2 em{font-weight:400;color:#718064}.vh-lead{max-width:510px;color:#70695e;font-size:15px;line-height:1.9}.vh-hero-actions{display:flex;align-items:center;gap:26px;margin-top:30px}.vh-primary-btn{padding:17px 22px}.vh-text-link{font-weight:600}.vh-trust-row{display:flex;align-items:center;gap:12px;margin-top:42px;color:#837b6d;font-size:11px}.vh-avatar-stack{display:flex;padding-left:4px}.vh-avatar-stack i{font-style:normal;width:25px;height:25px;margin-left:-4px;border:2px solid #f6f0e5;border-radius:50%;display:grid;place-items:center;background:#d7c7a9;color:#4e4b40;font-size:9px}.vh-avatar-stack i:nth-child(2){background:#aeb89d}.vh-avatar-stack i:nth-child(3){background:#b98c68}
+.vh-hero-art{height:420px;position:relative;display:grid;place-items:center}.vh-art-orbit{position:absolute;width:390px;height:390px;border:1px solid #d8cbb5;border-radius:50%}.vh-art-orbit:before,.vh-art-orbit:after{content:"";position:absolute;border:1px solid #e3d9c8;border-radius:50%;inset:26px}.vh-art-orbit:after{inset:54px}.vh-book-card{z-index:1;position:relative;width:275px;height:355px;padding:24px 25px;background:#e7dcc6;box-shadow:18px 20px 40px rgba(68,55,35,.17);transform:rotate(3deg);display:flex;flex-direction:column;color:#4c4b3e}.vh-book-top,.vh-book-bottom{display:flex;justify-content:space-between;font-size:8px;letter-spacing:1.5px}.vh-book-top span{font-size:19px;color:#a37c4b}.vh-book-line{height:1px;background:#b9aa8d;margin-top:15px}.vh-book-title{font:34px/1.12 "Noto Serif",serif;margin-top:42px}.vh-book-title i{color:#718064}.vh-book-quote{font:italic 14px/1.7 "Noto Serif",serif;margin-top:28px;color:#766b57}.vh-book-bottom{margin-top:auto;color:#8b806b;font-size:7px}.vh-art-note{position:absolute;top:30px;right:0;font-size:9px;letter-spacing:2px;color:#9a8d78}.vh-sticker{position:absolute;z-index:2;display:grid;place-items:center;text-align:center;border-radius:50%;box-shadow:0 8px 20px #4a40201c}.vh-sticker-one{width:82px;height:82px;top:66px;left:18px;background:#718064;color:#fff8e9;font-size:22px}.vh-sticker-one small{font:9px/1.3 "Be Vietnam Pro",sans-serif;letter-spacing:.5px}.vh-sticker-two{width:90px;height:90px;right:4px;bottom:50px;background:#b98e5d;color:#fff9ef;font:italic 15px/1.4 "Noto Serif",serif;transform:rotate(9deg)}
+.vh-feature-strip{max-width:1140px;margin:0 auto 88px;padding:25px 30px;border-top:1px solid #dfd4c1;border-bottom:1px solid #dfd4c1;display:grid;grid-template-columns:repeat(3,1fr);gap:24px}.vh-feature-strip>div{display:grid;grid-template-columns:35px 1fr;column-gap:12px}.vh-feature-strip>div>span{grid-row:span 2;color:#b18a59;font:italic 16px "Noto Serif",serif}.vh-feature-strip strong{font:16px "Noto Serif",serif;font-weight:500}.vh-feature-strip small{margin-top:6px;color:#8a8173;font-size:11px}
+.vh-spaces{max-width:1140px;margin:0 auto;padding:0 20px 100px}.vh-section-heading{display:flex;align-items:end;justify-content:space-between;gap:40px;margin-bottom:30px}.vh-section-heading h2,.vh-about h2{font:46px/1.15 "Noto Serif",serif;font-weight:500;margin:12px 0 0}.vh-section-heading>p{max-width:380px;color:#7a7265;font-size:13px;line-height:1.8;margin:0}.vh-grade-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.vh-grade-card{position:relative;min-height:275px;padding:22px 20px;background:#fffaf1;border:1px solid #e9dfcf;display:flex;flex-direction:column}.vh-grade-7{background:#e9eddf;border-color:#d5ddc8}.vh-grade-top{display:flex;align-items:center;justify-content:space-between;color:#938873;font-size:9px;letter-spacing:1.4px}.vh-grade-top b{font:italic 28px "Noto Serif",serif;color:#b18a59}.vh-grade-card h3{font:25px/1.18 "Noto Serif",serif;font-weight:500;margin:35px 0 10px;color:#3e4237}.vh-grade-card p{color:#7c7569;font-size:11px;line-height:1.7;margin:0 0 22px}.vh-coming{margin-top:auto;font-size:9px;letter-spacing:1.5px;color:#a08d70}.vh-current-label{position:absolute;right:16px;top:56px;font-size:8px;letter-spacing:1px;color:#657957}.vh-card-link{margin-top:auto;align-self:flex-start;padding:10px 0;background:none;color:#53664c;border-bottom:1px solid #aab49c;border-radius:0;font-size:11px}.vh-card-link:hover{background:none;color:#344638}
+.vh-about{background:#e9e1d2;padding:75px max(7vw,30px);display:grid;grid-template-columns:130px minmax(0,720px);justify-content:center;gap:28px}.vh-about-symbol{font:150px/.8 "Noto Serif",serif;color:#b99a70}.vh-about h2{font-size:42px;margin:16px 0}.vh-about p{max-width:690px;color:#70695e;font-size:13px;line-height:1.9}.vh-outline-btn{margin-top:18px;background:transparent;border:1px solid #8d876f;color:#4e5947}.vh-outline-btn:hover{background:#53664c;color:#fffaf1}
+.vh-footer{max-width:1240px;margin:auto;padding:30px 34px;display:flex;align-items:center;justify-content:space-between;gap:20px}.vh-footer>span{font:italic 13px "Noto Serif",serif;color:#7c7467}.vh-footer>small{font-size:10px;color:#968d7e}
+#loginSection:not(.hidden){max-width:440px;margin:7vh auto;padding:34px 28px;background:#fffaf1;border:1px solid #e9dfcf;border-radius:12px;box-shadow:0 15px 45px rgba(73,60,40,.09)}body:has(#loginSection:not(.hidden)){padding:20px;background:#f6f0e5}.container:has(#loginSection:not(.hidden)){background:transparent;box-shadow:none;padding:0}
+@media(max-width:850px){.vh-header{padding:0 22px}.vh-nav{gap:17px}.vh-hero{padding:55px 28px;gap:12px}.vh-hero-art{transform:scale(.88)}.vh-grade-grid{grid-template-columns:repeat(2,1fr)}.vh-feature-strip{margin-left:24px;margin-right:24px}}
+@media(max-width:600px){.vh-header{height:auto;min-height:76px;padding:14px 18px;flex-wrap:wrap;gap:12px}.vh-brand strong{font-size:14px}.vh-brand-mark{width:36px;height:36px}.vh-nav{order:3;width:100%;justify-content:space-between;gap:10px;padding:8px 0 2px}.vh-nav a{font-size:11px}.vh-login-btn{padding:10px 13px;font-size:11px}.vh-hero{display:flex;flex-direction:column;align-items:stretch;padding:48px 24px 35px}.vh-hero h1{font-size:51px;margin:20px 0}.vh-lead{font-size:13px}.vh-hero-actions{align-items:flex-start;flex-direction:column;gap:16px}.vh-trust-row{margin-top:28px}.vh-hero-art{height:330px;transform:scale(.83);transform-origin:top center;margin:8px 0 -42px}.vh-art-orbit{width:340px;height:340px}.vh-book-card{width:235px;height:305px}.vh-book-title{font-size:29px;margin-top:30px}.vh-feature-strip{grid-template-columns:1fr;gap:20px;margin:0 20px 65px;padding:22px 8px}.vh-section-heading{display:block}.vh-section-heading h2{font-size:38px}.vh-section-heading>p{margin-top:15px}.vh-spaces{padding:0 20px 65px}.vh-grade-grid{grid-template-columns:1fr 1fr;gap:9px}.vh-grade-card{min-height:250px;padding:16px 13px}.vh-grade-card h3{font-size:21px;margin-top:30px}.vh-grade-card p{font-size:10px}.vh-current-label{font-size:7px;right:8px}.vh-about{grid-template-columns:1fr;gap:0;padding:48px 25px}.vh-about-symbol{font-size:85px}.vh-about h2{font-size:34px}.vh-footer{padding:25px 20px;flex-wrap:wrap}.vh-footer>span{order:3;width:100%}}
+
 *{box-sizing:border-box}
 body{margin:0;padding:24px;font-family:Arial,sans-serif;background:#f5f7f4;color:#35443d;min-height:100vh}
 .container{width:100%;max-width:440px;margin:0 auto;background:#fff;padding:34px 28px;border-radius:22px;box-shadow:0 8px 30px rgba(53,68,61,.07)}
@@ -206,11 +228,67 @@ body:has(#homeSection:not(.hidden)){padding:24px 32px}
 
 <body>
 <main class="container">
+<section id="publicLanding" class="public-landing">
+  <header class="vh-header">
+    <a class="vh-brand" href="#" aria-label="Văn học số - Trang chủ">
+      <span class="vh-brand-mark">文</span>
+      <span><strong>VĂN HỌC SỐ</strong><small>Không gian học tập Ngữ văn</small></span>
+    </a>
+    <nav class="vh-nav" aria-label="Điều hướng chính">
+      <a href="#vh-home">Trang chủ</a><a href="#vh-spaces">Không gian học tập</a><a href="#vh-about">Về chúng tôi</a>
+    </nav>
+    <button class="vh-login-btn" type="button" data-open-login>Đăng nhập <span>↗</span></button>
+  </header>
 
-<section id="loginSection">
+  <div id="vh-home">
+    <section class="vh-hero">
+      <div class="vh-hero-copy">
+        <div class="vh-eyebrow"><span></span> NỀN TẢNG HỌC TẬP NGỮ VĂN TRỰC TUYẾN</div>
+        <h1>Mỗi trang văn<br>mở <em>một chân trời.</em></h1>
+        <p class="vh-lead">Một không gian học tập hiện đại, nơi thầy cô truyền cảm hứng, học sinh khám phá vẻ đẹp của ngôn từ và tự tin trưởng thành qua từng bài học.</p>
+        <div class="vh-hero-actions">
+          <button type="button" class="vh-primary-btn" data-open-login>Khám phá không gian học tập <span>→</span></button>
+          <a class="vh-text-link" href="#vh-about">Tìm hiểu thêm <span>↓</span></a>
+        </div>
+        <div class="vh-trust-row"><span class="vh-avatar-stack"><i>V</i><i>H</i><i>7</i></span><span>Đồng hành cùng giáo viên và học sinh THCS</span></div>
+      </div>
+      <div class="vh-hero-art" aria-label="Minh họa sách và trang viết">
+        <div class="vh-art-orbit"></div><div class="vh-art-note">ĐỌC · HIỂU · VIẾT · CẢM</div>
+        <div class="vh-book-card"><div class="vh-book-top">VĂN HỌC SỐ <span>✳</span></div><div class="vh-book-line"></div><div class="vh-book-title">Hành trình<br><i>cùng con chữ</i></div><div class="vh-book-quote">“Văn chương là<br>cánh cửa mở ra<br>thế giới tâm hồn.”</div><div class="vh-book-bottom"><span>KHÔNG GIAN TRI THỨC</span><span>01 / 04</span></div></div>
+        <div class="vh-sticker vh-sticker-one">✦<small>Khơi nguồn<br>sáng tạo</small></div><div class="vh-sticker vh-sticker-two">Đọc sâu<br>Viết tốt</div>
+      </div>
+    </section>
+
+    <section class="vh-feature-strip" aria-label="Giá trị nổi bật">
+      <div><span>01</span><strong>Học tập có định hướng</strong><small>Kiến thức rõ ràng, lộ trình phù hợp</small></div>
+      <div><span>02</span><strong>Đồng hành cùng giáo viên</strong><small>Công cụ tổ chức và quản lý lớp học</small></div>
+      <div><span>03</span><strong>Công nghệ hỗ trợ</strong><small>Ứng dụng AI có kiểm soát trong dạy học</small></div>
+    </section>
+
+    <section class="vh-spaces" id="vh-spaces">
+      <div class="vh-section-heading"><div><div class="vh-eyebrow">CHỌN HÀNH TRÌNH CỦA BẠN</div><h2>Không gian học tập</h2></div><p>Mỗi khối lớp là một hành trình riêng, được thiết kế để học sinh học chắc kiến thức và phát triển năng lực ngôn ngữ.</p></div>
+      <div class="vh-grade-grid">
+        <article class="vh-grade-card vh-grade-6"><div class="vh-grade-top"><span>KHỐI LỚP</span><b>06</b></div><h3>Học Văn 6<br>cùng cô Thương</h3><p>Khám phá thế giới văn học từ những điều gần gũi.</p><span class="vh-coming">SẮP RA MẮT</span></article>
+        <article class="vh-grade-card vh-grade-7 vh-current-grade"><div class="vh-grade-top"><span>KHỐI LỚP</span><b>07</b></div><div class="vh-current-label">ĐANG HOẠT ĐỘNG</div><h3>Học Văn 7<br>cùng cô Thương</h3><p>Học liệu, bài tập, ôn tập và đồng hành cùng cô Thương.</p><button type="button" class="vh-card-link" data-grade-entry="7">Vào không gian lớp 7 <span>↗</span></button></article>
+        <article class="vh-grade-card vh-grade-8"><div class="vh-grade-top"><span>KHỐI LỚP</span><b>08</b></div><h3>Học Văn 8<br>cùng cô Thương</h3><p>Mở rộng tư duy đọc hiểu và làm chủ kỹ năng viết.</p><span class="vh-coming">SẮP RA MẮT</span></article>
+        <article class="vh-grade-card vh-grade-9"><div class="vh-grade-top"><span>KHỐI LỚP</span><b>09</b></div><h3>Học Văn 9<br>cùng cô Thương</h3><p>Ôn luyện chuyên sâu, tự tin chinh phục kỳ thi vào 10.</p><span class="vh-coming">SẮP RA MẮT</span></article>
+      </div>
+    </section>
+
+    <section class="vh-about" id="vh-about">
+      <div class="vh-about-symbol">“</div><div><div class="vh-eyebrow">VỀ VĂN HỌC SỐ</div><h2>Không chỉ học một môn học.<br><em>Là học cách cảm nhận thế giới.</em></h2><p>Văn học số hướng đến một môi trường học Ngữ văn gần gũi, bài bản và giàu cảm hứng. Giáo viên có không gian tổ chức dạy học riêng; học sinh có hành trình học tập rõ ràng; công nghệ trở thành công cụ hỗ trợ, không thay thế vai trò của người thầy.</p><button type="button" class="vh-outline-btn" data-open-login>Dành cho giáo viên <span>→</span></button></div>
+    </section>
+  </div>
+  <footer class="vh-footer"><a class="vh-brand" href="#"><span class="vh-brand-mark">文</span><span><strong>VĂN HỌC SỐ</strong><small>Không gian học tập Ngữ văn</small></span></a><span>Đọc sâu hơn · Viết tốt hơn · Trưởng thành hơn</span><small>© 2026 Văn học số</small></footer>
+</section>
+
+
+
+<section id="loginSection" class="hidden">
 <div class="brand">
+<button type="button" class="logout" id="backToLanding" style="margin:0 0 18px">← Về trang chủ</button>
 <div class="book">📚</div>
-<h1>Văn 7 cùng cô Thương</h1>
+<h1 id="loginSpaceTitle">Đăng nhập Văn học số</h1>
 <div class="sub">Cùng học Văn, cùng khám phá và trưởng thành.</div>
 </div>
 
@@ -233,6 +311,24 @@ body:has(#homeSection:not(.hidden)){padding:24px 32px}
 <div id="dashboardMessage" class="message"></div>
 
 <div id="teacherPanel" class="hidden">
+
+  <section id="platformAdminPanel" class="hidden" style="margin:0 0 28px;padding:20px;border:1px solid #d8e3d9;border-radius:16px;background:#f7faf6;">
+    <h2>Quản trị Văn học số</h2>
+    <p>Tạo tài khoản và không gian riêng cho giáo viên tham gia nền tảng.</p>
+    <form id="createTeacherForm">
+      <label for="teacherName">Họ tên giáo viên</label>
+      <input id="teacherName" type="text" placeholder="Ví dụ: Cô Lan" required>
+      <label for="teacherEmail">Email đăng nhập</label>
+      <input id="teacherEmail" type="email" placeholder="giaovien@example.com" required>
+      <label for="teacherSlug">Đường dẫn riêng</label>
+      <input id="teacherSlug" type="text" placeholder="co-lan" pattern="[a-z0-9]+(-[a-z0-9]+)*" required>
+      <label for="teacherClasses">Các lớp được phân công</label>
+      <input id="teacherClasses" type="text" placeholder="6A, 7A, 8A, 9A" required>
+      <button type="submit">Tạo không gian giáo viên</button>
+      <div id="createTeacherMessage" class="message"></div>
+      <div id="createTeacherResult" class="note" style="white-space:pre-wrap"></div>
+    </form>
+  </section>
 
   <h2>Quản lý học sinh</h2>
 
@@ -2400,7 +2496,48 @@ body:has(#homeSection:not(.hidden)){padding:24px 32px}
 const SUPABASE_URL="https://xhgxxbjdidpkizxvrsfo.supabase.co";
 const SUPABASE_KEY="sb_publishable_NcGKpKd7YSw9CnofZh1XCw_4qfOm71i";
 
-const loginSection=document.getElementById("loginSection");
+const loginSection = document.getElementById("loginSection");
+const publicLanding = document.getElementById("publicLanding");
+const loginSpaceTitle = document.getElementById("loginSpaceTitle");
+const routeMatch = window.location.pathname.match(/^\/([a-z0-9-]+)\/hoc-van-([6-9])\/?$/i);
+const routeParams = new URLSearchParams(window.location.search);
+let activeTeacherSlug = (routeParams.get("teacher") || (routeMatch ? routeMatch[1] : "")).toLowerCase() || null;
+let activeGrade = Number(routeParams.get("grade") || (routeMatch ? routeMatch[2] : 0)) || null;
+
+function openLogin() {
+  publicLanding.classList.add("hidden");
+  loginSection.classList.remove("hidden");
+  if (loginSpaceTitle) loginSpaceTitle.textContent = activeGrade ? ("Học Văn " + activeGrade + " cùng cô Thương") : "Đăng nhập Văn học số";
+  document.getElementById("email").focus();
+}
+
+function enterGradeSpace(grade) {
+  if (grade !== 7) {
+    loginMessage.textContent = "Không gian Học Văn " + grade + " cùng cô Thương đang được chuẩn bị. Em hãy quay lại sau nhé.";
+    return;
+  }
+  activeGrade = grade;
+  activeTeacherSlug = "co-thuong";
+  window.history.pushState({}, "", "/?teacher=" + encodeURIComponent(activeTeacherSlug) + "&grade=" + grade);
+  openLogin();
+}
+
+document.querySelectorAll("[data-open-login]").forEach(button => button.addEventListener("click", openLogin));
+document.querySelectorAll("[data-grade-entry]").forEach(button => button.addEventListener("click", () => enterGradeSpace(Number(button.dataset.gradeEntry))));
+
+if (activeGrade) {
+  publicLanding.classList.add("hidden");
+  loginSection.classList.remove("hidden");
+  if (loginSpaceTitle) loginSpaceTitle.textContent = "Học Văn " + activeGrade + " cùng cô Thương";
+}
+
+document.getElementById("backToLanding").addEventListener("click", () => {
+  loginSection.classList.add("hidden");
+  publicLanding.classList.remove("hidden");
+  activeGrade = null;
+  activeTeacherSlug = null;
+  window.history.pushState({}, "", "/");
+});
 const homeSection=document.getElementById("homeSection");
 const loginMessage=document.getElementById("loginMessage");
 
@@ -2417,7 +2554,7 @@ if(!supabaseClient||!user)return;
 
 const {data,error}=await supabaseClient
 .from("profiles")
-.select("full_name, role, class_name")
+.select("full_name, role, class_name, teacher_id, is_platform_admin")
 .eq("id",user.id)
 .single();
 
@@ -2426,12 +2563,50 @@ loginMessage.textContent="Tài khoản chưa có hồ sơ được cấp. Vui l�
 return;
 }
 
+// Mỗi website nhỏ phải khớp với không gian được gắn cho tài khoản.
+if(activeTeacherSlug){
+  const {data:space,error:spaceError}=await supabaseClient.from("teacher_spaces").select("slug, display_name").eq("teacher_id",data.teacher_id).maybeSingle();
+  if(spaceError||!space||space.slug!==activeTeacherSlug){
+    await supabaseClient.auth.signOut();
+    loginMessage.textContent="Tài khoản này không thuộc không gian giáo viên đang mở."; 
+    return;
+  } else if (loginSpaceTitle && activeGrade) {
+    loginSpaceTitle.textContent = "Học Văn " + activeGrade + " cùng " + (space.display_name || "giáo viên");
+  }
+}
+
+// Kiểm tra khối lớp ở cả lần đăng nhập mới và khi khôi phục phiên.
+if(data.role==="teacher" && activeGrade){
+  const {data:teacherClasses,error:classesError}=await supabaseClient.from("teacher_classes").select("class_name").eq("teacher_id",user.id);
+  const hasGrade=!classesError&&(teacherClasses||[]).some(item=>String(item.class_name||"").startsWith(String(activeGrade)));
+  if(!hasGrade){
+    await supabaseClient.auth.signOut();
+    loginMessage.textContent="Không gian khối " + activeGrade + " chưa được phân công cho tài khoản giáo viên này."; 
+    return;
+  }
+}
+
+if(data.role==="student"){
+  const gradeMatch=String(data.class_name||"").match(/^([6-9])/);
+  const studentGrade=gradeMatch?Number(gradeMatch[1]):null;
+  if(!activeGrade || !activeTeacherSlug){
+    await supabaseClient.auth.signOut();
+    loginMessage.textContent="Em hãy chọn đúng không gian Học Văn theo khối lớp của mình rồi đăng nhập nhé.";
+    return;
+  }
+  if(studentGrade!==activeGrade){
+    await supabaseClient.auth.signOut();
+    loginMessage.textContent="Tài khoản lớp " + (data.class_name||"chưa rõ lớp") + " không thuộc không gian Học Văn " + activeGrade + ". Em hãy vào đúng khối lớp nhé.";
+    return;
+  }
+}
+
 loginSection.classList.add("hidden");
 homeSection.classList.remove("hidden");
 
 document.getElementById("userName").textContent=data.full_name||user.email;
 document.getElementById("userRole").textContent=data.role==="teacher"?"Tài khoản giáo viên":"Tài khoản học sinh";
-document.getElementById("dashboardMessage").textContent=data.role==="teacher"?"Chào cô Thương! Chúc cô có những giờ học thật vui.":"Chào em! Cùng hoàn thành tốt những bài tập cô giao nhé.";
+document.getElementById("dashboardMessage").textContent=data.role==="teacher"?("Chào "+(data.full_name||"thầy cô")+"! Chúc thầy cô có những giờ học thật vui."):"Chào em! Cùng hoàn thành tốt những bài tập cô giao nhé.";
 
 document.getElementById("revisionPanel").classList.remove("hidden");
 
@@ -2440,8 +2615,10 @@ const studentPanel=document.getElementById("studentPanel");
 
 teacherPanel.classList.toggle("hidden",data.role!=="teacher");
 studentPanel.classList.toggle("hidden",data.role!=="student");
+document.getElementById("platformAdminPanel").classList.toggle("hidden",data.is_platform_admin!==true);
 
 if(data.role==="teacher"){
+await loadTeacherClasses(user.id);
 await loadStudents();
 await loadSubmissions();
 }
@@ -2487,6 +2664,35 @@ homeSection.classList.add("hidden");
 loginSection.classList.remove("hidden");
 loginMessage.textContent="Em đã đăng xuất.";
 });
+
+const createTeacherForm=document.getElementById("createTeacherForm");
+if(createTeacherForm){
+  createTeacherForm.addEventListener("submit",async(event)=>{
+    event.preventDefault();
+    const message=document.getElementById("createTeacherMessage");
+    const result=document.getElementById("createTeacherResult");
+    const button=createTeacherForm.querySelector('button[type="submit"]');
+    button.disabled=true;button.textContent="Đang tạo không gian...";message.textContent="";result.textContent="";
+    const payload={
+      action:"create_teacher",
+      full_name:document.getElementById("teacherName").value.trim(),
+      email:document.getElementById("teacherEmail").value.trim(),
+      slug:document.getElementById("teacherSlug").value.trim().toLowerCase(),
+      classes:document.getElementById("teacherClasses").value.split(",").map(value=>value.trim()).filter(Boolean)
+    };
+    try{
+      const {data,error}=await supabaseClient.functions.invoke("clever-api",{body:payload});
+      if(error||!data?.success)throw new Error(data?.error||error?.message||"Không tạo được không gian giáo viên.");
+      message.textContent="Đã tạo không gian giáo viên thành công.";
+      result.textContent="Giáo viên: "+data.teacher_name+"\nEmail: "+data.email+"\nMật khẩu khởi tạo: "+data.initial_password+"\nCác lớp: "+data.classes.join(", ")+"\nĐường dẫn các khối:\n"+(data.space_urls||[]).map(item=>"Khối "+item.grade+": "+window.location.origin+item.url).join("\n");
+      createTeacherForm.reset();
+    }catch(error){
+      message.textContent=error instanceof Error?error.message:String(error);
+    }finally{
+      button.disabled=false;button.textContent="Tạo không gian giáo viên";
+    }
+  });
+}
 
 const createStudentForm=document.getElementById("createStudentForm");
 
@@ -2760,6 +2966,28 @@ message.textContent="Đã giao bài tập thành công!";
 createAssignmentForm.reset();
 });
 
+async function loadTeacherClasses(teacherId) {
+  const {data,error}=await supabaseClient.from("teacher_classes").select("class_name").eq("teacher_id",teacherId).order("class_name");
+  if(error){
+    const message=document.getElementById("studentListMessage");
+    if(message)message.textContent="Không tải được danh sách lớp: "+error.message;
+    return;
+  }
+  const classes=[...new Set((data||[]).map(item=>String(item.class_name||"").trim().toUpperCase()).filter(Boolean))];
+  ["studentClass","assignmentClass"].forEach(id=>{
+    const select=document.getElementById(id);
+    if(!select)return;
+    const previous=select.value;
+    select.innerHTML="";
+    if(!classes.length){
+      const option=document.createElement("option");option.value="";option.textContent="Chưa được phân công lớp";select.appendChild(option);select.disabled=true;return;
+    }
+    select.disabled=false;
+    classes.forEach(className=>{const option=document.createElement("option");option.value=className;option.textContent=className;select.appendChild(option);});
+    if(classes.includes(previous))select.value=previous;
+  });
+}
+
 async function loadStudents() {
   const list = document.getElementById("studentList");
   const message = document.getElementById("studentListMessage");
@@ -2793,12 +3021,9 @@ async function loadStudents() {
       student.class_name = (student.class_name || "").trim().toUpperCase();
     });
 
-    const classes = ["7A", "7C"];
-    const otherClasses = [...new Set(
-      data.map(s => s.class_name).filter(c => c && !classes.includes(c))
-    )].sort();
-
-    const allClasses = [...classes, ...otherClasses];
+    const classResult = await supabaseClient.from("teacher_classes").select("class_name").order("class_name");
+    const assignedClasses = classResult.error ? [] : (classResult.data || []).map(item => String(item.class_name || "").trim().toUpperCase()).filter(Boolean);
+    const allClasses = [...new Set([...assignedClasses, ...data.map(s => s.class_name).filter(Boolean)])].sort();
 
     message.textContent = `Tổng cộng ${data.length} học sinh.`;
 
