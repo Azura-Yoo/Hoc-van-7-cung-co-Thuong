@@ -69,6 +69,14 @@ alter table public.learning_questions enable row level security;
 alter table public.learning_attempts enable row level security;
 alter table public.learning_portfolio enable row level security;
 
+-- Explicit API grants; row-level security below decides which rows each role can access.
+grant select, insert, update, delete on public.learning_resources to authenticated;
+grant select, insert, update, delete on public.learning_activities to authenticated;
+grant insert, update, delete on public.learning_questions to authenticated;
+grant select, insert on public.learning_attempts to authenticated;
+grant select, insert, update, delete on public.learning_portfolio to authenticated;
+
+
 -- Remove only policies with these names so this migration is safe to rerun.
 drop policy if exists "resources_students_read_their_class" on public.learning_resources;
 drop policy if exists "resources_teachers_manage" on public.learning_resources;
