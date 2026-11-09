@@ -203,11 +203,12 @@
     }
     async function loadResources(c){
       try{
+        c.querySelector(".stem-resource-list")?.remove();
         let query=supabaseClient.from("learning_resources").select("id,title,description,content,external_url,class_name,created_at").order("created_at",{ascending:false});
         if(!teacher)query=query.or("class_name.is.null,class_name.eq."+profile.class_name);
         const {data,error}=await query;if(error)throw error;
-        const list=el("div");
-        (data||[]).forEach(r=>{const item=el("div",{className:"stem-item"});item.append(el("strong",{text:r.title}),el("p",{className:"stem-muted",text:r.description||""}));if(r.content)item.append(el("p",{className:"stem-result",text:r.content}));if(r.external_url){const a=el("a",{href:r.external_url,target:"_blank",rel:"noopener noreferrer",text:"Mở tài liệu"});item.append(a);}list.append(item);});
+        const list=el("div",{className:"stem-resource-list"});
+        (data||[]).forEach(r=>{const item=el("div",{className:"stem-item"});item.append(el("strong",{text:r.title}),el("p",{className:"stem-muted",text:(r.class_name||"Tất cả lớp")+" • "+(r.description||"")}));if(r.content)item.append(el("p",{className:"stem-result",text:r.content}));if(r.external_url){const a=el("a",{href:r.external_url,target:"_blank",rel:"noopener noreferrer",text:"Mở tài liệu"});item.append(a);}list.append(item);});
         if(!data?.length)list.append(el("p",{className:"stem-muted",text:"Thư viện chưa có tài liệu."}));
         c.append(list);
       }catch(e){c.append(el("p",{className:"stem-muted",text:"Chưa tải được thư viện: "+getErr(e)+". Kiểm tra migration STEM."}));}
@@ -224,11 +225,21 @@
     }
     async function loadPortfolio(c){
       try{
+        c.querySelector(".stem-portfolio-list")?.remove();
         let query=supabaseClient.from("learning_portfolio").select("id,student_id,title,item_type,content,external_url,created_at").order("created_at",{ascending:false});
         if(!teacher)query=query.eq("student_id",user.id);
         const {data,error}=await query;if(error)throw error;
-        (data||[]).forEach(item=>{const b=el("div",{className:"stem-item"});b.append(el("strong",{text:item.title}),el("p",{className:"stem-muted",text:item.item_type+" • "+new Date(item.created_at).toLocaleDateString("vi-VN")}));if(item.content)b.append(el("p",{className:"stem-result",text:item.content}));if(item.external_url)b.append(el("a",{href:item.external_url,target:"_blank",rel:"noopener noreferrer",text:"Mở sản phẩm"}));c.append(b);});
-        if(!data?.length)c.append(el("p",{className:"stem-muted",text:"Chưa có sản phẩm nào được lưu."}));
+        let studentMap={};
+        if(teacher && data?.length){
+          const ids=[...new Set(data.map(item=>item.student_id))];
+          const {data:students,error:studentError}=await supabaseClient.from("profiles").select("id,full_name,class_name").in("id",ids);
+          if(studentError)throw studentError;
+          (students||[]).forEach(st=>studentMap[st.id]=(st.full_name||"Học sinh")+" • "+(st.class_name||"Chưa rõ lớp"));
+        }
+        const list=el("div",{className:"stem-portfolio-list"});
+        (data||[]).forEach(item=>{const b=el("div",{className:"stem-item"});b.append(el("strong",{text:item.title}),el("p",{className:"stem-muted",text:(teacher?(studentMap[item.student_id]||"Học sinh"):"Sản phẩm của em")+" • "+item.item_type+" • "+new Date(item.created_at).toLocaleDateString("vi-VN")}));if(item.content)b.append(el("p",{className:"stem-result",text:item.content}));if(item.external_url)b.append(el("a",{href:item.external_url,target:"_blank",rel:"noopener noreferrer",text:"Mở sản phẩm"}));list.append(b);});
+        if(!data?.length)list.append(el("p",{className:"stem-muted",text:"Chưa có sản phẩm nào được lưu."}));
+        c.append(list);
       }catch(e){c.append(el("p",{className:"stem-muted",text:"Chưa tải được sản phẩm: "+getErr(e)+". Kiểm tra migration STEM."}));}
     }
     await render("assistant");
