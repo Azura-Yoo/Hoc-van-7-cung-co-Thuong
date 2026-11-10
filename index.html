@@ -342,7 +342,7 @@ button.logout,.logout{background:#eee4d7;color:var(--vh-brown)}
       <textarea id="assignmentBody" required></textarea>
 
       <label for="assignmentDueAt">Hạn cuối nhận bài (không bắt buộc)</label>
-      <input id="assignmentDueAt" type="datetime-local">
+      <input id="assignmentDueAt" type="datetime-local" lang="vi-VN" step="60">
       <p class="sub">Cô có thể gia hạn hoặc bỏ hạn nộp sau khi giao bài.</p>
 
       <label for="assignmentFile">Tệp đề bài đính kèm (không bắt buộc)</label>
@@ -2801,6 +2801,13 @@ bulkButton.addEventListener("click", async () => {
   }
 });
 
+function formatVietnamDateTime(value){
+  if(!value) return "";
+  const date=value instanceof Date?value:new Date(value);
+  if(Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("vi-VN",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).format(date);
+}
+
 function assignmentDateToLocalInput(value){
   if(!value) return "";
   const date=new Date(value);
@@ -2833,7 +2840,7 @@ async function loadTeacherAssignmentDeadlines(){
     title.textContent="Bài "+(index+1)+": "+(assignment.title||"Bài tập chưa có tên")+" · Lớp "+(assignment.class_name||"");
     const current=document.createElement("p");
     current.style.cssText="margin:5px 0 0;color:#68756d;font-size:13px;";
-    current.textContent=assignment.due_at?"Hạn hiện tại: "+new Date(assignment.due_at).toLocaleString("vi-VN"):"Chưa đặt hạn nộp";
+    current.textContent=assignment.due_at?"Hạn hiện tại: "+formatVietnamDateTime(assignment.due_at):"Chưa đặt hạn nộp";
     info.append(title,current);
     const detail=document.createElement("details");
     detail.style.cssText="margin:10px 0 14px;padding:10px 12px;background:#f7faf7;border-radius:10px;";
@@ -2868,6 +2875,8 @@ async function loadTeacherAssignmentDeadlines(){
     label.textContent="Hạn mới (để trống nếu không giới hạn)";
     const input=document.createElement("input");
     input.type="datetime-local";
+    input.lang="vi-VN";
+    input.step="60";
     input.value=assignmentDateToLocalInput(assignment.due_at);
     input.style.marginBottom="0";
     label.appendChild(input);
@@ -2887,7 +2896,7 @@ async function loadTeacherAssignmentDeadlines(){
         .update({due_at:date?date.toISOString():null})
         .eq("id",assignment.id).eq("created_by",user.id);
       if(update.error){result.textContent="Chưa cập nhật được: "+update.error.message;save.disabled=false;save.textContent="Lưu / gia hạn";return;}
-      result.textContent=date?"Đã cập nhật hạn nộp thành "+date.toLocaleString("vi-VN")+".":"Đã bỏ hạn nộp. Học sinh có thể nộp bài không giới hạn thời gian.";
+      result.textContent=date?"Đã cập nhật hạn nộp thành "+formatVietnamDateTime(date)+".":"Đã bỏ hạn nộp. Học sinh có thể nộp bài không giới hạn thời gian.";
       current.textContent=date?"Hạn hiện tại: "+date.toLocaleString("vi-VN"):"Chưa đặt hạn nộp";
       save.disabled=false;save.textContent="Lưu / gia hạn";
     });
