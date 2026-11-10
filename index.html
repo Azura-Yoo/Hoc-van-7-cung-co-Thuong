@@ -2474,6 +2474,7 @@ return;
 
 loginSection.classList.add("hidden");
 homeSection.classList.remove("hidden");
+if(aiLauncher)aiLauncher.style.display="inline-flex";
 
 document.getElementById("userName").textContent=data.full_name||user.email;
 document.getElementById("userRole").textContent=data.role==="teacher"?"Tài khoản giáo viên":"Tài khoản học sinh";
