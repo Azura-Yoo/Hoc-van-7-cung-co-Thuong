@@ -338,6 +338,10 @@ button.logout,.logout{background:#eee4d7;color:var(--vh-brown)}
       <label for="assignmentBody">Nội dung bài tập</label>
       <textarea id="assignmentBody" required></textarea>
 
+      <label for="assignmentFile">Tệp đề bài đính kèm (không bắt buộc)</label>
+      <input id="assignmentFile" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+      <p class="sub">Cô có thể tải lên đề PDF hoặc Word, tối đa 25 MB. Học sinh sẽ thấy nút mở/tải đề trong bài tập.</p>
+
       <label for="assignmentAnswerType">Hình thức học sinh nộp bài</label>
       <select id="assignmentAnswerType" required>
         <option value="short">Trả lời ngắn</option>
@@ -2792,44 +2796,77 @@ createAssignmentForm.addEventListener("submit", async (event) => {
   const body = document.getElementById("assignmentBody").value.trim();
   const className = document.getElementById("assignmentClass").value;
   const answerType = document.getElementById("assignmentAnswerType").value;
+  const file = document.getElementById("assignmentFile").files[0] || null;
+  const allowedTypes = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  ];
 
   if (!title || !body || !className || !answerType) {
     message.textContent = "Cô vui lòng nhập đầy đủ thông tin.";
+    return;
+  }
+  if (file && (file.size > 25 * 1024 * 1024 || !allowedTypes.includes(file.type))) {
+    message.textContent = "Tệp đề phải là PDF hoặc Word và không vượt quá 25 MB.";
     return;
   }
 
   button.disabled = true;
   button.textContent = "Đang giao bài...";
 
-  const { data: userData } = await supabaseClient.auth.getUser();
-  const user = userData.user;
+  try {
+    const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+    const user = userData?.user;
+    if (userError || !user) throw new Error("Phiên đăng nhập đã hết hạn. Cô vui lòng đăng nhập lại.");
 
-  if (!user) {
-    message.textContent = "Phiên đăng nhập đã hết hạn. Cô vui lòng đăng nhập lại.";
+    const { data: assignment, error: insertError } = await supabaseClient
+      .from("assignments")
+      .insert({
+        title,
+        body,
+        class_name: className,
+        answer_type: answerType,
+        created_by: user.id
+      })
+      .select("id")
+      .single();
+
+    if (insertError) throw insertError;
+
+    if (file) {
+      const extension = file.name.split(".").pop().toLowerCase();
+      const safeName = file.name.replace(/[^\\p{L}\\p{N}._-]+/gu, "_");
+      const path = assignment.id + "/" + user.id + "/" + Date.now() + "-" + safeName;
+      const { error: uploadError } = await supabaseClient.storage
+        .from("assignment-files")
+        .upload(path, file, { upsert: false, contentType: file.type });
+      if (uploadError) {
+        await supabaseClient.from("assignments").delete().eq("id", assignment.id);
+        throw uploadError;
+      }
+
+      const { error: updateError } = await supabaseClient
+        .from("assignments")
+        .update({ file_path: path, file_name: file.name, file_size: file.size, mime_type: file.type })
+        .eq("id", assignment.id);
+      if (updateError) {
+        await supabaseClient.storage.from("assignment-files").remove([path]);
+        await supabaseClient.from("assignments").delete().eq("id", assignment.id);
+        throw updateError;
+      }
+    }
+
+    message.textContent = file
+      ? "Đã giao bài tập và tải tệp đề lên thành công!"
+      : "Đã giao bài tập thành công!";
+    createAssignmentForm.reset();
+  } catch (error) {
+    message.textContent = "Chưa giao được bài: " + (error.message || "Có lỗi xảy ra.");
+  } finally {
     button.disabled = false;
     button.textContent = "Giao bài tập";
-    return;
   }
-
-  const { error } = await supabaseClient.from("assignments").insert({
-    title,
-    body,
-    class_name: className,
-    answer_type: answerType,
-    created_by: user.id
-  });
- 
-
-button.disabled=false;
-button.textContent="Giao bài tập";
-
-if(error){
-message.textContent="Chưa giao được bài: "+error.message;
-return;
-}
-
-message.textContent="Đã giao bài tập thành công!";
-createAssignmentForm.reset();
 });
 
 async function loadStudents() {
@@ -3444,7 +3481,7 @@ const student=userData.user;
 
 const {data,error}=await supabaseClient
 .from("assignments")
-.select("id,title,body,answer_type,created_at")
+.select("id,title,body,answer_type,file_path,file_name,created_at")
 .eq("class_name",className)
 .order("created_at",{ascending:false});
 
@@ -3488,6 +3525,29 @@ title.textContent=`${index+1}. ${assignment.title}`;
 const body=document.createElement("p");
 body.textContent=assignment.body||"";
 card.append(title,body);
+
+if(assignment.file_path){
+  const fileInfo=document.createElement("p");
+  fileInfo.textContent="📎 Đề bài đính kèm: "+(assignment.file_name||"Tệp đề bài");
+  fileInfo.style.cssText="margin:12px 0;padding:12px;background:#f7f1e8;border-radius:10px;";
+  const fileLink=document.createElement("a");
+  fileLink.textContent="Mở / tải đề bài";
+  fileLink.href="#";
+  fileLink.style.cssText="display:inline-block;margin-left:8px;color:#68452f;font-weight:700;";
+  fileLink.addEventListener("click",async(event)=>{
+    event.preventDefault();
+    fileLink.textContent="Đang mở tệp...";
+    const {data,error}=await supabaseClient.storage.from("assignment-files").createSignedUrl(assignment.file_path,3600);
+    if(error||!data?.signedUrl){
+      fileLink.textContent="Không mở được tệp. Em hãy tải lại trang.";
+      return;
+    }
+    window.open(data.signedUrl,"_blank","noopener");
+    fileLink.textContent="Mở / tải đề bài";
+  });
+  fileInfo.appendChild(fileLink);
+  card.appendChild(fileInfo);
+}
 
 const existingList=submittedMap.get(assignment.id)||[];
 
