@@ -247,6 +247,36 @@ button.logout,.logout{background:#eee4d7;color:var(--vh-brown)}
 .ai-status{padding:0 14px 9px;color:#927d69;font-size:11px;background:#fffdf9}
 @media(max-width:600px){#aiLauncher{right:14px;bottom:14px}#aiChat{right:10px;bottom:76px;width:calc(100vw - 20px);height:min(600px,calc(100vh - 95px))}#homeSection{padding:18px}}
 
+/* THANH DIEU HUONG NHANH TRANG GIAO VIEN */
+#teacherQuickNav{
+  position:sticky;top:8px;z-index:100;
+  display:flex;gap:8px;align-items:center;
+  width:100%;padding:10px;margin:0 0 8px;
+  overflow-x:auto;white-space:nowrap;
+  background:rgba(255,253,249,.96);
+  border:1px solid var(--vh-line);border-radius:15px;
+  box-shadow:0 8px 22px rgba(56,39,31,.08);
+  backdrop-filter:blur(10px);
+  scrollbar-width:thin;
+}
+#teacherQuickNav a{
+  flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;
+  padding:10px 14px;border-radius:10px;
+  background:#f6f0e5;color:#68452f;text-decoration:none;
+  font-size:13px;font-weight:700;border:1px solid #e9ddca;
+  transition:background .15s ease,transform .15s ease;
+}
+#teacherQuickNav a:hover{background:#eadcc9;transform:translateY(-1px)}
+#teacherPanel [id="teacherStudentsTop"],
+#teacherPanel #progressDashboard,
+#teacherPanel #teacherCreateAssignment,
+#teacherPanel #teacherDeadlines,
+#teacherPanel #teacherSubmissions{scroll-margin-top:90px}
+@media(max-width:650px){
+  #teacherQuickNav{top:4px;padding:7px;gap:6px}
+  #teacherQuickNav a{padding:9px 11px;font-size:12px}
+}
+
 </style>
 </head>
 
@@ -283,7 +313,15 @@ button.logout,.logout{background:#eee4d7;color:var(--vh-brown)}
 
 <div id="teacherPanel" class="hidden">
 
-  <h2>Quản lý học sinh</h2>
+<nav id="teacherQuickNav" aria-label="Điều hướng nhanh khu vực giáo viên">
+  <a href="#teacherStudentsTop">👥 Học sinh</a>
+  <a href="#progressDashboard">📊 Tiến độ</a>
+  <a href="#teacherCreateAssignment">📝 Giao bài</a>
+  <a href="#teacherDeadlines">⏰ Hạn nộp</a>
+  <a href="#teacherSubmissions">📥 Bài nộp</a>
+</nav>
+
+  <h2 id="teacherStudentsTop">Quản lý học sinh</h2>
 
   <form id="createStudentForm">
     <h3>Cấp tài khoản mới</h3>
@@ -340,7 +378,7 @@ button.logout,.logout{background:#eee4d7;color:var(--vh-brown)}
 
   <hr>
 
-  <div class="assignment-section">
+  <div class="assignment-section" id="teacherCreateAssignment">
     <h2>Giao bài tập</h2>
 
     <form id="createAssignmentForm">
@@ -389,7 +427,7 @@ button.logout,.logout{background:#eee4d7;color:var(--vh-brown)}
     </form>
   </div>
 
-  <div class="assignment-deadline-manager" style="margin:18px 0;padding:18px;background:#f8faf8;border:1px solid #dce8df;border-radius:14px;">
+  <div class="assignment-deadline-manager" id="teacherDeadlines" style="margin:18px 0;padding:18px;background:#f8faf8;border:1px solid #dce8df;border-radius:14px;">
     <h3>Quản lý hạn nộp và gia hạn bài tập</h3>
     <p class="sub">Cô có thể thay đổi thời gian nhận bài hoặc bỏ hạn nộp cho từng bài đã giao.</p>
     <button type="button" id="refreshAssignmentDeadlines">Làm mới danh sách bài tập</button>
@@ -399,7 +437,7 @@ button.logout,.logout{background:#eee4d7;color:var(--vh-brown)}
 
   <hr>
 
-  <div class="submission-section">
+  <div class="submission-section" id="teacherSubmissions">
     <h2>Bài nộp của học sinh</h2>
     <p class="sub">Theo dõi, xem bài làm và chấm điểm cho học sinh.</p>
 
