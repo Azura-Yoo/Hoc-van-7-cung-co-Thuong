@@ -2819,22 +2819,50 @@ async function loadTeacherAssignmentDeadlines(){
   const user=userData?.user;
   if(userError||!user){message.textContent="Phiên đăng nhập đã hết hạn.";return;}
   const {data,error}=await supabaseClient.from("assignments")
-    .select("id,title,class_name,due_at,created_at")
+    .select("id,title,body,class_name,due_at,created_at,file_path,file_name")
     .eq("created_by",user.id)
-    .order("created_at",{ascending:false});
+    .order("created_at",{ascending:true});
   if(error){message.textContent="Không tải được danh sách bài tập: "+error.message;return;}
   if(!data||!data.length){message.textContent="Cô chưa giao bài tập nào.";return;}
-  message.textContent="Có "+data.length+" bài tập. Cô có thể chỉnh hạn nộp ở từng bài.";
-  data.forEach(assignment=>{
+  message.textContent="Có "+data.length+" bài tập. Danh sách xếp theo thứ tự giao bài cũ trước, mới sau. Cô có thể mở đề và chỉnh hạn nộp tại từng bài.";
+  data.forEach((assignment,index)=>{
     const card=document.createElement("div");
-    card.style.cssText="display:grid;grid-template-columns:minmax(180px,1fr) minmax(210px,280px) auto;gap:10px;align-items:end;padding:13px 0;border-bottom:1px solid #e3ebe5;";
+    card.style.cssText="display:block;padding:15px 0;border-bottom:1px solid #e3ebe5;";
     const info=document.createElement("div");
     const title=document.createElement("strong");
-    title.textContent=(assignment.title||"Bài tập chưa có tên")+" · Lớp "+(assignment.class_name||"");
+    title.textContent="Bài "+(index+1)+": "+(assignment.title||"Bài tập chưa có tên")+" · Lớp "+(assignment.class_name||"");
     const current=document.createElement("p");
     current.style.cssText="margin:5px 0 0;color:#68756d;font-size:13px;";
     current.textContent=assignment.due_at?"Hạn hiện tại: "+new Date(assignment.due_at).toLocaleString("vi-VN"):"Chưa đặt hạn nộp";
     info.append(title,current);
+    const detail=document.createElement("details");
+    detail.style.cssText="margin:10px 0 14px;padding:10px 12px;background:#f7faf7;border-radius:10px;";
+    const summary=document.createElement("summary");
+    summary.textContent="Xem lại nội dung đề đã giao";
+    summary.style.cssText="cursor:pointer;font-weight:700;color:#355b45;";
+    const content=document.createElement("div");
+    content.style.cssText="white-space:pre-wrap;line-height:1.75;margin-top:10px;";
+    content.textContent=assignment.body||"Bài tập này chưa có nội dung đề.";
+    detail.append(summary,content);
+    if(assignment.file_path){
+      const fileLine=document.createElement("p");
+      fileLine.style.margin="10px 0 0";
+      const fileLink=document.createElement("a");
+      fileLink.href="#";
+      fileLink.textContent="📎 Mở tệp đề: "+(assignment.file_name||"Tệp đính kèm");
+      fileLink.addEventListener("click",async(event)=>{
+        event.preventDefault();
+        const popup=window.open("about:blank","_blank");
+        if(!popup){fileLink.textContent="Trình duyệt đang chặn cửa sổ bật lên.";return;}
+        const signed=await supabaseClient.storage.from("assignment-files").createSignedUrl(assignment.file_path,3600);
+        if(signed.error||!signed.data?.signedUrl){popup.close();fileLink.textContent="Không mở được tệp đề.";return;}
+        popup.location=signed.data.signedUrl;
+      });
+      fileLine.appendChild(fileLink);detail.appendChild(fileLine);
+    }
+    info.appendChild(detail);
+    const controls=document.createElement("div");
+    controls.style.cssText="display:grid;grid-template-columns:minmax(210px,280px) auto;gap:10px;align-items:end;";
     const field=document.createElement("div");
     const label=document.createElement("label");
     label.textContent="Hạn mới (để trống nếu không giới hạn)";
@@ -2863,7 +2891,8 @@ async function loadTeacherAssignmentDeadlines(){
       current.textContent=date?"Hạn hiện tại: "+date.toLocaleString("vi-VN"):"Chưa đặt hạn nộp";
       save.disabled=false;save.textContent="Lưu / gia hạn";
     });
-    card.append(info,field,save,result);
+    controls.append(field,save);
+    card.append(info,controls,result);
     list.appendChild(card);
   });
 }
@@ -3576,7 +3605,7 @@ const {data,error}=await supabaseClient
 .from("assignments")
 .select("id,title,body,answer_type,file_path,file_name,due_at,created_at")
 .eq("class_name",className)
-.order("created_at",{ascending:false});
+.order("created_at",{ascending:true});
 
 if(error){
 message.textContent="Chưa tải được bài tập: "+error.message;
@@ -3605,7 +3634,7 @@ if(!submittedMap.has(item.assignment_id))submittedMap.set(item.assignment_id,[])
 submittedMap.get(item.assignment_id).push(item);
 });
 
-message.textContent=`Lớp ${className} có ${data.length} bài tập.`;
+message.textContent=`Lớp ${className} có ${data.length} bài tập. Em hãy làm lần lượt theo thứ tự Bài 1, Bài 2, ... (bài được giao trước hiển thị trước).`;
 
 data.forEach((assignment,index)=>{
 const card=document.createElement("div");
@@ -3613,7 +3642,7 @@ card.className="student-assignment-item";
 card.style.cssText="background:#fff;border:1px solid #e3ebe5;border-radius:14px;padding:20px;margin:16px 0;";
 
 const title=document.createElement("h3");
-title.textContent=`${index+1}. ${assignment.title}`;
+title.textContent=`Bài ${index+1}: ${assignment.title}`;
 
 const body=document.createElement("p");
 body.textContent=assignment.body||"";
