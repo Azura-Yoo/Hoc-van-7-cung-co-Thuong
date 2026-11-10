@@ -341,9 +341,12 @@ button.logout,.logout{background:#eee4d7;color:var(--vh-brown)}
       <label for="assignmentBody">Nội dung bài tập</label>
       <textarea id="assignmentBody" required></textarea>
 
-      <label for="assignmentDueAt">Hạn cuối nhận bài (không bắt buộc)</label>
-      <input id="assignmentDueAt" type="datetime-local" lang="vi-VN" step="60">
-      <p class="sub">Cô có thể gia hạn hoặc bỏ hạn nộp sau khi giao bài.</p>
+      <label>Hạn cuối nhận bài (không bắt buộc)</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><label for="assignmentDueDate">Ngày</label><input id="assignmentDueDate" type="date"></div>
+        <div><label for="assignmentDueTime">Giờ (24 giờ)</label><input id="assignmentDueTime" type="text" inputmode="numeric" maxlength="5" placeholder="Ví dụ: 17:30" pattern="([01][0-9]|2[0-3]):[0-5][0-9]" autocomplete="off"></div>
+      </div>
+      <p class="sub">Nhập giờ theo dạng 00:00–23:59. Cô có thể gia hạn hoặc bỏ hạn nộp sau khi giao bài.</p>
 
       <label for="assignmentFile">Tệp đề bài đính kèm (không bắt buộc)</label>
       <input id="assignmentFile" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
@@ -2816,6 +2819,17 @@ function assignmentDateToLocalInput(value){
   return local.toISOString().slice(0,16);
 }
 
+function combineLocalDateTime(dateValue,timeValue){
+  if(!dateValue&&!timeValue) return null;
+  if(!dateValue||!timeValue) return null;
+  const match=timeValue.trim().match(/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/);
+  if(!match) return null;
+  const [year,month,day]=dateValue.split("-").map(Number);
+  const date=new Date(year,month-1,day,Number(match[1]),Number(match[2]),0,0);
+  if(date.getFullYear()!==year||date.getMonth()!==month-1||date.getDate()!==day) return null;
+  return date;
+}
+
 async function loadTeacherAssignmentDeadlines(){
   const list=document.getElementById("assignmentDeadlineList");
   const message=document.getElementById("assignmentDeadlineMessage");
@@ -2871,16 +2885,29 @@ async function loadTeacherAssignmentDeadlines(){
     const controls=document.createElement("div");
     controls.style.cssText="display:grid;grid-template-columns:minmax(210px,280px) auto;gap:10px;align-items:end;";
     const field=document.createElement("div");
-    const label=document.createElement("label");
-    label.textContent="Hạn mới (để trống nếu không giới hạn)";
-    const input=document.createElement("input");
-    input.type="datetime-local";
-    input.lang="vi-VN";
-    input.step="60";
-    input.value=assignmentDateToLocalInput(assignment.due_at);
-    input.style.marginBottom="0";
-    label.appendChild(input);
-    field.appendChild(label);
+    field.style.cssText="display:grid;grid-template-columns:1fr 1fr;gap:8px;";
+    const localValue=assignmentDateToLocalInput(assignment.due_at);
+    const [savedDate="",savedTime=""]=localValue.split("T");
+    const dateLabel=document.createElement("label");
+    dateLabel.textContent="Ngày mới";
+    const dateInput=document.createElement("input");
+    dateInput.type="date";
+    dateInput.value=savedDate;
+    dateInput.style.marginBottom="0";
+    dateLabel.appendChild(dateInput);
+    const timeLabel=document.createElement("label");
+    timeLabel.textContent="Giờ mới (24 giờ)";
+    const timeInput=document.createElement("input");
+    timeInput.type="text";
+    timeInput.inputMode="numeric";
+    timeInput.maxLength=5;
+    timeInput.placeholder="17:30";
+    timeInput.pattern="([01][0-9]|2[0-3]):[0-5][0-9]";
+    timeInput.autocomplete="off";
+    timeInput.value=savedTime;
+    timeInput.style.marginBottom="0";
+    timeLabel.appendChild(timeInput);
+    field.append(dateLabel,timeLabel);
     const save=document.createElement("button");
     save.type="button";
     save.textContent="Lưu / gia hạn";
@@ -2888,9 +2915,10 @@ async function loadTeacherAssignmentDeadlines(){
     result.className="message";
     result.style.gridColumn="1 / -1";
     save.addEventListener("click",async()=>{
-      const value=input.value;
-      const date=value?new Date(value):null;
-      if(value&&(!date||Number.isNaN(date.getTime()))){result.textContent="Thời hạn không hợp lệ.";return;}
+      const hasDate=!!dateInput.value;
+      const hasTime=!!timeInput.value.trim();
+      const date=hasDate||hasTime?combineLocalDateTime(dateInput.value,timeInput.value):null;
+      if((hasDate||hasTime)&&!date){result.textContent="Cô nhập đủ ngày và giờ theo dạng 24 giờ, ví dụ 17:30 nhé.";return;}
       save.disabled=true;save.textContent="Đang lưu...";
       const update=await supabaseClient.from("assignments")
         .update({due_at:date?date.toISOString():null})
@@ -2919,8 +2947,10 @@ createAssignmentForm.addEventListener("submit", async (event) => {
   const body = document.getElementById("assignmentBody").value.trim();
   const className = document.getElementById("assignmentClass").value;
   const answerType = document.getElementById("assignmentAnswerType").value;
-  const dueAtValue = document.getElementById("assignmentDueAt").value;
-  const dueAt = dueAtValue ? new Date(dueAtValue) : null;
+  const dueDateValue = document.getElementById("assignmentDueDate").value;
+  const dueTimeValue = document.getElementById("assignmentDueTime").value.trim();
+  const dueAt = dueDateValue||dueTimeValue ? combineLocalDateTime(dueDateValue,dueTimeValue) : null;
+  const hasDueAt = !!dueDateValue || !!dueTimeValue;
   const file = document.getElementById("assignmentFile").files[0] || null;
   const allowedTypes = [
     "application/pdf",
@@ -2932,7 +2962,7 @@ createAssignmentForm.addEventListener("submit", async (event) => {
     message.textContent = "Cô vui lòng nhập đầy đủ thông tin.";
     return;
   }
-  if (dueAtValue && (!dueAt || Number.isNaN(dueAt.getTime()))) {
+  if (hasDueAt && (!dueAt || Number.isNaN(dueAt.getTime()))) {
     message.textContent = "Thời hạn nộp bài chưa hợp lệ. Cô kiểm tra lại nhé.";
     return;
   }
