@@ -375,6 +375,15 @@ button.logout,.logout{background:#eee4d7;color:var(--vh-brown)}
       </select>
       <p class="sub">Nếu chọn tải tệp, học sinh phải đính kèm ít nhất 1 tệp và được chọn tối đa 10 tệp mỗi lần nộp.</p>
 
+      <div style="margin:18px 0;padding:16px;background:#f3f7f2;border:1px solid #dce8df;border-radius:12px;">
+        <h3 style="margin:0 0 8px;">Đáp án và hướng dẫn chấm (chỉ giáo viên xem)</h3>
+        <label for="assignmentAnswerKey">Nhập đáp án / thang điểm / tiêu chí chấm</label>
+        <textarea id="assignmentAnswerKey" rows="5" placeholder="Cô nhập đáp án, các ý cần đạt, thang điểm và lưu ý khi chấm..."></textarea>
+        <label for="assignmentAnswerKeyFiles">Hoặc tải tệp đáp án (PDF, Word .docx, TXT; tối đa 10 tệp, 25 MB/tệp)</label>
+        <input id="assignmentAnswerKeyFiles" type="file" multiple accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
+        <p class="sub">Đáp án được lưu riêng tư, không xuất hiện trong tài khoản học sinh.</p>
+      </div>
+
       <button type="submit">Giao bài tập</button>
       <div id="assignmentMessage" class="message"></div>
     </form>
@@ -2995,6 +3004,9 @@ createAssignmentForm.addEventListener("submit", async (event) => {
   const dueAt = dueDateValue||dueTimeValue ? combineLocalDateTime(dueDateValue,dueTimeValue) : null;
   const hasDueAt = !!dueDateValue || !!dueTimeValue;
   const file = document.getElementById("assignmentFile").files[0] || null;
+  const answerKeyText = document.getElementById("assignmentAnswerKey").value.trim();
+  const answerKeyFiles = Array.from(document.getElementById("assignmentAnswerKeyFiles").files || []);
+  const allowedKeyExtensions = ["pdf","docx","txt"];
   const allowedTypes = [
     "application/pdf",
     "application/msword",
@@ -3011,6 +3023,10 @@ createAssignmentForm.addEventListener("submit", async (event) => {
   }
   if (file && (file.size > 25 * 1024 * 1024 || !allowedTypes.includes(file.type))) {
     message.textContent = "Tệp đề phải là PDF hoặc Word và không vượt quá 25 MB.";
+    return;
+  }
+  if (answerKeyFiles.length > 10 || answerKeyFiles.some(f => f.size > 25 * 1024 * 1024 || !allowedKeyExtensions.includes((f.name.split(".").pop()||"").toLowerCase()))) {
+    message.textContent = "Đáp án chỉ nhận tối đa 10 tệp PDF, DOCX hoặc TXT, mỗi tệp không quá 25 MB.";
     return;
   }
 
@@ -3036,6 +3052,32 @@ createAssignmentForm.addEventListener("submit", async (event) => {
       .single();
 
     if (insertError) throw insertError;
+
+    const rubricPaths = [];
+    const rubricNames = [];
+    for (let i = 0; i < answerKeyFiles.length; i++) {
+      const keyFile = answerKeyFiles[i];
+      const ext = (keyFile.name.split(".").pop() || "pdf").toLowerCase();
+      const safe = keyFile.name.replace(/[^a-zA-Z0-9._-]+/g, "_");
+      const keyPath = user.id + "/" + assignment.id + "/" + Date.now() + "-" + i + "-" + safe;
+      const keyUpload = await supabaseClient.storage.from("teacher-answer-keys").upload(keyPath, keyFile, { upsert: false, contentType: keyFile.type || (ext === "pdf" ? "application/pdf" : ext === "docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document" : "text/plain") });
+      if (keyUpload.error) {
+        if (rubricPaths.length) await supabaseClient.storage.from("teacher-answer-keys").remove(rubricPaths);
+        await supabaseClient.from("assignments").delete().eq("id", assignment.id);
+        throw keyUpload.error;
+      }
+      rubricPaths.push(keyPath);
+      rubricNames.push(keyFile.name);
+    }
+    const { error: rubricError } = await supabaseClient.from("assignment_rubrics").upsert({
+      assignment_id: assignment.id, teacher_id: user.id, answer_text: answerKeyText,
+      file_paths: rubricPaths, file_names: rubricNames, updated_at: new Date().toISOString()
+    }, { onConflict: "assignment_id" });
+    if (rubricError) {
+      if (rubricPaths.length) await supabaseClient.storage.from("teacher-answer-keys").remove(rubricPaths);
+      await supabaseClient.from("assignments").delete().eq("id", assignment.id);
+      throw rubricError;
+    }
 
     if (file) {
       const extension = file.name.split(".").pop().toLowerCase();
@@ -3816,6 +3858,33 @@ saveButton.disabled=false;
 saveButton.textContent="Lưu điểm và nhận xét";
 });
 
+const aiGradeButton=document.createElement("button");
+aiGradeButton.type="button";
+aiGradeButton.textContent="AI chấm thử";
+aiGradeButton.style.cssText="background:#725b8d;margin:10px 8px 8px 0;";
+const aiPanel=document.createElement("div");
+aiPanel.style.cssText="display:none;margin:10px 0;padding:14px;background:#f7f3fb;border:1px solid #e4d9ef;border-radius:10px;white-space:normal;";
+aiGradeButton.addEventListener("click",async()=>{
+  aiGradeButton.disabled=true; aiGradeButton.textContent="AI đang đọc bài...";
+  aiPanel.style.display="block"; aiPanel.textContent="Đang đối chiếu bài làm với đáp án và hướng dẫn chấm của cô...";
+  try{
+    const {data,error}=await supabaseClient.functions.invoke("learning-api",{body:{action:"grade_submission",assignment_id:sub.assignment_id,submission_id:sub.id}});
+    if(error)throw error;
+    if(!data||!data.success)throw new Error(data&&data.error||"AI chưa chấm được bài này.");
+    aiPanel.innerHTML="";
+    const heading=document.createElement("strong"); heading.textContent="Kết quả AI đề xuất: "+data.suggested_score+"/10"; aiPanel.appendChild(heading);
+    if(data.needs_teacher_review){const warn=document.createElement("p");warn.textContent="Cần cô xem lại: "+(data.review_reason||"Có nội dung chưa rõ.");warn.style.color="#9a5b21";aiPanel.appendChild(warn);}
+    (data.criteria||[]).forEach(c=>{const p=document.createElement("p");p.textContent=(c.name||"Tiêu chí")+": "+c.score+"/"+c.max_score+" – "+(c.comment||"");aiPanel.appendChild(p);});
+    if((data.strengths||[]).length){const p=document.createElement("p");p.textContent="Ưu điểm: "+data.strengths.join("; ");aiPanel.appendChild(p);}
+    if((data.improvements||[]).length){const p=document.createElement("p");p.textContent="Cần cải thiện: "+data.improvements.join("; ");aiPanel.appendChild(p);}
+    const fb=document.createElement("p");fb.textContent="Nhận xét gợi ý: "+(data.teacher_feedback||"");aiPanel.appendChild(fb);
+    const use=document.createElement("button");use.type="button";use.textContent="Dùng đề xuất (chưa lưu)";
+    use.addEventListener("click",()=>{scoreInput.value=data.suggested_score;feedbackInput.value=data.teacher_feedback||"";result.textContent="Đã đưa đề xuất vào ô điểm và nhận xét. Cô kiểm tra, chỉnh sửa rồi nhấn “Lưu điểm và nhận xét”.";});
+    aiPanel.appendChild(use);
+  }catch(err){aiPanel.textContent="Chưa chấm được: "+(err.message||"Lỗi kết nối");}
+  finally{aiGradeButton.disabled=false;aiGradeButton.textContent="AI chấm thử";}
+});
+attemptDetails.append(aiGradeButton,aiPanel);
 attemptDetails.append(scoreLabel,scoreInput,feedbackLabel,feedbackInput,saveButton,result);
 studentDetails.appendChild(attemptDetails);
 });
