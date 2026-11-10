@@ -2532,6 +2532,9 @@ document.getElementById("logoutButton").addEventListener("click",async()=>{
 if(supabaseClient)await supabaseClient.auth.signOut();
 homeSection.classList.add("hidden");
 loginSection.classList.remove("hidden");
+if(aiLauncher)aiLauncher.style.display="none";
+if(aiChat)aiChat.classList.remove("open");
+aiHistory=[];
 loginMessage.textContent="Em đã đăng xuất.";
 });
 
