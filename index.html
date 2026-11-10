@@ -2811,6 +2811,33 @@ function formatVietnamDateTime(value){
   return new Intl.DateTimeFormat("vi-VN",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).format(date);
 }
 
+function openSubmissionImage(url,altText){
+  let overlay=document.getElementById("submissionImageLightbox");
+  if(!overlay){
+    overlay=document.createElement("div");
+    overlay.id="submissionImageLightbox";
+    overlay.style.cssText="position:fixed;inset:0;z-index:99999;background:rgba(12,18,14,.92);display:none;align-items:center;justify-content:center;padding:24px;cursor:zoom-out;";
+    const close=document.createElement("button");
+    close.type="button";
+    close.textContent="✕ Đóng";
+    close.setAttribute("aria-label","Đóng ảnh");
+    close.style.cssText="position:absolute;top:18px;right:18px;background:#fff;color:#26352b;border:0;border-radius:20px;padding:10px 16px;font-size:15px;cursor:pointer;z-index:2;";
+    const large=document.createElement("img");
+    large.id="submissionImageLightboxContent";
+    large.style.cssText="display:block;max-width:96vw;max-height:92vh;object-fit:contain;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.35);cursor:default;";
+    close.addEventListener("click",()=>{overlay.style.display="none";});
+    overlay.addEventListener("click",event=>{if(event.target===overlay)overlay.style.display="none";});
+    large.addEventListener("click",event=>event.stopPropagation());
+    overlay.append(close,large);
+    document.body.appendChild(overlay);
+    document.addEventListener("keydown",event=>{if(event.key==="Escape"&&overlay.style.display==="flex")overlay.style.display="none";});
+  }
+  const large=overlay.querySelector("#submissionImageLightboxContent");
+  large.src=url;
+  large.alt=altText||"Ảnh bài làm phóng to";
+  overlay.style.display="flex";
+}
+
 function assignmentDateToLocalInput(value){
   if(!value) return "";
   const date=new Date(value);
@@ -3520,7 +3547,12 @@ if(/\.(jpg|jpeg|png|webp|gif)$/i.test(fileName)){
 const img=document.createElement("img");
 img.src=signed.data.signedUrl;
 img.alt="Ảnh bài làm";
-img.style.cssText="display:block;max-width:100%;max-height:500px;margin:10px 0;border-radius:8px;";
+img.style.cssText="display:block;max-width:100%;max-height:500px;margin:10px 0;border-radius:8px;cursor:zoom-in;transition:transform .15s ease;";
+img.title="Nhấn để xem ảnh kích thước lớn";
+img.tabIndex=0;
+img.setAttribute("role","button");
+img.addEventListener("click",()=>openSubmissionImage(img.src,img.alt));
+img.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();openSubmissionImage(img.src,img.alt);}});
 attemptDetails.appendChild(img);
 }else{
 const link=document.createElement("a");
