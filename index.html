@@ -201,6 +201,52 @@ body:has(#homeSection:not(.hidden)){padding:24px 32px}
   border-radius: 10px;
 }
 
+
+/* GIAO DIEN VAN HOC SO - HOC VAN 7 */
+:root{--vh-cream:#f6f0e5;--vh-paper:#fffdf9;--vh-brown:#68452f;--vh-dark:#38271f;--vh-muted:#88796d;--vh-line:#e9ddca;--vh-gold:#b69a76}
+body{font-family:Inter,"Segoe UI",Arial,sans-serif;background:linear-gradient(135deg,#f6f0e5 0%,#efe5d7 100%);color:var(--vh-dark)}
+.container{color:var(--vh-dark)}
+#homeSection{background:var(--vh-paper);border:1px solid var(--vh-line);border-radius:24px;box-shadow:0 18px 55px rgba(56,39,31,.08)}
+#homeSection>.book{display:inline-flex;align-items:center;justify-content:center;width:54px;height:54px;border-radius:17px;background:var(--vh-cream);font-size:27px}
+#homeSection h1,#homeSection h2,#teacherPanel h3,#revisionPanel>h2{color:var(--vh-brown)}
+#homeSection h1{font-weight:750;letter-spacing:-.7px}
+#homeSection .sub,#homeSection p.sub{color:var(--vh-muted)}
+#teacherPanel .student-list,#teacherPanel form,#teacherPanel .assignment-section,#teacherPanel .submission-section,#studentPanel,#revisionPanel{background:#fffaf3;border:1px solid var(--vh-line);border-radius:18px}
+#teacherPanel .assignment-section form{background:transparent;border:0}
+#teacherPanel h3{font-weight:700}
+input,select,textarea{background:#fffefa;border:1px solid #dfd2c1;border-radius:12px;color:var(--vh-dark)}
+input:focus,select:focus,textarea:focus{border-color:var(--vh-gold);box-shadow:0 0 0 3px rgba(182,154,118,.16)}
+button{background:var(--vh-brown);border-radius:12px;transition:transform .15s ease,background .15s ease}
+button:hover{background:var(--vh-dark);transform:translateY(-1px)}
+button.logout,.logout{background:#eee4d7;color:var(--vh-brown)}
+#revisionPanel{background:#fdf8f0}
+.revision-unit{border-color:var(--vh-line);border-radius:16px}
+.revision-unit h3,#revisionPanel>h2{color:var(--vh-brown)}
+.revision-unit details{background:#fffaf3;border-color:var(--vh-line);border-radius:12px}
+.revision-unit summary{color:var(--vh-brown)}
+#loginSection .container,.brand h1{color:var(--vh-brown)}
+/* AI STUDY COMPANION */
+#aiLauncher{position:fixed;right:24px;bottom:24px;z-index:9998;border:0;border-radius:999px;padding:14px 19px;box-shadow:0 10px 30px rgba(56,39,31,.24);display:none;align-items:center;gap:9px;background:var(--vh-brown);color:white;font-weight:700}
+#aiLauncher .ai-spark{font-size:20px}
+#aiChat{position:fixed;right:24px;bottom:88px;width:min(390px,calc(100vw - 28px));height:min(590px,calc(100vh - 120px));z-index:9999;background:#fffdf9;border:1px solid var(--vh-line);border-radius:20px;box-shadow:0 22px 70px rgba(56,39,31,.22);display:none;flex-direction:column;overflow:hidden}
+#aiChat.open{display:flex}
+.ai-head{padding:17px 18px;background:linear-gradient(135deg,#68452f,#38271f);color:#fff;display:flex;align-items:center;justify-content:space-between}
+.ai-head strong{display:block;font-size:15px}
+.ai-head small{display:block;margin-top:4px;color:#eadcc9;font-size:12px}
+.ai-close{margin:0;padding:4px 9px;background:rgba(255,255,255,.14);font-size:20px}
+.ai-intro{padding:13px 15px 8px;color:#756557;font-size:12px;line-height:1.5}
+.ai-suggestions{display:flex;flex-wrap:wrap;gap:7px;padding:0 14px 10px}
+.ai-suggestions button{margin:0;padding:7px 10px;background:#f3eadc;color:#68452f;border:1px solid #e9ddca;font-size:11px;font-weight:600}
+.ai-messages{flex:1;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;background:#fcf8f1}
+.ai-msg{max-width:88%;padding:10px 12px;border-radius:14px;font-size:13px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.ai-msg.bot{align-self:flex-start;background:#fff;border:1px solid #eee3d5;color:#433329;border-bottom-left-radius:5px}
+.ai-msg.user{align-self:flex-end;background:#68452f;color:#fff;border-bottom-right-radius:5px}
+.ai-compose{padding:12px;border-top:1px solid var(--vh-line);display:flex;gap:8px;background:#fffdf9}
+.ai-compose textarea{margin:0;min-height:44px;max-height:100px;resize:vertical;font-size:13px;padding:11px}
+.ai-compose button{margin:0;min-width:72px;padding:10px;font-size:13px}
+.ai-status{padding:0 14px 9px;color:#927d69;font-size:11px;background:#fffdf9}
+@media(max-width:600px){#aiLauncher{right:14px;bottom:14px}#aiChat{right:10px;bottom:76px;width:calc(100vw - 20px);height:min(600px,calc(100vh - 95px))}#homeSection{padding:18px}}
+
 </style>
 </head>
 
@@ -3552,8 +3598,80 @@ const {data}=await supabaseClient.auth.getSession();
 if(data.session)await showUser(data.session.user);
 }
 
+
+/* TRO LI AI - goi Edge Function learning-api, khong de khoa AI o trinh duyet */
+let aiHistory=[];
+const aiChat=document.getElementById("aiChat");
+const aiLauncher=document.getElementById("aiLauncher");
+const aiMessages=document.getElementById("aiMessages");
+const aiInput=document.getElementById("aiInput");
+const aiForm=document.getElementById("aiForm");
+const aiSend=document.getElementById("aiSend");
+const aiStatus=document.getElementById("aiStatus");
+function addAiMessage(text,who){
+ const node=document.createElement("div");
+ node.className="ai-msg "+who;
+ node.textContent=text;
+ aiMessages.appendChild(node);
+ aiMessages.scrollTop=aiMessages.scrollHeight;
+}
+function openAiChat(){aiChat.classList.add("open");aiInput.focus();}
+aiLauncher.addEventListener("click",()=>aiChat.classList.contains("open")?aiChat.classList.remove("open"):openAiChat());
+document.getElementById("aiClose").addEventListener("click",()=>aiChat.classList.remove("open"));
+document.querySelectorAll(".ai-suggestions [data-prompt]").forEach(btn=>btn.addEventListener("click",()=>{aiInput.value=btn.dataset.prompt;aiInput.focus();}));
+aiForm.addEventListener("submit",async(event)=>{
+ event.preventDefault();
+ const question=aiInput.value.trim();
+ if(!question||!supabaseClient)return;
+ const {data:sessionData}=await supabaseClient.auth.getSession();
+ const session=sessionData?.session;
+ if(!session){addAiMessage("Phiên đăng nhập đã hết hạn. Em đăng nhập lại rồi thử nhé.","bot");return;}
+ addAiMessage(question,"user");
+ aiInput.value="";
+ aiSend.disabled=true;aiSend.textContent="...";
+ aiStatus.textContent="Trợ lí đang suy nghĩ...";
+ const transcript=aiHistory.slice(-6).map(m=>(m.role==="user"?"Học sinh: ":"Trợ lí: ")+m.content).join("\n");
+ const prompt=(transcript?transcript+"\n":"")+"Câu hỏi hiện tại: "+question;
+ try{
+  const {data,error}=await supabaseClient.functions.invoke("learning-api",{body:{action:"study_assistant",prompt}});
+  if(error)throw error;
+  if(!data?.success)throw new Error(data?.error||"Trợ lí chưa thể trả lời lúc này.");
+  const answer=String(data.answer||"Trợ lí chưa tạo được câu trả lời.");
+  addAiMessage(answer,"bot");
+  aiHistory.push({role:"user",content:question},{role:"assistant",content:answer});
+  aiHistory=aiHistory.slice(-12);
+  aiStatus.textContent="Câu trả lời do AI gợi ý. Em hãy suy nghĩ và tự hoàn thiện bài nhé.";
+ }catch(err){
+  addAiMessage("Mình chưa kết nối được trợ lí AI: "+(err.message||"Lỗi kết nối")+". Em thử lại sau nhé.","bot");
+  aiStatus.textContent="Kiểm tra cấu hình AI trên máy chủ nếu lỗi tiếp tục.";
+ }finally{aiSend.disabled=false;aiSend.textContent="Gửi";aiInput.focus();}
+});
+
 checkSession();
 </script>
+
+<div id="aiChat" aria-label="Trợ lí AI Ngữ văn">
+  <div class="ai-head">
+    <div><strong>Trợ lí học tập Ngữ văn</strong><small>Đồng hành cùng em trong từng bài học</small></div>
+    <button class="ai-close" id="aiClose" type="button" aria-label="Đóng">×</button>
+  </div>
+  <div class="ai-intro">Em có thể hỏi kiến thức, nhờ gợi ý đọc hiểu, tìm ý hoặc góp ý bài viết. Trợ lí sẽ hướng dẫn từng bước để em tự hoàn thành bài.</div>
+  <div class="ai-suggestions">
+    <button type="button" data-prompt="Hướng dẫn em cách tìm ý cho một đoạn văn biểu cảm.">Tìm ý viết văn</button>
+    <button type="button" data-prompt="Giải thích cho em cách nhận biết và nêu tác dụng của biện pháp tu từ.">Tiếng Việt</button>
+    <button type="button" data-prompt="Hướng dẫn em các bước đọc hiểu một văn bản truyện.">Đọc hiểu truyện</button>
+  </div>
+  <div class="ai-messages" id="aiMessages" aria-live="polite">
+    <div class="ai-msg bot">Chào em! 🌿 Em đang vướng ở phần kiến thức hay bài tập nào? Hãy gửi câu hỏi, cô trợ lí sẽ cùng em tháo gỡ nhé.</div>
+  </div>
+  <div class="ai-status" id="aiStatus">Trợ lí AI hỗ trợ học tập, không thay em làm bài.</div>
+  <form class="ai-compose" id="aiForm">
+    <textarea id="aiInput" rows="1" maxlength="3000" placeholder="Nhập câu hỏi của em..." required></textarea>
+    <button type="submit" id="aiSend">Gửi</button>
+  </form>
+</div>
+<button id="aiLauncher" type="button"><span class="ai-spark">✦</span> Hỏi trợ lí AI</button>
+
 <script src="./stem-features.js"></script>
 </body>
 </html>
