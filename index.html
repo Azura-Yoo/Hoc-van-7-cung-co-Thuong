@@ -277,6 +277,9 @@ button.logout,.logout{background:#eee4d7;color:var(--vh-brown)}
 <p id="userName"></p>
 <p id="userRole" class="sub"></p>
 <div id="dashboardMessage" class="message"></div>
+<div class="workspace-home-link" style="margin:12px 0 22px;">
+  <a href="https://vanhocso.hocvancungcothuong.workers.dev/" style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border:1px solid #dfd2c1;border-radius:12px;background:#fffaf3;color:#68452f;text-decoration:none;font-weight:700;">← Quay lại trang chủ Văn học số</a>
+</div>
 
 <div id="teacherPanel" class="hidden">
 
@@ -338,6 +341,10 @@ button.logout,.logout{background:#eee4d7;color:var(--vh-brown)}
       <label for="assignmentBody">Nội dung bài tập</label>
       <textarea id="assignmentBody" required></textarea>
 
+      <label for="assignmentDueAt">Hạn cuối nhận bài (không bắt buộc)</label>
+      <input id="assignmentDueAt" type="datetime-local">
+      <p class="sub">Cô có thể gia hạn hoặc bỏ hạn nộp sau khi giao bài.</p>
+
       <label for="assignmentFile">Tệp đề bài đính kèm (không bắt buộc)</label>
       <input id="assignmentFile" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
       <p class="sub">Cô có thể tải lên đề PDF hoặc Word, tối đa 25 MB. Học sinh sẽ thấy nút mở/tải đề trong bài tập.</p>
@@ -353,6 +360,14 @@ button.logout,.logout{background:#eee4d7;color:var(--vh-brown)}
       <button type="submit">Giao bài tập</button>
       <div id="assignmentMessage" class="message"></div>
     </form>
+  </div>
+
+  <div class="assignment-deadline-manager" style="margin:18px 0;padding:18px;background:#f8faf8;border:1px solid #dce8df;border-radius:14px;">
+    <h3>Quản lý hạn nộp và gia hạn bài tập</h3>
+    <p class="sub">Cô có thể thay đổi thời gian nhận bài hoặc bỏ hạn nộp cho từng bài đã giao.</p>
+    <button type="button" id="refreshAssignmentDeadlines">Làm mới danh sách bài tập</button>
+    <div id="assignmentDeadlineMessage" class="message"></div>
+    <div id="assignmentDeadlineList"></div>
   </div>
 
   <hr>
@@ -2517,6 +2532,7 @@ studentPanel.classList.toggle("hidden",data.role!=="student");
 if(data.role==="teacher"){
 await loadStudents();
 await loadSubmissions();
+await loadTeacherAssignmentDeadlines();
 }
 
 if(data.role==="student"){
@@ -2785,6 +2801,75 @@ bulkButton.addEventListener("click", async () => {
   }
 });
 
+function assignmentDateToLocalInput(value){
+  if(!value) return "";
+  const date=new Date(value);
+  if(Number.isNaN(date.getTime())) return "";
+  const local=new Date(date.getTime()-date.getTimezoneOffset()*60000);
+  return local.toISOString().slice(0,16);
+}
+
+async function loadTeacherAssignmentDeadlines(){
+  const list=document.getElementById("assignmentDeadlineList");
+  const message=document.getElementById("assignmentDeadlineMessage");
+  if(!list||!message||!supabaseClient) return;
+  list.innerHTML="";
+  message.textContent="Đang tải danh sách bài tập...";
+  const {data:userData,error:userError}=await supabaseClient.auth.getUser();
+  const user=userData?.user;
+  if(userError||!user){message.textContent="Phiên đăng nhập đã hết hạn.";return;}
+  const {data,error}=await supabaseClient.from("assignments")
+    .select("id,title,class_name,due_at,created_at")
+    .eq("created_by",user.id)
+    .order("created_at",{ascending:false});
+  if(error){message.textContent="Không tải được danh sách bài tập: "+error.message;return;}
+  if(!data||!data.length){message.textContent="Cô chưa giao bài tập nào.";return;}
+  message.textContent="Có "+data.length+" bài tập. Cô có thể chỉnh hạn nộp ở từng bài.";
+  data.forEach(assignment=>{
+    const card=document.createElement("div");
+    card.style.cssText="display:grid;grid-template-columns:minmax(180px,1fr) minmax(210px,280px) auto;gap:10px;align-items:end;padding:13px 0;border-bottom:1px solid #e3ebe5;";
+    const info=document.createElement("div");
+    const title=document.createElement("strong");
+    title.textContent=(assignment.title||"Bài tập chưa có tên")+" · Lớp "+(assignment.class_name||"");
+    const current=document.createElement("p");
+    current.style.cssText="margin:5px 0 0;color:#68756d;font-size:13px;";
+    current.textContent=assignment.due_at?"Hạn hiện tại: "+new Date(assignment.due_at).toLocaleString("vi-VN"):"Chưa đặt hạn nộp";
+    info.append(title,current);
+    const field=document.createElement("div");
+    const label=document.createElement("label");
+    label.textContent="Hạn mới (để trống nếu không giới hạn)";
+    const input=document.createElement("input");
+    input.type="datetime-local";
+    input.value=assignmentDateToLocalInput(assignment.due_at);
+    input.style.marginBottom="0";
+    label.appendChild(input);
+    field.appendChild(label);
+    const save=document.createElement("button");
+    save.type="button";
+    save.textContent="Lưu / gia hạn";
+    const result=document.createElement("p");
+    result.className="message";
+    result.style.gridColumn="1 / -1";
+    save.addEventListener("click",async()=>{
+      const value=input.value;
+      const date=value?new Date(value):null;
+      if(value&&(!date||Number.isNaN(date.getTime()))){result.textContent="Thời hạn không hợp lệ.";return;}
+      save.disabled=true;save.textContent="Đang lưu...";
+      const update=await supabaseClient.from("assignments")
+        .update({due_at:date?date.toISOString():null})
+        .eq("id",assignment.id).eq("created_by",user.id);
+      if(update.error){result.textContent="Chưa cập nhật được: "+update.error.message;save.disabled=false;save.textContent="Lưu / gia hạn";return;}
+      result.textContent=date?"Đã cập nhật hạn nộp thành "+date.toLocaleString("vi-VN")+".":"Đã bỏ hạn nộp. Học sinh có thể nộp bài không giới hạn thời gian.";
+      current.textContent=date?"Hạn hiện tại: "+date.toLocaleString("vi-VN"):"Chưa đặt hạn nộp";
+      save.disabled=false;save.textContent="Lưu / gia hạn";
+    });
+    card.append(info,field,save,result);
+    list.appendChild(card);
+  });
+}
+
+document.getElementById("refreshAssignmentDeadlines")?.addEventListener("click",loadTeacherAssignmentDeadlines);
+
 const createAssignmentForm = document.getElementById("createAssignmentForm");
 
 createAssignmentForm.addEventListener("submit", async (event) => {
@@ -2796,6 +2881,8 @@ createAssignmentForm.addEventListener("submit", async (event) => {
   const body = document.getElementById("assignmentBody").value.trim();
   const className = document.getElementById("assignmentClass").value;
   const answerType = document.getElementById("assignmentAnswerType").value;
+  const dueAtValue = document.getElementById("assignmentDueAt").value;
+  const dueAt = dueAtValue ? new Date(dueAtValue) : null;
   const file = document.getElementById("assignmentFile").files[0] || null;
   const allowedTypes = [
     "application/pdf",
@@ -2805,6 +2892,10 @@ createAssignmentForm.addEventListener("submit", async (event) => {
 
   if (!title || !body || !className || !answerType) {
     message.textContent = "Cô vui lòng nhập đầy đủ thông tin.";
+    return;
+  }
+  if (dueAtValue && (!dueAt || Number.isNaN(dueAt.getTime()))) {
+    message.textContent = "Thời hạn nộp bài chưa hợp lệ. Cô kiểm tra lại nhé.";
     return;
   }
   if (file && (file.size > 25 * 1024 * 1024 || !allowedTypes.includes(file.type))) {
@@ -2827,6 +2918,7 @@ createAssignmentForm.addEventListener("submit", async (event) => {
         body,
         class_name: className,
         answer_type: answerType,
+        due_at: dueAt ? dueAt.toISOString() : null,
         created_by: user.id
       })
       .select("id")
@@ -2861,6 +2953,7 @@ createAssignmentForm.addEventListener("submit", async (event) => {
       ? "Đã giao bài tập và tải tệp đề lên thành công!"
       : "Đã giao bài tập thành công!";
     createAssignmentForm.reset();
+    await loadTeacherAssignmentDeadlines();
   } catch (error) {
     message.textContent = "Chưa giao được bài: " + (error.message || "Có lỗi xảy ra.");
   } finally {
@@ -3481,7 +3574,7 @@ const student=userData.user;
 
 const {data,error}=await supabaseClient
 .from("assignments")
-.select("id,title,body,answer_type,file_path,file_name,created_at")
+.select("id,title,body,answer_type,file_path,file_name,due_at,created_at")
 .eq("class_name",className)
 .order("created_at",{ascending:false});
 
@@ -3525,6 +3618,14 @@ title.textContent=`${index+1}. ${assignment.title}`;
 const body=document.createElement("p");
 body.textContent=assignment.body||"";
 card.append(title,body);
+
+const isPastDeadline=!!assignment.due_at&&new Date(assignment.due_at).getTime()<Date.now();
+const deadlineInfo=document.createElement("p");
+deadlineInfo.style.cssText="margin:10px 0;padding:10px 12px;border-radius:10px;background:"+(isPastDeadline?"#fff0ed":"#f0f6f1")+";color:"+(isPastDeadline?"#a13d32":"#355b45")+";font-weight:700;";
+deadlineInfo.textContent=assignment.due_at
+  ? (isPastDeadline?"Đã hết hạn nộp bài: ":"Hạn cuối nộp bài: ")+new Date(assignment.due_at).toLocaleString("vi-VN")
+  : "Bài tập không giới hạn thời gian nộp.";
+card.appendChild(deadlineInfo);
 
 if(assignment.file_path){
   const fileInfo=document.createElement("p");
@@ -3589,7 +3690,12 @@ card.appendChild(feedback);
 }
 });
 
-if(existingList.length>=2){
+if(isPastDeadline){
+const closed=document.createElement("p");
+closed.textContent="Bài tập đã đóng. Em vẫn có thể xem đề và bài đã nộp, nhưng không thể nộp thêm sau hạn."; 
+closed.style.cssText="color:#a13d32;font-weight:700;margin-top:12px;";
+card.appendChild(closed);
+}else if(existingList.length>=2){
 const finished=document.createElement("p");
 finished.textContent="Em đã sử dụng hết 2 lần nộp bài. Không thể nộp thêm.";
 finished.style.cssText="color:#477b58;font-weight:bold";
@@ -3635,6 +3741,11 @@ result.textContent=fileInput.files.length?`Đã chọn ${fileInput.files.length}
 });
 }
 submitButton.addEventListener("click",async()=>{
+if(assignment.due_at&&new Date(assignment.due_at).getTime()<Date.now()){
+  result.textContent="Đã hết hạn nộp bài. Em không thể gửi bài này nữa.";
+  submitButton.disabled=true;
+  return;
+}
 const answer=answerInput?answerInput.value.trim():"";
 const files=fileInput?Array.from(fileInput.files||[]):[];
 const allowedExtensions=["doc","docx","pdf","jpg","jpeg","png","webp"];
