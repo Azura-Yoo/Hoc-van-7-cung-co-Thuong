@@ -3425,21 +3425,8 @@ assignmentSummary.textContent=((ag.assignment&&ag.assignment.title)||"Bài tập
 assignmentSummary.style.cssText="cursor:pointer;font-weight:600;color:#496b59;padding:4px 0;";
 assignmentDetails.appendChild(assignmentSummary);
 
-// HIỂN THỊ ĐỀ BÀI NGAY KHI MỞ TÊN BÀI TẬP
-const assignmentContent=document.createElement("div");
-assignmentContent.style.cssText="background:#f0f6f1;border:1px solid #dce8df;border-radius:10px;padding:15px;margin:12px 0 16px;";
-
-const assignmentHeading=document.createElement("h4");
-assignmentHeading.textContent="NỘI DUNG ĐỀ BÀI";
-assignmentHeading.style.cssText="color:#355b45;margin:0 0 10px;";
-assignmentContent.appendChild(assignmentHeading);
-
-const assignmentBody=document.createElement("div");
-assignmentBody.textContent=ag.assignment?.body||"Chưa có nội dung đề bài.";
-assignmentBody.style.cssText="white-space:pre-wrap;line-height:1.8;color:#35443d;";
-assignmentContent.appendChild(assignmentBody);
-
-assignmentDetails.appendChild(assignmentContent);
+// Nội dung đề được xem trong mục Quản lý hạn nộp và gia hạn bài tập.
+// Khu vực xem bài học sinh nộp chỉ tập trung vào danh sách và bài làm đã nộp.
 
 // DANH SÁCH HỌC SINH ĐÃ NỘP BÀI
 studentKeys.sort((x,y)=>
