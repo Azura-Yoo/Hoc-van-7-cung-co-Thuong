@@ -325,6 +325,21 @@ button.logout,.logout{background:#eee4d7;color:var(--vh-brown)}
 
   <hr>
 
+  <section id="progressDashboard" class="progress-dashboard" style="padding:20px;background:#fffaf3;border:1px solid #e9ddca;border-radius:18px;">
+    <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;">
+      <div>
+        <h2 style="margin:0 0 6px;">Bảng theo dõi tiến độ học tập</h2>
+        <p class="sub" style="margin:0;">Tổng hợp tình hình làm bài, bài còn thiếu và kết quả của từng học sinh.</p>
+      </div>
+      <button type="button" id="refreshProgressDashboard">Làm mới tiến độ</button>
+    </div>
+    <div id="progressDashboardMessage" class="message" aria-live="polite">Bảng tiến độ sẽ hiển thị tại đây.</div>
+    <div id="progressDashboardStats" class="progress-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin:16px 0;"></div>
+    <div id="progressDashboardList"></div>
+  </section>
+
+  <hr>
+
   <div class="assignment-section">
     <h2>Giao bài tập</h2>
 
@@ -2534,6 +2549,7 @@ studentPanel.classList.toggle("hidden",data.role!=="student");
 
 if(data.role==="teacher"){
 await loadStudents();
+await loadProgressDashboard();
 await loadSubmissions();
 await loadTeacherAssignmentDeadlines();
 }
@@ -3343,6 +3359,186 @@ async function loadStudents() {
 }
 document.getElementById("refreshStudents").addEventListener("click",loadStudents);
 
+
+async function loadProgressDashboard(){
+  const message=document.getElementById("progressDashboardMessage");
+  const stats=document.getElementById("progressDashboardStats");
+  const list=document.getElementById("progressDashboardList");
+  if(!message||!stats||!list||!supabaseClient)return;
+  message.textContent="Đang tổng hợp tiến độ học sinh...";
+  stats.innerHTML="";
+  list.innerHTML="";
+  try{
+    const {data:userData,error:userError}=await supabaseClient.auth.getUser();
+    const user=userData?.user;
+    if(userError||!user)throw new Error("Phiên đăng nhập đã hết hạn.");
+
+    const [studentResult,assignmentResult]=await Promise.all([
+      supabaseClient.from("profiles").select("id,full_name,class_name").eq("role","student").order("full_name",{ascending:true}),
+      supabaseClient.from("assignments").select("id,title,class_name,due_at,created_at").eq("created_by",user.id).order("created_at",{ascending:true})
+    ]);
+    if(studentResult.error)throw new Error("Không tải được danh sách học sinh: "+studentResult.error.message);
+    if(assignmentResult.error)throw new Error("Không tải được bài tập: "+assignmentResult.error.message);
+
+    const students=(studentResult.data||[]).map(x=>({...x,class_name:(x.class_name||"").trim().toUpperCase()}));
+    const assignments=assignmentResult.data||[];
+    let submissions=[];
+    if(assignments.length){
+      const submissionResult=await supabaseClient.from("submissions")
+        .select("id,assignment_id,student_id,attempt,score,feedback,submitted_at")
+        .in("assignment_id",assignments.map(x=>x.id))
+        .order("submitted_at",{ascending:true});
+      if(submissionResult.error)throw new Error("Không tải được dữ liệu bài nộp: "+submissionResult.error.message);
+      submissions=submissionResult.data||[];
+    }
+
+    const now=Date.now();
+    const submissionMap=new Map();
+    submissions.forEach(sub=>{
+      const key=sub.student_id+"::"+sub.assignment_id;
+      if(!submissionMap.has(key))submissionMap.set(key,[]);
+      submissionMap.get(key).push(sub);
+    });
+    submissionMap.forEach(items=>items.sort((a,b)=>
+      (Number(a.attempt||0)-Number(b.attempt||0))||
+      (new Date(a.submitted_at||0).getTime()-new Date(b.submitted_at||0).getTime())
+    ));
+
+    const classNames=[...new Set(students.map(x=>x.class_name).filter(Boolean))].sort();
+    const totalPairs=students.reduce((sum,student)=>sum+assignments.filter(a=>(a.class_name||"").trim().toUpperCase()===student.class_name).length,0);
+    let completedPairs=0,overduePairs=0,scoredCount=0,scoreSum=0;
+    students.forEach(student=>{
+      const ownAssignments=assignments.filter(a=>(a.class_name||"").trim().toUpperCase()===student.class_name);
+      ownAssignments.forEach(a=>{
+        const items=submissionMap.get(student.id+"::"+a.id)||[];
+        if(items.length)completedPairs++;
+        else if(a.due_at&&new Date(a.due_at).getTime()<now)overduePairs++;
+        if(items.length){
+          const latest=items[items.length-1];
+          if(latest.score!==null&&latest.score!==undefined&&Number.isFinite(Number(latest.score))){
+            scoredCount++;scoreSum+=Number(latest.score);
+          }
+        }
+      });
+    });
+    const pendingPairs=Math.max(0,totalPairs-completedPairs);
+    const average=scoredCount?scoreSum/scoredCount:null;
+    const statItems=[
+      ["Tổng học sinh",students.length,"👩‍🎓"],
+      ["Bài tập đã giao",assignments.length,"📚"],
+      ["Lượt hoàn thành",completedPairs,"✓"],
+      ["Còn thiếu",pendingPairs,"⏳"],
+      ["Quá hạn chưa nộp",overduePairs,"⚠"],
+      ["Điểm trung bình",average===null?"—":average.toFixed(2)+"/10","★"]
+    ];
+    statItems.forEach(([label,value,emoji])=>{
+      const card=document.createElement("div");
+      card.style.cssText="padding:14px;border:1px solid #e9ddca;border-radius:13px;background:#fff;min-width:0;";
+      const caption=document.createElement("div");
+      caption.textContent=emoji+" "+label;
+      caption.style.cssText="font-size:12px;color:#88796d;margin-bottom:7px;";
+      const number=document.createElement("strong");
+      number.textContent=String(value);
+      number.style.cssText="font-size:23px;color:#68452f;";
+      card.append(caption,number);stats.appendChild(card);
+    });
+
+    if(!students.length){
+      message.textContent="Chưa có học sinh để thống kê.";
+      return;
+    }
+    message.textContent="Đã tổng hợp "+students.length+" học sinh, "+assignments.length+" bài tập và "+submissions.length+" lượt nộp. Số liệu được tính theo các bài cô đã giao cho từng lớp.";
+    const orderedClasses=["7A","7C",...classNames.filter(c=>!["7A","7C"].includes(c))];
+    orderedClasses.forEach(className=>{
+      const classStudents=students.filter(x=>x.class_name===className);
+      if(!classStudents.length)return;
+      const classAssignments=assignments.filter(a=>(a.class_name||"").trim().toUpperCase()===className);
+      const section=document.createElement("details");
+      section.open=true;
+      section.style.cssText="margin:14px 0;padding:14px 16px;background:#fff;border:1px solid #e9ddca;border-radius:14px;";
+      const classSummary=document.createElement("summary");
+      let classDone=0,classPending=0,classOverdue=0;
+      classStudents.forEach(student=>classAssignments.forEach(a=>{
+        const items=submissionMap.get(student.id+"::"+a.id)||[];
+        if(items.length)classDone++;
+        else if(a.due_at&&new Date(a.due_at).getTime()<now)classOverdue++;
+        else classPending++;
+      }));
+      classSummary.textContent="LỚP "+className+" · "+classStudents.length+" học sinh · "+classDone+" lượt hoàn thành · "+classPending+" còn thiếu · "+classOverdue+" quá hạn";
+      classSummary.style.cssText="cursor:pointer;font-weight:700;color:#68452f;line-height:1.6;";
+      section.appendChild(classSummary);
+      if(!classAssignments.length){
+        const empty=document.createElement("p");empty.textContent="Lớp này chưa có bài tập được giao.";section.appendChild(empty);
+      }
+      classStudents.forEach(student=>{
+        const ownAssignments=classAssignments;
+        let done=0,pending=0,overdue=0;
+        const scored=[];
+        ownAssignments.forEach(a=>{
+          const items=submissionMap.get(student.id+"::"+a.id)||[];
+          if(items.length){
+            done++;
+            const latest=items[items.length-1];
+            if(latest.score!==null&&latest.score!==undefined&&Number.isFinite(Number(latest.score)))scored.push(Number(latest.score));
+          }else{
+            pending++;
+            if(a.due_at&&new Date(a.due_at).getTime()<now)overdue++;
+          }
+        });
+        const row=document.createElement("details");
+        row.style.cssText="margin:10px 0;padding:11px 12px;border:1px solid #eee4d7;border-radius:11px;background:#fffdf9;";
+        const summary=document.createElement("summary");
+        const avg=scored.length?(scored.reduce((a,b)=>a+b,0)/scored.length).toFixed(2)+"/10":"Chưa có điểm";
+        summary.textContent=(student.full_name||"Chưa rõ tên")+" · "+done+"/"+ownAssignments.length+" bài · "+(ownAssignments.length?Math.round(done/ownAssignments.length*100):0)+"% · TB "+avg;
+        summary.style.cssText="cursor:pointer;color:#433329;font-weight:600;line-height:1.6;";
+        row.appendChild(summary);
+        const progress=document.createElement("div");
+        progress.style.cssText="height:7px;background:#eee7dd;border-radius:99px;overflow:hidden;margin:10px 0;";
+        const fill=document.createElement("div");
+        fill.style.cssText="height:100%;width:"+(ownAssignments.length?done/ownAssignments.length*100:0)+"%;background:#8a9d78;border-radius:99px;";
+        progress.appendChild(fill);row.appendChild(progress);
+        const summaryLine=document.createElement("p");
+        summaryLine.style.cssText="font-size:13px;color:#756557;margin:6px 0 10px;";
+        summaryLine.textContent="Đã nộp: "+done+" · Chưa nộp: "+pending+" · Quá hạn: "+overdue+" · Đã có điểm: "+scored.length;
+        row.appendChild(summaryLine);
+        ownAssignments.forEach(a=>{
+          const items=submissionMap.get(student.id+"::"+a.id)||[];
+          const latest=items.length?items[items.length-1]:null;
+          const item=document.createElement("div");
+          item.style.cssText="padding:9px 0;border-top:1px solid #f0e8dd;font-size:13px;line-height:1.6;";
+          const title=document.createElement("strong");
+          title.textContent=a.title||"Bài tập chưa có tên";
+          const status=document.createElement("div");
+          if(latest){
+            status.textContent="✓ Đã nộp "+(latest.submitted_at?"· "+formatVietnamDateTime(latest.submitted_at):"")+
+              " · Lần "+(latest.attempt||1)+"/2"+
+              (latest.score!==null&&latest.score!==undefined?" · Điểm "+latest.score+"/10":" · Chưa chấm");
+            status.style.color="#477b58";
+          }else if(a.due_at&&new Date(a.due_at).getTime()<now){
+            status.textContent="⚠ Quá hạn, chưa nộp · Hạn: "+formatVietnamDateTime(a.due_at);
+            status.style.color="#a13d32";
+          }else{
+            status.textContent="Chưa nộp"+(a.due_at?" · Hạn: "+formatVietnamDateTime(a.due_at):" · Không giới hạn thời gian");
+            status.style.color="#92724f";
+          }
+          item.append(title,status);
+          if(latest?.feedback){
+            const feedback=document.createElement("div");
+            feedback.textContent="Nhận xét: "+latest.feedback;
+            feedback.style.cssText="margin-top:4px;color:#756557;";
+            item.appendChild(feedback);
+          }
+          row.appendChild(item);
+        });
+        section.appendChild(row);
+      });
+      list.appendChild(section);
+    });
+  }catch(error){
+    message.textContent="Chưa tổng hợp được tiến độ: "+(error.message||"Có lỗi xảy ra.");
+  }
+}
+document.getElementById("refreshProgressDashboard")?.addEventListener("click",loadProgressDashboard);
 
 const filterStudent=document.getElementById("filterStudent");
 const filterAssignment=document.getElementById("filterAssignment");
