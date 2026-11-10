@@ -2836,7 +2836,7 @@ createAssignmentForm.addEventListener("submit", async (event) => {
 
     if (file) {
       const extension = file.name.split(".").pop().toLowerCase();
-      const safeName = file.name.replace(/[^\\p{L}\\p{N}._-]+/gu, "_");
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "_");
       const path = assignment.id + "/" + user.id + "/" + Date.now() + "-" + safeName;
       const { error: uploadError } = await supabaseClient.storage
         .from("assignment-files")
@@ -3536,13 +3536,19 @@ if(assignment.file_path){
   fileLink.style.cssText="display:inline-block;margin-left:8px;color:#68452f;font-weight:700;";
   fileLink.addEventListener("click",async(event)=>{
     event.preventDefault();
+    const popup=window.open("about:blank","_blank");
+    if(!popup){
+      fileLink.textContent="Trình duyệt đang chặn cửa sổ mới. Hãy cho phép mở cửa sổ bật lên rồi thử lại.";
+      return;
+    }
     fileLink.textContent="Đang mở tệp...";
     const {data,error}=await supabaseClient.storage.from("assignment-files").createSignedUrl(assignment.file_path,3600);
     if(error||!data?.signedUrl){
+      popup.close();
       fileLink.textContent="Không mở được tệp. Em hãy tải lại trang.";
       return;
     }
-    window.open(data.signedUrl,"_blank","noopener");
+    popup.location=data.signedUrl;
     fileLink.textContent="Mở / tải đề bài";
   });
   fileInfo.appendChild(fileLink);
