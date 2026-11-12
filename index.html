@@ -331,6 +331,51 @@ button.logout,.logout{background:#eee4d7;color:var(--vh-brown)}
   #teacherPanel .student-item{align-items:flex-start!important}
   #teacherPanel .student-item button{width:auto}
 }
+
+/* DONG BO FONT TOAN HE THONG - tieng Viet va responsive */
+:root{
+  --vh-font-family:"Segoe UI",Tahoma,Arial,sans-serif;
+}
+html{
+  font-family:var(--vh-font-family);
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+}
+body,body *{
+  font-family:var(--vh-font-family);
+  font-synthesis:none;
+}
+body{
+  font-size:15px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+button,input,select,textarea{
+  font-family:var(--vh-font-family)!important;
+  font-size:inherit;
+  line-height:1.45;
+}
+button{font-weight:600;letter-spacing:0}
+input,select,textarea{font-weight:400}
+h1,h2,h3,h4,h5,h6{
+  font-family:var(--vh-font-family);
+  line-height:1.35;
+  overflow-wrap:anywhere;
+}
+p,li,label,summary,a,small,strong,em,span,div{
+  font-family:var(--vh-font-family);
+}
+#homeSection,#teacherPanel,#studentPanel,#revisionPanel,
+#teacherPanel form,#teacherPanel section,
+.revision-content,.student-assignment-item{
+  font-family:var(--vh-font-family);
+}
+@media(max-width:600px){
+  body{font-size:14px;line-height:1.6}
+  input,select,textarea,button{font-size:14px}
+}
+
 </style>
 </head>
 
