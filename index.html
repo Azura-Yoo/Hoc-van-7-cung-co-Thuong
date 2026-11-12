@@ -278,6 +278,57 @@ button.logout,.logout{background:#eee4d7;color:var(--vh-brown)}
   #teacherQuickNav a{padding:9px 11px;font-size:12px}
 }
 
+/* Giao diện gọn cho khu vực quản lý học sinh */
+#teacherPanel #createStudentForm{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(150px,190px);
+  gap:8px 14px;
+  align-items:end;
+  padding:16px 18px;
+  margin:10px 0 16px;
+  background:#fffdf9;
+  border:1px solid #eadfce;
+  border-radius:14px;
+}
+#teacherPanel #createStudentForm h3,
+#teacherPanel #createStudentForm p,
+#teacherPanel #createStudentForm button,
+#teacherPanel #createStudentForm .message{
+  grid-column:1 / -1;
+}
+#teacherPanel #createStudentForm h3{margin:0 0 2px;font-size:17px;color:#68452f}
+#teacherPanel #createStudentForm label{margin:0 0 3px;font-size:13px;color:#625448}
+#teacherPanel #createStudentForm input,
+#teacherPanel #createStudentForm select{margin:0;min-height:40px}
+#teacherPanel #createStudentForm p{margin:2px 0;color:#7b7168;font-size:12px}
+#teacherPanel #createStudentForm button,
+#teacherPanel #createBulkStudents,
+#teacherPanel #refreshStudents{width:auto;min-width:0;padding:9px 15px;font-size:13px}
+#teacherPanel #bulkStudentList{
+  min-height:105px;
+  max-height:150px;
+  padding:10px 12px;
+  font-size:13px;
+  line-height:1.5;
+}
+#teacherPanel #studentList{margin-top:10px}
+#teacherPanel .student-class-section{padding:14px 16px!important;margin:12px 0!important}
+#teacherPanel .student-class-heading{margin-bottom:8px!important}
+#teacherPanel .student-item{padding:9px 0!important;gap:8px!important}
+#teacherPanel .student-item button{padding:7px 10px;font-size:12px}
+#progressDashboard{scroll-margin-top:90px}
+#progressDashboard>div:first-child button{width:auto;padding:9px 13px;font-size:13px}
+#progressDashboardList>details{margin:10px 0!important;padding:12px 15px!important}
+#progressDashboardList>details>summary{font-size:15px}
+@media(max-width:650px){
+  #teacherPanel #createStudentForm{grid-template-columns:1fr;padding:14px}
+  #teacherPanel #createStudentForm h3,
+  #teacherPanel #createStudentForm p,
+  #teacherPanel #createStudentForm button,
+  #teacherPanel #createStudentForm .message{grid-column:1}
+  #teacherPanel .student-item{align-items:flex-start!important}
+  #teacherPanel .student-item button{width:auto}
+}
 </style>
 </head>
 
@@ -3530,13 +3581,13 @@ async function loadProgressDashboard(){
       return;
     }
     message.textContent="Đã tổng hợp "+students.length+" học sinh, "+assignments.length+" bài tập và "+submissions.length+" lượt nộp. Số liệu được tính theo các bài cô đã giao cho từng lớp.";
-    const orderedClasses=["7A","7C",...classNames.filter(c=>!["7A","7C"].includes(c))];
+    const orderedClasses=["7A","7C",...classNames.filter(c=>!["7A","7C"].includes(c))].filter((className,index,array)=>array.indexOf(className)===index);
     orderedClasses.forEach(className=>{
       const classStudents=students.filter(x=>x.class_name===className);
       if(!classStudents.length)return;
       const classAssignments=assignments.filter(a=>(a.class_name||"").trim().toUpperCase()===className);
       const section=document.createElement("details");
-      section.open=true;
+      section.open=false;
       section.style.cssText="margin:14px 0;padding:14px 16px;background:#fff;border:1px solid #e9ddca;border-radius:14px;";
       const classSummary=document.createElement("summary");
       let classDone=0,classPending=0,classOverdue=0;
