@@ -3099,7 +3099,7 @@ async function loadTeacherAssignmentDeadlines(){
         document.body.appendChild(overlay);
         fileLink.textContent="👁 Xem tệp đề: "+(assignment.file_name||"Tệp đính kèm");
       });
-      fileLine.appendChild(fileLink);bodyDetails.appendChild(fileLine);
+      fileLine.appendChild(fileLink);detail.appendChild(fileLine);
     }
     info.appendChild(detail);
     const controls=document.createElement("div");
