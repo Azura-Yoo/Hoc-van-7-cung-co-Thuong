@@ -4471,6 +4471,27 @@ list.appendChild(card);
 
 async function checkSession(){
 if(!supabaseClient)return;
+
+// Đăng nhập một lần từ Văn học số: token chỉ nằm trong fragment URL,
+// không gửi kèm khi trình duyệt tải trang hay các tài nguyên bên ngoài.
+const hashParams=new URLSearchParams((window.location.hash||"").replace(/^#/,""));
+const ssoToken=hashParams.get("sso");
+if(ssoToken){
+  history.replaceState(null,"",window.location.pathname+window.location.search);
+  loginMessage.textContent="Đang xác thực phiên đăng nhập Văn học số...";
+  const {data,error}=await supabaseClient.auth.verifyOtp({
+    token_hash:ssoToken,
+    type:"magiclink"
+  });
+  if(error){
+    loginMessage.textContent="Không thể vào không gian học tập: "+error.message+". Cô hãy quay lại Văn học số và thử vào lại.";
+    return;
+  }
+  if(data.user){
+    await showUser(data.user);
+    return;
+  }
+}
 const {data}=await supabaseClient.auth.getSession();
 if(data.session)await showUser(data.session.user);
 }
