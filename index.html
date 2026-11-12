@@ -4184,9 +4184,16 @@ card.style.cssText="background:#fff;border:1px solid #e3ebe5;border-radius:14px;
 const title=document.createElement("h3");
 title.textContent=`Bài ${index+1}: ${assignment.title}`;
 
-const body=document.createElement("p");
-body.textContent=assignment.body||"";
-card.append(title,body);
+const bodyDetails=document.createElement("details");
+bodyDetails.style.cssText="margin:12px 0;padding:12px 14px;background:#f7faf7;border:1px solid #e3ebe5;border-radius:11px;";
+const bodySummary=document.createElement("summary");
+bodySummary.textContent="📖 Xem nội dung đề bài";
+bodySummary.style.cssText="cursor:pointer;font-weight:700;color:#355b45;";
+const body=document.createElement("div");
+body.textContent=assignment.body||"Bài tập này chưa có nội dung đề.";
+body.style.cssText="white-space:pre-wrap;line-height:1.75;margin-top:12px;";
+bodyDetails.append(bodySummary,body);
+card.append(title,bodyDetails);
 
 const isPastDeadline=!!assignment.due_at&&new Date(assignment.due_at).getTime()<Date.now();
 const deadlineInfo=document.createElement("p");
@@ -4197,13 +4204,12 @@ deadlineInfo.textContent=assignment.due_at
 card.appendChild(deadlineInfo);
 
 if(assignment.file_path){
-  const fileInfo=document.createElement("p");
-  fileInfo.textContent="📎 Đề bài đính kèm: "+(assignment.file_name||"Tệp đề bài");
-  fileInfo.style.cssText="margin:12px 0;padding:12px;background:#f7f1e8;border-radius:10px;";
+  const fileInfo=document.createElement("div");
+  fileInfo.style.cssText="margin-top:12px;padding-top:10px;border-top:1px solid #e8eee9;";
   const fileLink=document.createElement("a");
-  fileLink.textContent="Mở / tải đề bài";
+  fileLink.textContent="📎 Mở / tải tệp đề bài: "+(assignment.file_name||"Tệp đề bài");
   fileLink.href="#";
-  fileLink.style.cssText="display:inline-block;margin-left:8px;color:#68452f;font-weight:700;";
+  fileLink.style.cssText="color:#68452f;font-weight:700;";
   fileLink.addEventListener("click",async(event)=>{
     event.preventDefault();
     const popup=window.open("about:blank","_blank");
@@ -4219,10 +4225,10 @@ if(assignment.file_path){
       return;
     }
     popup.location=data.signedUrl;
-    fileLink.textContent="Mở / tải đề bài";
+    fileLink.textContent="📎 Mở / tải tệp đề bài: "+(assignment.file_name||"Tệp đề bài");
   });
   fileInfo.appendChild(fileLink);
-  card.appendChild(fileInfo);
+  bodyDetails.appendChild(fileInfo);
 }
 
 const existingList=submittedMap.get(assignment.id)||[];
