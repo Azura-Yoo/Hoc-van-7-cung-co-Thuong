@@ -3064,20 +3064,42 @@ async function loadTeacherAssignmentDeadlines(){
     content.textContent=assignment.body||"Bài tập này chưa có nội dung đề.";
     detail.append(summary,content);
     if(assignment.file_path){
-      const fileLine=document.createElement("p");
-      fileLine.style.margin="10px 0 0";
-      const fileLink=document.createElement("a");
-      fileLink.href="#";
-      fileLink.textContent="📎 Mở tệp đề: "+(assignment.file_name||"Tệp đính kèm");
-      fileLink.addEventListener("click",async(event)=>{
-        event.preventDefault();
-        const popup=window.open("about:blank","_blank");
-        if(!popup){fileLink.textContent="Trình duyệt đang chặn cửa sổ bật lên.";return;}
-        const signed=await supabaseClient.storage.from("assignment-files").createSignedUrl(assignment.file_path,3600);
-        if(signed.error||!signed.data?.signedUrl){popup.close();fileLink.textContent="Không mở được tệp đề.";return;}
-        popup.location=signed.data.signedUrl;
+      const fileLine=document.createElement("div");
+      fileLine.style.cssText="margin-top:12px;padding-top:10px;border-top:1px solid #e8eee9;";
+      const fileLink=document.createElement("button");
+      fileLink.type="button";
+      fileLink.textContent="👁 Xem tệp đề: "+(assignment.file_name||"Tệp đính kèm");
+      fileLink.style.cssText="background:#496b59;padding:9px 13px;margin:0;";
+      fileLink.addEventListener("click",async()=>{
+        fileLink.disabled=true;fileLink.textContent="Đang tải bản xem trước...";
+        const signed=await supabaseClient.storage.from("assignment-files").createSignedUrl(assignment.file_path,3600,{download:false});
+        fileLink.disabled=false;
+        if(signed.error||!signed.data?.signedUrl){fileLink.textContent="Không tạo được bản xem trước. Thử tải lại trang.";return;}
+        const overlay=document.createElement("div");
+        overlay.style.cssText="position:fixed;inset:0;z-index:99999;background:rgba(18,28,22,.78);display:flex;align-items:center;justify-content:center;padding:14px;";
+        const panel=document.createElement("div");
+        panel.style.cssText="background:#fff;width:min(100%,1050px);height:min(92vh,850px);border-radius:14px;display:flex;flex-direction:column;overflow:hidden;";
+        const bar=document.createElement("div");
+        bar.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid #e5eae6;";
+        const fileTitle=document.createElement("strong");
+        fileTitle.textContent=assignment.file_name||"Tệp đề bài";
+        const close=document.createElement("button");
+        close.type="button";close.textContent="Đóng";close.style.cssText="margin:0;padding:8px 14px;";
+        close.addEventListener("click",()=>overlay.remove());
+        bar.append(fileTitle,close);
+        const frame=document.createElement("iframe");
+        frame.src=signed.data.signedUrl;
+        frame.title="Xem trước tệp đề bài";
+        frame.style.cssText="width:100%;height:100%;border:0;flex:1;";
+        const note=document.createElement("p");
+        note.textContent="Nếu tệp Word không hiển thị trực tiếp trên trình duyệt, em có thể mở bằng ứng dụng Word hoặc tải tệp xuống.";
+        note.style.cssText="font-size:12px;color:#68756d;padding:6px 14px;margin:0;";
+        panel.append(bar,frame,note);overlay.appendChild(panel);
+        overlay.addEventListener("click",event=>{if(event.target===overlay)overlay.remove();});
+        document.body.appendChild(overlay);
+        fileLink.textContent="👁 Xem tệp đề: "+(assignment.file_name||"Tệp đính kèm");
       });
-      fileLine.appendChild(fileLink);detail.appendChild(fileLine);
+      fileLine.appendChild(fileLink);bodyDetails.appendChild(fileLine);
     }
     info.appendChild(detail);
     const controls=document.createElement("div");
@@ -3128,6 +3150,52 @@ async function loadTeacherAssignmentDeadlines(){
     });
     controls.append(field,save);
 
+    const editButton=document.createElement("button");
+    editButton.type="button";
+    editButton.textContent="✏️ Chỉnh sửa đề";
+    editButton.style.cssText="margin-top:12px;margin-right:8px;background:#496b59;padding:9px 14px;";
+    const editor=document.createElement("div");
+    editor.hidden=true;
+    editor.style.cssText="margin-top:12px;padding:14px;background:#f7faf7;border:1px solid #dfe9e1;border-radius:11px;";
+    const editTitleLabel=document.createElement("label");
+    editTitleLabel.textContent="Tên bài tập";
+    const editTitle=document.createElement("input");
+    editTitle.type="text";editTitle.value=assignment.title||"";editTitle.style.width="100%";
+    editTitleLabel.appendChild(editTitle);
+    const editBodyLabel=document.createElement("label");
+    editBodyLabel.textContent="Nội dung đề bài";
+    const editBody=document.createElement("textarea");
+    editBody.value=assignment.body||"";editBody.rows=7;editBody.style.width="100%";
+    editBodyLabel.appendChild(editBody);
+    const editStatus=document.createElement("p");
+    editStatus.style.cssText="font-size:13px;color:#68756d;margin:8px 0;";
+    const editSave=document.createElement("button");
+    editSave.type="button";editSave.textContent="Lưu nội dung đã sửa";
+    const editCancel=document.createElement("button");
+    editCancel.type="button";editCancel.textContent="Đóng";editCancel.style.cssText="margin-left:8px;background:#78847c;";
+    editButton.addEventListener("click",()=>{
+      editor.hidden=!editor.hidden;
+      editButton.textContent=editor.hidden?"✏️ Chỉnh sửa đề":"Ẩn phần chỉnh sửa";
+    });
+    editCancel.addEventListener("click",()=>{editor.hidden=true;editButton.textContent="✏️ Chỉnh sửa đề";});
+    editSave.addEventListener("click",async()=>{
+      const nextTitle=editTitle.value.trim(),nextBody=editBody.value.trim();
+      if(!nextTitle||!nextBody){editStatus.textContent="Cô nhập đầy đủ tên bài và nội dung đề nhé.";return;}
+      if(!confirm("Lưu nội dung đề mới? Học sinh sẽ nhìn thấy nội dung đã chỉnh sửa khi tải lại trang."))return;
+      editSave.disabled=true;editSave.textContent="Đang lưu...";
+      const update=await supabaseClient.from("assignments").update({title:nextTitle,body:nextBody})
+        .eq("id",assignment.id).eq("created_by",user.id);
+      if(update.error){editStatus.textContent="Chưa lưu được: "+update.error.message;editSave.disabled=false;editSave.textContent="Lưu nội dung đã sửa";return;}
+      assignment.title=nextTitle;assignment.body=nextBody;
+      title.textContent="Bài "+(index+1)+": "+nextTitle+" · Lớp "+(assignment.class_name||"");
+      summary.textContent="Xem lại nội dung đề đã giao";
+      content.textContent=nextBody;
+      editStatus.textContent="Đã cập nhật đề thành công.";
+      editSave.disabled=false;editSave.textContent="Lưu nội dung đã sửa";
+      editor.hidden=true;editButton.textContent="✏️ Chỉnh sửa đề";
+    });
+    editor.append(editTitleLabel,editBodyLabel,editStatus,editSave,editCancel);
+
     const removeButton=document.createElement("button");
     removeButton.type="button";
     removeButton.textContent="Xóa bài tập";
@@ -3166,7 +3234,7 @@ async function loadTeacherAssignmentDeadlines(){
       message.textContent="Đã xóa bài tập chưa có lượt nộp.";
     });
 
-    card.append(info,controls,result,removeButton);
+    card.append(info,controls,result,editButton,editor,removeButton);
     list.appendChild(card);
   });
 }
