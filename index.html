@@ -4477,6 +4477,9 @@ if(!supabaseClient)return;
 const hashParams=new URLSearchParams((window.location.hash||"").replace(/^#/,""));
 const ssoToken=hashParams.get("sso");
 if(ssoToken){
+  // BẮT BUỘC xóa phiên cũ trước khi đổi sang tài khoản giáo viên khác.
+  // Nếu không, khi SSO lỗi/hết hạn, ứng dụng có thể dùng lại phiên giáo viên trước.
+  await supabaseClient.auth.signOut();
   history.replaceState(null,"",window.location.pathname+window.location.search);
   loginMessage.textContent="Đang xác thực phiên đăng nhập Văn học số...";
   const {data,error}=await supabaseClient.auth.verifyOtp({
@@ -4491,6 +4494,8 @@ if(ssoToken){
     await showUser(data.user);
     return;
   }
+  loginMessage.textContent="Không nhận được tài khoản từ Văn học số. Cô hãy quay lại cổng giáo viên và thử vào lại.";
+  return;
 }
 const {data}=await supabaseClient.auth.getSession();
 if(data.session)await showUser(data.session.user);
