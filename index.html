@@ -376,6 +376,31 @@ p,li,label,summary,a,small,strong,em,span,div{
   input,select,textarea,button{font-size:14px}
 }
 
+
+/* Giao diện học sinh: điều hướng gọn, nội dung thành từng khối rõ ràng */
+.student-quick-nav{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px;padding:10px;background:#f3f6f2;border:1px solid #e2e9e1;border-radius:12px}
+.student-quick-nav a{display:inline-flex;align-items:center;justify-content:center;padding:8px 13px;border-radius:9px;background:#fff;border:1px solid #dfe8df;color:#355b45;text-decoration:none;font-weight:700;font-size:14px;line-height:1.35}
+.student-quick-nav a:hover{background:#eaf2eb}
+#studentPanel{margin-top:18px;padding:18px 20px}
+#studentPanel h2{margin:0 0 6px;color:#355b45;font-size:21px}
+#studentPanel>.sub{margin:0 0 10px;font-size:14px}
+#studentAssignmentMessage{margin:8px 0 12px;font-size:13px}
+.student-assignment-item{padding:15px!important;margin:12px 0!important;border-radius:12px!important}
+.student-assignment-item h3{margin:0 0 8px;font-size:17px;color:#355b45;line-height:1.45}
+.student-assignment-item button{width:auto;min-width:130px;padding:10px 16px}
+#revisionPanel{margin-top:18px;padding:20px}
+#revisionPanel>h2{font-size:21px;margin-bottom:5px}
+#revisionPanel>.sub{font-size:14px;margin-bottom:12px}
+#revisionPanel .revision-unit{margin-top:10px;padding:14px;border-radius:12px}
+#revisionPanel .revision-unit h3{font-size:17px;margin-bottom:8px}
+#revisionPanel .revision-unit details{margin:7px 0;padding:11px 13px}
+@media(max-width:700px){
+ .student-quick-nav{gap:6px;padding:8px}
+ .student-quick-nav a{flex:1 1 145px;padding:9px 10px;font-size:13px}
+ #studentPanel{padding:14px;margin-top:14px}
+ #revisionPanel{padding:14px;margin-top:14px}
+ .student-assignment-item{padding:12px!important}
+}
 </style>
 </head>
 
@@ -577,6 +602,10 @@ p,li,label,summary,a,small,strong,em,span,div{
 </div>
 
 <div id="studentPanel" class="hidden">
+<nav class="student-quick-nav" aria-label="Mục lục học sinh">
+  <a href="#studentAssignments">📝 Bài tập của em</a>
+  <a href="#revisionPanel">📚 Ôn tập Ngữ văn 7</a>
+</nav>
 <h2>Bài tập của em</h2>
 <p class="sub">Những bài tập cô Thương đã giao cho lớp mình.</p>
 <div id="studentAssignmentMessage" class="message">Đang chờ tải bài tập...</div>
