@@ -3323,7 +3323,8 @@ createAssignmentForm.addEventListener("submit", async (event) => {
     createAssignmentForm.reset();
     await loadTeacherAssignmentDeadlines();
   } catch (error) {
-    message.textContent = "Chưa giao được bài: " + (error.message || "Có lỗi xảy ra.");
+    assignmentPreviewConfirmed=false;
+    message.textContent = "Chưa giao được bài: " + (error.message || "Có lỗi xảy ra.") + " Cô kiểm tra lại rồi xem trước và xác nhận lại nhé.";
   } finally {
     button.disabled = false;
     button.textContent = "Xem trước bài tập";
