@@ -440,6 +440,16 @@ p,li,label,summary,a,small,strong,em,span,div{
 
 <div id="teacherPanel" class="hidden">
 
+<section id="adminClassManager" class="hidden" style="margin:0 0 22px;padding:18px;background:#f3f7ff;border:1px solid #d7e2f4;border-radius:16px;">
+  <h2 style="margin:0 0 8px;">Quản trị phân lớp giáo viên</h2>
+  <p class="sub">Chỉ quản trị viên được phân công lớp. Giáo viên chỉ nhìn thấy học sinh và giao bài trong các lớp được cấp.</p>
+  <label for="adminTeacherSelect">Chọn giáo viên</label>
+  <select id="adminTeacherSelect"><option value="">Đang tải danh sách giáo viên...</option></select>
+  <div id="adminClassChoices" style="display:flex;gap:12px;flex-wrap:wrap;margin:12px 0;padding:12px;background:#fff;border:1px solid #dce4f0;border-radius:12px;"></div>
+  <button type="button" id="saveTeacherClassesButton">Lưu phân lớp</button>
+  <div id="adminClassMessage" class="message" aria-live="polite"></div>
+</section>
+
 <nav id="teacherQuickNav" aria-label="Điều hướng nhanh khu vực giáo viên">
   <a href="#teacherStudentsTop">👥 Học sinh</a>
   <a href="#progressDashboard">📊 Tiến độ</a>
@@ -2702,6 +2712,8 @@ loginMessage.textContent="Website đang chờ cấu hình thông tin kết nối
 }
 
 let availableTeacherClasses=[];
+let currentTeacherId=null;
+const platformClassList=["6A","6B","6C","7A","7B","7C","8A","8B","8C","9A","9B","9C","9D"];
 
 async function loadTeacherClasses(teacherId){
   const {data,error}=await supabaseClient
@@ -2747,12 +2759,81 @@ async function loadTeacherClasses(teacherId){
   }
 }
 
+async function loadAdminTeacherClassManager(){
+  const panel=document.getElementById("adminClassManager");
+  const select=document.getElementById("adminTeacherSelect");
+  const message=document.getElementById("adminClassMessage");
+  if(!panel||!select||!message||!supabaseClient)return;
+  panel.classList.remove("hidden");
+  message.textContent="Đang tải danh sách giáo viên...";
+  const {data,error}=await supabaseClient.functions.invoke("clever-api",{body:{action:"list_teacher_classes"}});
+  if(error||!data?.success){
+    message.textContent=data?.error||error?.message||"Không tải được danh sách giáo viên.";
+    return;
+  }
+  select.replaceChildren();
+  (data.teachers||[]).forEach(item=>{
+    const option=document.createElement("option");
+    option.value=item.id;
+    option.textContent=item.full_name+" · "+(item.classes?.length?item.classes.join(", "):"Chưa phân lớp");
+    option.dataset.classes=JSON.stringify(item.classes||[]);
+    select.appendChild(option);
+  });
+  if(!select.options.length){
+    message.textContent="Chưa có tài khoản giáo viên.";
+    return;
+  }
+  const renderChoices=()=>{
+    const container=document.getElementById("adminClassChoices");
+    container.replaceChildren();
+    const selected=select.options[select.selectedIndex];
+    const current=new Set(selected?JSON.parse(selected.dataset.classes||"[]"):[]);
+    platformClassList.forEach(className=>{
+      const label=document.createElement("label");
+      label.style.cssText="display:flex;align-items:center;gap:6px;margin:0;";
+      const input=document.createElement("input");
+      input.type="checkbox";
+      input.name="adminTeacherClass";
+      input.value=className;
+      input.checked=current.has(className);
+      input.style.cssText="width:auto;margin:0;";
+      label.append(input,document.createTextNode(className));
+      container.appendChild(label);
+    });
+    message.textContent="Đang chỉnh sửa phân lớp của "+(selected?.textContent||"giáo viên")+".";
+  };
+  select.addEventListener("change",renderChoices);
+  renderChoices();
+  document.getElementById("saveTeacherClassesButton").onclick=async()=>{
+    const button=document.getElementById("saveTeacherClassesButton");
+    const classes=Array.from(document.querySelectorAll('input[name="adminTeacherClass"]:checked')).map(input=>input.value);
+    button.disabled=true;
+    message.textContent="Đang lưu phân lớp...";
+    const result=await supabaseClient.functions.invoke("clever-api",{
+      body:{action:"set_teacher_classes",teacher_id:select.value,classes}
+    });
+    button.disabled=false;
+    if(result.error||!result.data?.success){
+      message.textContent=result.data?.error||result.error?.message||"Không lưu được phân lớp.";
+      return;
+    }
+    const option=select.options[select.selectedIndex];
+    option.dataset.classes=JSON.stringify(classes);
+    option.textContent=option.textContent.split(" · ")[0]+" · "+(classes.length?classes.join(", "):"Chưa phân lớp");
+    message.textContent="Đã lưu. Giáo viên này hiện được phân quyền: "+(classes.join(", ")||"chưa có lớp")+".";
+    if(select.value===currentTeacherId){
+      await loadTeacherClasses(currentTeacherId);
+      await loadStudents();
+    }
+  };
+}
+
 async function showUser(user){
 if(!supabaseClient||!user)return;
 
 const {data,error}=await supabaseClient
 .from("profiles")
-.select("full_name, role, class_name")
+.select("full_name, role, class_name, is_platform_admin")
 .eq("id",user.id)
 .single();
 
@@ -2767,7 +2848,11 @@ if(aiLauncher)aiLauncher.style.display="inline-flex";
 
 document.getElementById("userName").textContent=data.full_name||user.email;
 document.getElementById("userRole").textContent=data.role==="teacher"?"Tài khoản giáo viên":"Tài khoản học sinh";
-document.getElementById("dashboardMessage").textContent=data.role==="teacher"?"Chào cô Thương! Chúc cô có những giờ học thật vui.":"Chào em! Cùng hoàn thành tốt những bài tập cô giao nhé.";
+document.querySelector("#homeSection h1").textContent=data.role==="teacher"?"Chào mừng thầy/cô!":"Chào mừng em!";
+document.getElementById("dashboardMessage").textContent=data.role==="teacher"?"Chào thầy/cô "+(data.full_name||"")+". Chúc thầy/cô có những giờ học thật vui.":"Chào em! Cùng hoàn thành tốt những bài tập cô giao nhé.";
+const aiGreeting=document.querySelector("#aiMessages .ai-msg.bot");
+if(aiGreeting)aiGreeting.textContent=data.role==="teacher"?"Chào thầy/cô! 🌿 Thầy/cô cần hỗ trợ soạn bài, xây dựng câu hỏi hay hướng dẫn học sinh phần kiến thức nào?":"Chào em! 🌿 Em đang vướng ở phần kiến thức hay bài tập nào? Hãy gửi câu hỏi, cô trợ lí sẽ cùng em tháo gỡ nhé.";
+document.getElementById("aiInput").placeholder=data.role==="teacher"?"Nhập câu hỏi của thầy/cô...":"Nhập câu hỏi của em...";
 
 document.getElementById("revisionPanel").classList.remove("hidden");
 
@@ -2778,6 +2863,9 @@ teacherPanel.classList.toggle("hidden",data.role!=="teacher");
 studentPanel.classList.toggle("hidden",data.role!=="student");
 
 if(data.role==="teacher"){
+currentTeacherId=user.id;
+document.getElementById("adminClassManager").classList.toggle("hidden",data.is_platform_admin!==true);
+if(data.is_platform_admin===true)await loadAdminTeacherClassManager();
 try{
   await loadTeacherClasses(user.id);
 }catch(classError){
@@ -2791,6 +2879,7 @@ await loadTeacherAssignmentDeadlines();
 }
 
 if(data.role==="student"){
+currentTeacherId=null;
 await loadAssignments(data.class_name);
 }
 if(window.initStemFeatures) await window.initStemFeatures(data);
@@ -2851,6 +2940,11 @@ createStudentForm.addEventListener("submit", async (event) => {
 
   const full_name = document.getElementById("studentName").value.trim();
   const class_name = document.getElementById("studentClass").value;
+
+  if (!availableTeacherClasses.includes(class_name)) {
+    message.textContent = "Lớp này chưa được quản trị viên phân công cho tài khoản.";
+    return;
+  }
 
   if (!full_name) {
     message.textContent = "Cô chưa nhập họ tên học sinh.";
@@ -3359,7 +3453,11 @@ createAssignmentForm.addEventListener("submit", async (event) => {
   ];
 
   if (!title || !body || !classNames.length || !answerType) {
-    message.textContent = "Cô vui lòng nhập tên bài, nội dung và chọn ít nhất một lớp.";
+    message.textContent = "Thầy/cô vui lòng nhập tên bài, nội dung và chọn ít nhất một lớp.";
+    return;
+  }
+  if(classNames.some(className=>!availableTeacherClasses.includes(className))){
+    message.textContent="Có lớp không thuộc quyền quản lý của tài khoản. Thầy/cô tải lại trang và chọn lớp được quản trị viên phân công nhé.";
     return;
   }
   if (hasDueAt && (!dueAt || Number.isNaN(dueAt.getTime()))) {
@@ -3493,10 +3591,16 @@ async function loadStudents() {
   message.textContent = "Đang tải danh sách học sinh...";
 
   try {
+    if(!currentTeacherId || !availableTeacherClasses.length){
+      message.textContent="Tài khoản này chưa được quản trị viên phân lớp. Cô vui lòng liên hệ quản trị viên.";
+      return;
+    }
     const { data, error } = await supabaseClient
       .from("profiles")
       .select("id, full_name, username, class_name")
       .eq("role", "student")
+      .eq("teacher_id", currentTeacherId)
+      .in("class_name", availableTeacherClasses)
       .order("full_name", { ascending: true });
 
     if (error) {
