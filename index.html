@@ -2802,7 +2802,7 @@ async function loadAdminTeacherClassManager(){
     });
     message.textContent="Đang chỉnh sửa phân lớp của "+(selected?.textContent||"giáo viên")+".";
   };
-  select.addEventListener("change",renderChoices);
+  select.onchange=renderChoices;
   renderChoices();
   document.getElementById("saveTeacherClassesButton").onclick=async()=>{
     const button=document.getElementById("saveTeacherClassesButton");
@@ -2921,7 +2921,8 @@ loginSection.classList.remove("hidden");
 if(aiLauncher)aiLauncher.style.display="none";
 if(aiChat)aiChat.classList.remove("open");
 aiHistory=[];
-loginMessage.textContent="Em đã đăng xuất.";
+loginMessage.textContent=currentTeacherId?"Thầy/cô đã đăng xuất.":"Em đã đăng xuất.";
+currentTeacherId=null;
 });
 
 const createStudentForm=document.getElementById("createStudentForm");
