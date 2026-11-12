@@ -485,11 +485,11 @@ p,li,label,summary,a,small,strong,em,span,div{
       <label for="assignmentTitle">Tên bài tập</label>
       <input id="assignmentTitle" type="text" required>
 
-      <label for="assignmentClass">Lớp nhận bài</label>
-      <select id="assignmentClass" required>
-        <option value="7A">7A</option>
-        <option value="7C">7C</option>
-      </select>
+      <label>Lớp nhận bài (có thể chọn nhiều lớp)</label>
+      <div id="assignmentClassChoices" style="display:flex;gap:16px;flex-wrap:wrap;margin:8px 0 14px;padding:12px 14px;background:#fffefa;border:1px solid #dfd2c1;border-radius:12px;">
+        <label style="display:flex;align-items:center;gap:8px;margin:0;"><input type="checkbox" name="assignmentClass" value="7A" checked style="width:auto;margin:0;"> Lớp 7A</label>
+        <label style="display:flex;align-items:center;gap:8px;margin:0;"><input type="checkbox" name="assignmentClass" value="7C" style="width:auto;margin:0;"> Lớp 7C</label>
+      </div>
 
       <label for="assignmentBody">Nội dung bài tập</label>
       <textarea id="assignmentBody" required></textarea>
@@ -522,7 +522,15 @@ p,li,label,summary,a,small,strong,em,span,div{
         <p class="sub">Đáp án được lưu riêng tư, không xuất hiện trong tài khoản học sinh.</p>
       </div>
 
-      <button type="submit">Giao bài tập</button>
+      <button type="submit" id="previewAssignmentButton">Xem trước bài tập</button>
+      <div id="assignmentPreviewPanel" hidden style="margin-top:16px;padding:18px;background:#fff;border:1px solid #cdbb9f;border-radius:14px;">
+        <h3 style="margin:0 0 12px;">Xem trước trước khi giao</h3>
+        <div id="assignmentPreviewContent" style="line-height:1.7;overflow-wrap:anywhere;"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+          <button type="button" id="confirmAssignmentButton">Xác nhận giao bài</button>
+          <button type="button" id="cancelAssignmentPreview" class="logout">Quay lại chỉnh sửa</button>
+        </div>
+      </div>
       <div id="assignmentMessage" class="message"></div>
     </form>
   </div>
@@ -3166,15 +3174,26 @@ async function loadTeacherAssignmentDeadlines(){
 document.getElementById("refreshAssignmentDeadlines")?.addEventListener("click",loadTeacherAssignmentDeadlines);
 
 const createAssignmentForm = document.getElementById("createAssignmentForm");
+let assignmentPreviewConfirmed = false;
+
+document.getElementById("cancelAssignmentPreview")?.addEventListener("click",()=>{
+  document.getElementById("assignmentPreviewPanel").hidden=true;
+  assignmentPreviewConfirmed=false;
+});
+
+document.getElementById("confirmAssignmentButton")?.addEventListener("click",()=>{
+  assignmentPreviewConfirmed=true;
+  createAssignmentForm.requestSubmit();
+});
 
 createAssignmentForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const message = document.getElementById("assignmentMessage");
-  const button = createAssignmentForm.querySelector('button[type="submit"]');
+  const button = document.getElementById("previewAssignmentButton");
   const title = document.getElementById("assignmentTitle").value.trim();
   const body = document.getElementById("assignmentBody").value.trim();
-  const className = document.getElementById("assignmentClass").value;
+  const classNames = Array.from(createAssignmentForm.querySelectorAll('input[name="assignmentClass"]:checked')).map(input=>input.value);
   const answerType = document.getElementById("assignmentAnswerType").value;
   const dueDateValue = document.getElementById("assignmentDueDate").value;
   const dueTimeValue = document.getElementById("assignmentDueTime").value.trim();
@@ -3190,8 +3209,8 @@ createAssignmentForm.addEventListener("submit", async (event) => {
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
   ];
 
-  if (!title || !body || !className || !answerType) {
-    message.textContent = "Cô vui lòng nhập đầy đủ thông tin.";
+  if (!title || !body || !classNames.length || !answerType) {
+    message.textContent = "Cô vui lòng nhập tên bài, nội dung và chọn ít nhất một lớp.";
     return;
   }
   if (hasDueAt && (!dueAt || Number.isNaN(dueAt.getTime()))) {
@@ -3207,88 +3226,108 @@ createAssignmentForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  if(!assignmentPreviewConfirmed){
+    const preview=document.getElementById("assignmentPreviewPanel");
+    const previewContent=document.getElementById("assignmentPreviewContent");
+    const dueText=dueAt?dueAt.toLocaleString("vi-VN"):"Không giới hạn thời gian";
+    const fileText=file?file.name:"Không có tệp đề đính kèm";
+    const keyFilesText=answerKeyFiles.length?answerKeyFiles.map(f=>f.name).join(", "):"Không có tệp đáp án";
+    const answerLabel=answerType==="short"?"Trả lời ngắn":answerType==="file"?"Bắt buộc tải tệp":"Trả lời dài";
+    previewContent.replaceChildren();
+    const addLine=(label,value)=>{
+      const p=document.createElement("p");p.style.margin="7px 0";
+      const strong=document.createElement("strong");strong.textContent=label+": ";
+      const span=document.createElement("span");span.textContent=value;
+      p.append(strong,span);previewContent.appendChild(p);
+    };
+    addLine("Tên bài",title);
+    addLine("Lớp nhận bài",classNames.join(", "));
+    addLine("Nội dung",body);
+    addLine("Hạn nộp",dueText);
+    addLine("Hình thức nộp",answerLabel);
+    addLine("Tệp đề",fileText);
+    addLine("Đáp án riêng của giáo viên",answerKeyText?"Đã nhập nội dung đáp án":"Chưa nhập nội dung đáp án");
+    addLine("Tệp đáp án",keyFilesText);
+    preview.hidden=false;
+    preview.scrollIntoView({behavior:"smooth",block:"center"});
+    message.textContent="Cô kiểm tra kỹ nội dung và lớp nhận bài. Bài chưa được giao cho học sinh.";
+    return;
+  }
+
   button.disabled = true;
   button.textContent = "Đang giao bài...";
+  document.getElementById("confirmAssignmentButton").disabled=true;
 
   try {
     const { data: userData, error: userError } = await supabaseClient.auth.getUser();
     const user = userData?.user;
     if (userError || !user) throw new Error("Phiên đăng nhập đã hết hạn. Cô vui lòng đăng nhập lại.");
 
-    const { data: assignment, error: insertError } = await supabaseClient
-      .from("assignments")
-      .insert({
-        title,
-        body,
-        class_name: className,
-        answer_type: answerType,
-        due_at: dueAt ? dueAt.toISOString() : null,
-        created_by: user.id
-      })
-      .select("id")
-      .single();
+    const createdAssignments=[];
+    const uploadedKeyPaths=[];
+    const uploadedAssignmentPaths=[];
+    try{
+      for(const className of classNames){
+        const {data:assignment,error:insertError}=await supabaseClient
+          .from("assignments")
+          .insert({
+            title,body,class_name:className,answer_type:answerType,
+            due_at:dueAt?dueAt.toISOString():null,created_by:user.id
+          })
+          .select("id").single();
+        if(insertError) throw insertError;
+        createdAssignments.push(assignment);
 
-    if (insertError) throw insertError;
+        const rubricPaths=[];
+        const rubricNames=[];
+        for(let i=0;i<answerKeyFiles.length;i++){
+          const keyFile=answerKeyFiles[i];
+          const ext=(keyFile.name.split(".").pop()||"pdf").toLowerCase();
+          const safe=keyFile.name.replace(/[^a-zA-Z0-9._-]+/g,"_");
+          const keyPath=user.id+"/"+assignment.id+"/"+Date.now()+"-"+i+"-"+safe;
+          const keyUpload=await supabaseClient.storage.from("teacher-answer-keys").upload(keyPath,keyFile,{upsert:false,contentType:keyFile.type||(ext==="pdf"?"application/pdf":ext==="docx"?"application/vnd.openxmlformats-officedocument.wordprocessingml.document":"text/plain")});
+          if(keyUpload.error) throw keyUpload.error;
+          rubricPaths.push(keyPath);rubricNames.push(keyFile.name);uploadedKeyPaths.push(keyPath);
+        }
+        const {error:rubricError}=await supabaseClient.from("assignment_rubrics").upsert({
+          assignment_id:assignment.id,teacher_id:user.id,answer_text:answerKeyText,
+          file_paths:rubricPaths,file_names:rubricNames,updated_at:new Date().toISOString()
+        },{onConflict:"assignment_id"});
+        if(rubricError) throw rubricError;
 
-    const rubricPaths = [];
-    const rubricNames = [];
-    for (let i = 0; i < answerKeyFiles.length; i++) {
-      const keyFile = answerKeyFiles[i];
-      const ext = (keyFile.name.split(".").pop() || "pdf").toLowerCase();
-      const safe = keyFile.name.replace(/[^a-zA-Z0-9._-]+/g, "_");
-      const keyPath = user.id + "/" + assignment.id + "/" + Date.now() + "-" + i + "-" + safe;
-      const keyUpload = await supabaseClient.storage.from("teacher-answer-keys").upload(keyPath, keyFile, { upsert: false, contentType: keyFile.type || (ext === "pdf" ? "application/pdf" : ext === "docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document" : "text/plain") });
-      if (keyUpload.error) {
-        if (rubricPaths.length) await supabaseClient.storage.from("teacher-answer-keys").remove(rubricPaths);
-        await supabaseClient.from("assignments").delete().eq("id", assignment.id);
-        throw keyUpload.error;
+        if(file){
+          const safeName=file.name.replace(/[^a-zA-Z0-9._-]+/g,"_");
+          const path=assignment.id+"/"+user.id+"/"+Date.now()+"-"+safeName;
+          const upload=await supabaseClient.storage.from("assignment-files").upload(path,file,{upsert:false,contentType:file.type});
+          if(upload.error) throw upload.error;
+          uploadedAssignmentPaths.push(path);
+          const {error:updateError}=await supabaseClient.from("assignments")
+            .update({file_path:path,file_name:file.name,file_size:file.size,mime_type:file.type})
+            .eq("id",assignment.id).eq("created_by",user.id);
+          if(updateError) throw updateError;
+        }
       }
-      rubricPaths.push(keyPath);
-      rubricNames.push(keyFile.name);
-    }
-    const { error: rubricError } = await supabaseClient.from("assignment_rubrics").upsert({
-      assignment_id: assignment.id, teacher_id: user.id, answer_text: answerKeyText,
-      file_paths: rubricPaths, file_names: rubricNames, updated_at: new Date().toISOString()
-    }, { onConflict: "assignment_id" });
-    if (rubricError) {
-      if (rubricPaths.length) await supabaseClient.storage.from("teacher-answer-keys").remove(rubricPaths);
-      await supabaseClient.from("assignments").delete().eq("id", assignment.id);
-      throw rubricError;
-    }
-
-    if (file) {
-      const extension = file.name.split(".").pop().toLowerCase();
-      const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "_");
-      const path = assignment.id + "/" + user.id + "/" + Date.now() + "-" + safeName;
-      const { error: uploadError } = await supabaseClient.storage
-        .from("assignment-files")
-        .upload(path, file, { upsert: false, contentType: file.type });
-      if (uploadError) {
-        await supabaseClient.from("assignments").delete().eq("id", assignment.id);
-        throw uploadError;
+    }catch(createError){
+      if(uploadedKeyPaths.length) await supabaseClient.storage.from("teacher-answer-keys").remove(uploadedKeyPaths);
+      if(uploadedAssignmentPaths.length) await supabaseClient.storage.from("assignment-files").remove(uploadedAssignmentPaths);
+      for(const created of createdAssignments){
+        await supabaseClient.from("assignment_rubrics").delete().eq("assignment_id",created.id).eq("teacher_id",user.id);
+        await supabaseClient.from("assignments").delete().eq("id",created.id).eq("created_by",user.id);
       }
-
-      const { error: updateError } = await supabaseClient
-        .from("assignments")
-        .update({ file_path: path, file_name: file.name, file_size: file.size, mime_type: file.type })
-        .eq("id", assignment.id);
-      if (updateError) {
-        await supabaseClient.storage.from("assignment-files").remove([path]);
-        await supabaseClient.from("assignments").delete().eq("id", assignment.id);
-        throw updateError;
-      }
+      throw createError;
     }
 
-    message.textContent = file
-      ? "Đã giao bài tập và tải tệp đề lên thành công!"
-      : "Đã giao bài tập thành công!";
+    message.textContent="Đã giao bài tập thành công cho "+classNames.join(", ")+(file?" và tải tệp đề lên thành công!":"!");
+    assignmentPreviewConfirmed=false;
+    document.getElementById("assignmentPreviewPanel").hidden=true;
     createAssignmentForm.reset();
     await loadTeacherAssignmentDeadlines();
   } catch (error) {
     message.textContent = "Chưa giao được bài: " + (error.message || "Có lỗi xảy ra.");
   } finally {
     button.disabled = false;
-    button.textContent = "Giao bài tập";
+    button.textContent = "Xem trước bài tập";
+    document.getElementById("confirmAssignmentButton").disabled=false;
   }
 });
 
