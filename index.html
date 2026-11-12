@@ -3119,7 +3119,46 @@ async function loadTeacherAssignmentDeadlines(){
       save.disabled=false;save.textContent="Lưu / gia hạn";
     });
     controls.append(field,save);
-    card.append(info,controls,result);
+
+    const removeButton=document.createElement("button");
+    removeButton.type="button";
+    removeButton.textContent="Xóa bài tập";
+    removeButton.style.cssText="margin-top:12px;background:#a94f45;padding:9px 14px;";
+    removeButton.addEventListener("click",async()=>{
+      if(!confirm("Cô muốn xóa bài tập “"+(assignment.title||"Chưa có tên")+"” của lớp "+(assignment.class_name||"")+"?\n\nBài tập chỉ được xóa khi chưa có học sinh nộp bài. Dữ liệu bài nộp và điểm số sẽ được bảo vệ."))return;
+      removeButton.disabled=true;removeButton.textContent="Đang kiểm tra...";
+      const {data:submitted,error:submittedError}=await supabaseClient.from("submissions")
+        .select("id").eq("assignment_id",assignment.id).limit(1);
+      if(submittedError){
+        result.textContent="Không kiểm tra được bài nộp nên chưa thể xóa: "+submittedError.message;
+        removeButton.disabled=false;removeButton.textContent="Xóa bài tập";return;
+      }
+      if(submitted&&submitted.length){
+        result.textContent="Chưa thể xóa vì bài tập đã có học sinh nộp. Ara giữ nguyên bài làm và điểm số để tránh mất dữ liệu. Cô có thể điều chỉnh hạn nộp hoặc liên hệ hỗ trợ để xử lý trường hợp này.";
+        removeButton.disabled=false;removeButton.textContent="Xóa bài tập";return;
+      }
+      const {data:rubric}=await supabaseClient.from("assignment_rubrics")
+        .select("file_paths").eq("assignment_id",assignment.id).eq("teacher_id",user.id).maybeSingle();
+      const rubricPaths=rubric?.file_paths||[];
+      const {error:rubricDeleteError}=await supabaseClient.from("assignment_rubrics")
+        .delete().eq("assignment_id",assignment.id).eq("teacher_id",user.id);
+      if(rubricDeleteError){
+        result.textContent="Chưa xóa được đáp án riêng: "+rubricDeleteError.message;
+        removeButton.disabled=false;removeButton.textContent="Xóa bài tập";return;
+      }
+      const {error:assignmentDeleteError}=await supabaseClient.from("assignments")
+        .delete().eq("id",assignment.id).eq("created_by",user.id);
+      if(assignmentDeleteError){
+        result.textContent="Chưa xóa được bài tập: "+assignmentDeleteError.message;
+        removeButton.disabled=false;removeButton.textContent="Xóa bài tập";return;
+      }
+      if(assignment.file_path)await supabaseClient.storage.from("assignment-files").remove([assignment.file_path]);
+      if(rubricPaths.length)await supabaseClient.storage.from("teacher-answer-keys").remove(rubricPaths);
+      card.remove();
+      message.textContent="Đã xóa bài tập chưa có lượt nộp.";
+    });
+
+    card.append(info,controls,result,removeButton);
     list.appendChild(card);
   });
 }
