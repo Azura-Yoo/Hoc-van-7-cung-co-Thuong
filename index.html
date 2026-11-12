@@ -459,8 +459,7 @@ p,li,label,summary,a,small,strong,em,span,div{
 
     <label for="studentClass">Lớp</label>
     <select id="studentClass" required>
-      <option value="7A">7A</option>
-      <option value="7C">7C</option>
+      <option value="">Đang tải danh sách lớp...</option>
     </select>
 
     <p>Tên đăng nhập và mật khẩu được hệ thống tự động tạo.</p>
@@ -515,8 +514,7 @@ p,li,label,summary,a,small,strong,em,span,div{
 
       <label>Lớp nhận bài (có thể chọn nhiều lớp)</label>
       <div id="assignmentClassChoices" style="display:flex;gap:16px;flex-wrap:wrap;margin:8px 0 14px;padding:12px 14px;background:#fffefa;border:1px solid #dfd2c1;border-radius:12px;">
-        <label style="display:flex;align-items:center;gap:8px;margin:0;"><input type="checkbox" name="assignmentClass" value="7A" checked style="width:auto;margin:0;"> Lớp 7A</label>
-        <label style="display:flex;align-items:center;gap:8px;margin:0;"><input type="checkbox" name="assignmentClass" value="7C" style="width:auto;margin:0;"> Lớp 7C</label>
+        <span class="sub">Danh sách lớp sẽ được tải theo quyền của tài khoản giáo viên.</span>
       </div>
 
       <label for="assignmentBody">Nội dung bài tập</label>
@@ -2703,6 +2701,52 @@ supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 loginMessage.textContent="Website đang chờ cấu hình thông tin kết nối Supabase.";
 }
 
+let availableTeacherClasses=[];
+
+async function loadTeacherClasses(teacherId){
+  const {data,error}=await supabaseClient
+    .from("teacher_classes")
+    .select("class_name")
+    .eq("teacher_id",teacherId)
+    .order("class_name",{ascending:true});
+
+  if(error) throw new Error("Không tải được danh sách lớp được phân quyền: "+error.message);
+
+  availableTeacherClasses=[...new Set((data||[])
+    .map(item=>String(item.class_name||"").trim().toUpperCase())
+    .filter(Boolean))].sort((a,b)=>a.localeCompare(b,"vi",{numeric:true}));
+
+  const studentSelect=document.getElementById("studentClass");
+  studentSelect.replaceChildren();
+  availableTeacherClasses.forEach(className=>{
+    const option=document.createElement("option");
+    option.value=className;
+    option.textContent=className;
+    studentSelect.appendChild(option);
+  });
+
+  const assignmentChoices=document.getElementById("assignmentClassChoices");
+  assignmentChoices.replaceChildren();
+  if(!availableTeacherClasses.length){
+    const empty=document.createElement("span");
+    empty.className="sub";
+    empty.textContent="Tài khoản chưa được phân quyền lớp nào. Cô liên hệ quản trị viên.";
+    assignmentChoices.appendChild(empty);
+  }else{
+    availableTeacherClasses.forEach(className=>{
+      const label=document.createElement("label");
+      label.style.cssText="display:flex;align-items:center;gap:8px;margin:0;";
+      const checkbox=document.createElement("input");
+      checkbox.type="checkbox";
+      checkbox.name="assignmentClass";
+      checkbox.value=className;
+      checkbox.style.cssText="width:auto;margin:0;";
+      label.append(checkbox,document.createTextNode(" Lớp "+className));
+      assignmentChoices.appendChild(label);
+    });
+  }
+}
+
 async function showUser(user){
 if(!supabaseClient||!user)return;
 
@@ -2734,6 +2778,12 @@ teacherPanel.classList.toggle("hidden",data.role!=="teacher");
 studentPanel.classList.toggle("hidden",data.role!=="student");
 
 if(data.role==="teacher"){
+try{
+  await loadTeacherClasses(user.id);
+}catch(classError){
+  document.getElementById("dashboardMessage").textContent=classError.message;
+  return;
+}
 await loadStudents();
 await loadProgressDashboard();
 await loadSubmissions();
@@ -2886,12 +2936,12 @@ bulkButton.addEventListener("click", async () => {
 
   const invalidStudents = students.filter(student =>
     !student.full_name ||
-    !["7A", "7C"].includes(student.class_name)
+    !availableTeacherClasses.includes(student.class_name)
   );
 
   if (invalidStudents.length > 0) {
     message.textContent =
-      "Có dòng chưa hợp lệ. Hãy kiểm tra họ tên và mã lớp 7A hoặc 7C.";
+      "Có dòng chưa hợp lệ. Hãy kiểm tra họ tên và mã lớp trong danh sách lớp được cấp cho tài khoản.";
     return;
   }
 
@@ -3464,12 +3514,10 @@ async function loadStudents() {
       student.class_name = (student.class_name || "").trim().toUpperCase();
     });
 
-    const classes = ["7A", "7C"];
-    const otherClasses = [...new Set(
-      data.map(s => s.class_name).filter(c => c && !classes.includes(c))
-    )].sort();
-
-    const allClasses = [...classes, ...otherClasses];
+    const allClasses = [...new Set([
+      ...availableTeacherClasses,
+      ...data.map(s => s.class_name).filter(Boolean)
+    ])].sort((a,b)=>a.localeCompare(b,"vi",{numeric:true}));
 
     message.textContent = `Tổng cộng ${data.length} học sinh.`;
 
@@ -3513,7 +3561,7 @@ async function loadStudents() {
       heading.appendChild(title);
 
       // NÚT XÓA TOÀN BỘ HỌC SINH TRONG LỚP
-      if (["7A", "7C"].includes(className) && students.length > 0) {
+      if (students.length > 0) {
         const deleteClassButton = document.createElement("button");
         deleteClassButton.type = "button";
         deleteClassButton.textContent = "Xóa toàn bộ lớp";
