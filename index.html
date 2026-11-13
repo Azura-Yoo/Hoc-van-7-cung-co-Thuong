@@ -2754,6 +2754,14 @@ async function loadTeacherClasses(teacherId){
   availableTeacherGrades=[...new Set((data||[])
     .map(item=>String(item.grade_level||String(item.class_name||"").trim().charAt(0)))
     .filter(grade=>["6","7","8","9"].includes(grade)))].sort();
+  try{
+    const {data:gradeData,error:gradeError}=await supabaseClient.functions.invoke("clever-api",{
+      body:{action:"list_teacher_class_grades"}
+    });
+    if(!gradeError&&gradeData?.success){
+      availableTeacherGrades=gradeData.grade_levels||availableTeacherGrades;
+    }
+  }catch(_gradeError){}
   const gradeSelect=document.getElementById("newClassGrade");
   if(gradeSelect){
     gradeSelect.replaceChildren();
