@@ -4555,20 +4555,23 @@ if(assignment.file_path){
   fileLink.style.cssText="color:#68452f;font-weight:700;";
   fileLink.addEventListener("click",async(event)=>{
     event.preventDefault();
-    const popup=window.open("about:blank","_blank");
-    if(!popup){
-      fileLink.textContent="Trình duyệt đang chặn cửa sổ mới. Hãy cho phép mở cửa sổ bật lên rồi thử lại.";
-      return;
+    if(fileLink.dataset.opening==="1")return;
+    fileLink.dataset.opening="1";
+    fileLink.textContent="Đang chuẩn bị tệp...";
+    try{
+      const {data,error}=await supabaseClient.storage.from("assignment-files").createSignedUrl(assignment.file_path,3600,{download:false});
+      if(error||!data?.signedUrl){
+        throw error||new Error("Không tạo được đường dẫn mở tệp.");
+      }
+      // Không dùng window.open() sau một thao tác bất đồng bộ:
+      // trình duyệt điện thoại thường chặn tab about:blank, khiến học sinh chỉ thấy trang trắng.
+      // Điều hướng ngay trong tab hiện tại để PDF/Word được trình duyệt hoặc ứng dụng phù hợp xử lý.
+      window.location.assign(data.signedUrl);
+    }catch(error){
+      fileLink.dataset.opening="0";
+      fileLink.textContent="Không mở được tệp. Em hãy thử tải lại trang hoặc báo cô kiểm tra tệp đính kèm.";
+      console.error("Lỗi mở tệp đề bài:",error);
     }
-    fileLink.textContent="Đang mở tệp...";
-    const {data,error}=await supabaseClient.storage.from("assignment-files").createSignedUrl(assignment.file_path,3600);
-    if(error||!data?.signedUrl){
-      popup.close();
-      fileLink.textContent="Không mở được tệp. Em hãy tải lại trang.";
-      return;
-    }
-    popup.location=data.signedUrl;
-    fileLink.textContent="📎 Mở / tải tệp đề bài: "+(assignment.file_name||"Tệp đề bài");
   });
   fileInfo.appendChild(fileLink);
   bodyDetails.appendChild(fileInfo);
