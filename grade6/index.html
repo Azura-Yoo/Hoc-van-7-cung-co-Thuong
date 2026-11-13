@@ -1,0 +1,2894 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Học Văn 6 cùng cô Thương</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23eaf2eb'/%3E%3Ctext x='50' y='72' font-size='65' text-anchor='middle'%3E📚%3C/text%3E%3C/svg%3E">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:24px;font-family:Arial,sans-serif;background:#f5f7f4;color:#35443d;min-height:100vh}
+.container{width:100%;max-width:440px;margin:0 auto;background:#fff;padding:34px 28px;border-radius:22px;box-shadow:0 8px 30px rgba(53,68,61,.07)}
+.hidden{display:none!important}
+.brand{text-align:center;margin-bottom:28px}
+.book{font-size:42px}
+h1{font-size:25px;margin:12px 0 8px;color:#496b59}
+.sub{color:#7c8980;font-size:14px;line-height:1.6}
+label{display:block;margin:17px 0 7px;font-size:14px}
+input,select,textarea{width:100%;padding:13px 14px;border:1px solid #dce4dc;border-radius:10px;font:inherit;font-size:15px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:#789982}
+button{padding:13px 18px;margin-top:12px;background:#668a72;color:#fff;border:0;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer}
+button:hover{background:#52745e}
+button:disabled{opacity:.6;cursor:not-allowed}
+form button{width:100%}
+.message{font-size:14px;line-height:1.6;margin-top:12px;overflow-wrap:anywhere}
+.note{margin-top:24px;font-size:12px;color:#929b94;text-align:center}
+.logout{background:#e9eee9;color:#496b59}
+body:has(#homeSection:not(.hidden)){padding:24px 32px}
+.container:has(#homeSection:not(.hidden)){width:100%;max-width:none;padding:0;background:transparent;box-shadow:none;border-radius:0}
+#homeSection{width:100%;max-width:1400px;margin:0 auto;padding:32px;background:#fff;border-radius:20px;box-shadow:0 8px 30px rgba(40,70,50,.07)}
+#homeSection h1{color:#345d49;font-size:30px}
+#homeSection h2{color:#345d49;font-size:21px;margin:0 0 14px}
+#teacherPanel{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:22px;
+  width:100%;
+  max-width:1100px;
+  margin:28px auto 0;
+  box-sizing:border-box;
+}
+
+#teacherPanel>*{
+  grid-column:1/-1;
+  min-width:0;
+  width:100%;
+  box-sizing:border-box;
+}
+
+#teacherPanel #createTeacherClassForm input,
+#teacherPanel #createTeacherClassForm select{min-height:40px}
+@media(max-width:650px){
+  #teacherPanel #createTeacherClassForm{grid-template-columns:1fr!important}
+  #teacherPanel #createTeacherClassForm button{width:100%}
+}
+#teacherPanel #createStudentForm{
+  width:100%;
+  max-width:700px;
+  justify-self:center;
+  margin-left:auto;
+  margin-right:auto;
+  box-sizing:border-box;
+}
+
+#teacherPanel .student-list,
+#teacherPanel form,
+#teacherPanel .assignment-section,
+#teacherPanel .submission-section{
+  background:#f8faf8;
+  border:1px solid #e3ebe5;
+  border-radius:16px;
+  padding:22px;
+  min-width:0;
+  box-sizing:border-box;
+}
+
+#teacherPanel h3{
+  color:#496b59;
+  margin-top:0;
+}
+
+#teacherPanel input,
+#teacherPanel select,
+#teacherPanel textarea{
+  margin:8px 0 14px;
+}
+
+#teacherPanel textarea{
+  min-height:110px;
+  resize:vertical;
+}
+
+#teacherPanel .assignment-section form{
+  background:transparent;
+  border:0;
+  padding:0;
+}
+
+@media(max-width:768px){
+  #teacherPanel{
+    padding:0 12px;
+  }
+
+  #teacherPanel>*{
+    width:100%;
+  }
+}
+#studentList{line-height:1.8;overflow-wrap:anywhere}
+.student-item{padding:12px 0;border-bottom:1px solid #e3ebe5}
+.student-item button{display:block;width:auto;background:#b66b60;margin-top:8px}
+.submission-section{min-width:0}
+.submission-section>button,.student-list>button{width:auto}
+.submission-filters{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin:15px 0}
+#studentPanel{margin-top:28px;padding:22px;background:#f8faf8;border:1px solid #e3ebe5;border-radius:16px}
+.student-assignment-item{overflow-wrap:anywhere}
+#revisionPanel{margin-top:28px;padding:24px;background:#fffaf5;border:1px solid #f0e2d5;border-radius:18px}
+#revisionPanel>h2{color:#805b43;margin:0 0 8px}
+#revisionPanel>.sub{margin-bottom:18px}
+.revision-unit{margin-top:16px;padding:20px;background:#fff;border:1px solid #eadfd5;border-radius:14px}
+.revision-unit h3{color:#805b43;margin:0 0 14px;font-size:19px}
+.revision-unit details{display:block;width:100%;margin:10px 0;padding:14px 16px;background:#fff8f1;border:1px solid #f0e5db;border-radius:10px}
+.revision-unit summary{cursor:pointer;font-weight:700;color:#6f503c;line-height:1.5}
+.revision-content{display:block;width:100%;padding-top:14px;line-height:1.75;color:#444;overflow-wrap:anywhere}
+.revision-content h4{color:#6f503c;margin:20px 0 8px}
+.revision-content h4:first-child{margin-top:0}
+.revision-content p{margin:8px 0}
+.revision-content li{margin:5px 0}
+.revision-content ul,.revision-content ol{padding-left:24px}
+.revision-content details{background:#fff;border-color:#e8ded3}
+.revision-note{padding:14px;background:#f7f4ef;border-left:4px solid #c6a98d;border-radius:6px;margin:12px 0}
+.reading-source{font-size:13px;color:#777;background:#f8f8f6;padding:12px;border-radius:8px}
+.reading-placeholder{padding:16px;border:1px dashed #cdbca9;border-radius:10px;background:#fffdf9}
+.revision-table{width:100%;border-collapse:collapse;margin:12px 0}
+.revision-table th,.revision-table td{border:1px solid #e4ddd4;padding:9px;text-align:left;vertical-align:top}
+.revision-table th{background:#f8f0e8}
+@media(max-width:700px){
+ body{padding:12px}
+ body:has(#homeSection:not(.hidden)){padding:10px}
+ .container:has(#homeSection:not(.hidden)){padding:0}
+ #homeSection{padding:18px}
+ #teacherPanel{grid-template-columns:1fr}
+ #teacherPanel>h2,#teacherPanel .assignment-section,#teacherPanel .submission-section{grid-column:1}
+ #homeSection h1{font-size:25px}
+ #revisionPanel{padding:14px}
+ .revision-unit{padding:14px}
+ .revision-unit h3{font-size:17px}
+ .submission-filters{grid-template-columns:1fr}
+ .revision-table{font-size:13px}
+}
+ 
+/* Thu gọn danh sách học sinh */
+.student-list {
+  max-height: 380px;
+  display: flex;
+  flex-direction: column;
+}
+
+#studentList {
+  max-height: 280px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+  scrollbar-width: thin;
+}
+
+#studentList::-webkit-scrollbar {
+  width: 6px;
+}
+
+#studentList::-webkit-scrollbar-thumb {
+  background: #c5c5c5;
+  border-radius: 10px;
+}
+
+#studentList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Thu gọn kết quả cấp tài khoản hàng loạt */
+#bulkStudentResults {
+  max-height: 220px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 12px;
+  margin-top: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  scrollbar-width: thin;
+}
+
+#bulkStudentResults p {
+  margin: 5px 0;
+  padding: 5px 0;
+  border-bottom: 1px solid #eeeeee;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+#bulkStudentResults::-webkit-scrollbar {
+  width: 6px;
+}
+
+#bulkStudentResults::-webkit-scrollbar-thumb {
+  background: #c5c5c5;
+  border-radius: 10px;
+}
+
+
+/* GIAO DIEN VAN HOC SO - HOC VAN 7 */
+:root{--vh-cream:#f6f0e5;--vh-paper:#fffdf9;--vh-brown:#68452f;--vh-dark:#38271f;--vh-muted:#88796d;--vh-line:#e9ddca;--vh-gold:#b69a76}
+body{font-family:"Segoe UI",Tahoma,Arial,sans-serif;background:linear-gradient(135deg,#f6f0e5 0%,#efe5d7 100%);color:var(--vh-dark)}
+button,input,select,textarea{font:inherit}
+button{font-weight:600}
+.container{color:var(--vh-dark)}
+#homeSection{background:var(--vh-paper);border:1px solid var(--vh-line);border-radius:24px;box-shadow:0 18px 55px rgba(56,39,31,.08)}
+#homeSection>.book{display:inline-flex;align-items:center;justify-content:center;width:54px;height:54px;border-radius:17px;background:var(--vh-cream);font-size:27px}
+#homeSection h1,#homeSection h2,#teacherPanel h3,#revisionPanel>h2{color:var(--vh-brown)}
+#homeSection h1{font-weight:750;letter-spacing:-.7px}
+#homeSection .sub,#homeSection p.sub{color:var(--vh-muted)}
+#teacherPanel .student-list,#teacherPanel form,#teacherPanel .assignment-section,#teacherPanel .submission-section,#studentPanel,#revisionPanel{background:#fffaf3;border:1px solid var(--vh-line);border-radius:18px}
+#teacherPanel .assignment-section form{background:transparent;border:0}
+#teacherPanel h3{font-weight:700}
+input,select,textarea{background:#fffefa;border:1px solid #dfd2c1;border-radius:12px;color:var(--vh-dark)}
+input:focus,select:focus,textarea:focus{border-color:var(--vh-gold);box-shadow:0 0 0 3px rgba(182,154,118,.16)}
+button{background:var(--vh-brown);border-radius:12px;transition:transform .15s ease,background .15s ease}
+button:hover{background:var(--vh-dark);transform:translateY(-1px)}
+button.logout,.logout{background:#eee4d7;color:var(--vh-brown)}
+#revisionPanel{background:#fdf8f0}
+.revision-unit{border-color:var(--vh-line);border-radius:16px}
+.revision-unit h3,#revisionPanel>h2{color:var(--vh-brown)}
+.revision-unit details{background:#fffaf3;border-color:var(--vh-line);border-radius:12px}
+.revision-unit summary{color:var(--vh-brown)}
+#loginSection .container,.brand h1{color:var(--vh-brown)}
+/* AI STUDY COMPANION */
+#aiLauncher{position:fixed;right:24px;bottom:24px;z-index:9998;border:0;border-radius:999px;padding:14px 19px;box-shadow:0 10px 30px rgba(56,39,31,.24);display:none;align-items:center;gap:9px;background:var(--vh-brown);color:white;font-weight:700}
+#aiLauncher .ai-spark{font-size:20px}
+#aiChat{position:fixed;right:24px;bottom:88px;width:min(390px,calc(100vw - 28px));height:min(590px,calc(100vh - 120px));z-index:9999;background:#fffdf9;border:1px solid var(--vh-line);border-radius:20px;box-shadow:0 22px 70px rgba(56,39,31,.22);display:none;flex-direction:column;overflow:hidden}
+#aiChat.open{display:flex}
+.ai-head{padding:17px 18px;background:linear-gradient(135deg,#68452f,#38271f);color:#fff;display:flex;align-items:center;justify-content:space-between}
+.ai-head strong{display:block;font-size:15px}
+.ai-head small{display:block;margin-top:4px;color:#eadcc9;font-size:12px}
+.ai-close{margin:0;padding:4px 9px;background:rgba(255,255,255,.14);font-size:20px}
+.ai-intro{padding:13px 15px 8px;color:#756557;font-size:12px;line-height:1.5}
+.ai-suggestions{display:flex;flex-wrap:wrap;gap:7px;padding:0 14px 10px}
+.ai-suggestions button{margin:0;padding:7px 10px;background:#f3eadc;color:#68452f;border:1px solid #e9ddca;font-size:11px;font-weight:600}
+.ai-messages{flex:1;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;background:#fcf8f1}
+.ai-msg{max-width:88%;padding:10px 12px;border-radius:14px;font-size:13px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.ai-msg.bot{align-self:flex-start;background:#fff;border:1px solid #eee3d5;color:#433329;border-bottom-left-radius:5px}
+.ai-msg.user{align-self:flex-end;background:#68452f;color:#fff;border-bottom-right-radius:5px}
+.ai-compose{padding:12px;border-top:1px solid var(--vh-line);display:flex;gap:8px;background:#fffdf9}
+.ai-compose textarea{margin:0;min-height:44px;max-height:100px;resize:vertical;font-size:13px;padding:11px}
+.ai-compose button{margin:0;min-width:72px;padding:10px;font-size:13px}
+.ai-status{padding:0 14px 9px;color:#927d69;font-size:11px;background:#fffdf9}
+@media(max-width:600px){#aiLauncher{right:14px;bottom:14px}#aiChat{right:10px;bottom:76px;width:calc(100vw - 20px);height:min(600px,calc(100vh - 95px))}#homeSection{padding:18px}}
+
+/* THANH DIEU HUONG NHANH TRANG GIAO VIEN */
+#teacherQuickNav{
+  position:sticky;top:8px;z-index:100;
+  display:flex;gap:8px;align-items:center;
+  width:100%;padding:10px;margin:0 0 8px;
+  overflow-x:auto;white-space:nowrap;
+  background:rgba(255,253,249,.96);
+  border:1px solid var(--vh-line);border-radius:15px;
+  box-shadow:0 8px 22px rgba(56,39,31,.08);
+  backdrop-filter:blur(10px);
+  scrollbar-width:thin;
+}
+#teacherQuickNav a{
+  flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;
+  padding:10px 14px;border-radius:10px;
+  background:#f6f0e5;color:#68452f;text-decoration:none;
+  font-size:13px;font-weight:700;border:1px solid #e9ddca;
+  transition:background .15s ease,transform .15s ease;
+}
+#teacherQuickNav a:hover{background:#eadcc9;transform:translateY(-1px)}
+#teacherPanel [id="teacherStudentsTop"],
+#teacherPanel #progressDashboard,
+#teacherPanel #teacherCreateAssignment,
+#teacherPanel #teacherDeadlines,
+#teacherPanel #teacherSubmissions,
+#revisionPanel{scroll-margin-top:90px}
+@media(max-width:650px){
+  #teacherQuickNav{top:4px;padding:7px;gap:6px}
+  #teacherQuickNav a{padding:9px 11px;font-size:12px}
+}
+
+/* Giao diện gọn cho khu vực quản lý học sinh */
+#teacherPanel #createStudentForm{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(150px,190px);
+  gap:8px 14px;
+  align-items:end;
+  padding:16px 18px;
+  margin:10px 0 16px;
+  background:#fffdf9;
+  border:1px solid #eadfce;
+  border-radius:14px;
+}
+#teacherPanel #createStudentForm h3,
+#teacherPanel #createStudentForm p,
+#teacherPanel #createStudentForm button,
+#teacherPanel #createStudentForm .message{
+  grid-column:1 / -1;
+}
+#teacherPanel #createStudentForm h3{margin:0 0 2px;font-size:17px;color:#68452f}
+#teacherPanel #createStudentForm label{margin:0 0 3px;font-size:13px;color:#625448}
+#teacherPanel #createStudentForm input,
+#teacherPanel #createStudentForm select{margin:0;min-height:40px}
+#teacherPanel #createStudentForm p{margin:2px 0;color:#7b7168;font-size:12px}
+#teacherPanel #createStudentForm button,
+#teacherPanel #createBulkStudents,
+#teacherPanel #refreshStudents{width:auto;min-width:0;padding:9px 15px;font-size:13px}
+#teacherPanel #bulkStudentList{
+  min-height:105px;
+  max-height:150px;
+  padding:10px 12px;
+  font-size:13px;
+  line-height:1.5;
+}
+#teacherPanel #studentList{margin-top:10px}
+#teacherPanel .student-class-section{padding:14px 16px!important;margin:12px 0!important}
+#teacherPanel .student-class-heading{margin-bottom:8px!important}
+#teacherPanel .student-item{padding:9px 0!important;gap:8px!important}
+#teacherPanel .student-item button{padding:7px 10px;font-size:12px}
+#progressDashboard{scroll-margin-top:90px}
+#progressDashboard>div:first-child button{width:auto;padding:9px 13px;font-size:13px}
+#progressDashboardList>details{margin:10px 0!important;padding:12px 15px!important}
+#progressDashboardList>details>summary{font-size:15px}
+@media(max-width:650px){
+  #teacherPanel #createStudentForm{grid-template-columns:1fr;padding:14px}
+  #teacherPanel #createStudentForm h3,
+  #teacherPanel #createStudentForm p,
+  #teacherPanel #createStudentForm button,
+  #teacherPanel #createStudentForm .message{grid-column:1}
+  #teacherPanel .student-item{align-items:flex-start!important}
+  #teacherPanel .student-item button{width:auto}
+}
+
+/* DONG BO FONT TOAN HE THONG - tieng Viet va responsive */
+:root{
+  --vh-font-family:"Segoe UI",Tahoma,Arial,sans-serif;
+}
+html{
+  font-family:var(--vh-font-family);
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+}
+body,body *{
+  font-family:var(--vh-font-family);
+  font-synthesis:none;
+}
+body{
+  font-size:15px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+button,input,select,textarea{
+  font-family:var(--vh-font-family)!important;
+  font-size:inherit;
+  line-height:1.45;
+}
+button{font-weight:600;letter-spacing:0}
+input,select,textarea{font-weight:400}
+h1,h2,h3,h4,h5,h6{
+  font-family:var(--vh-font-family);
+  line-height:1.35;
+  overflow-wrap:anywhere;
+}
+p,li,label,summary,a,small,strong,em,span,div{
+  font-family:var(--vh-font-family);
+}
+#homeSection,#teacherPanel,#studentPanel,#revisionPanel,
+#teacherPanel form,#teacherPanel section,
+.revision-content,.student-assignment-item{
+  font-family:var(--vh-font-family);
+}
+@media(max-width:600px){
+  body{font-size:14px;line-height:1.6}
+  input,select,textarea,button{font-size:14px}
+}
+
+
+/* Giao diện học sinh: điều hướng gọn, nội dung thành từng khối rõ ràng */
+.student-quick-nav{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px;padding:10px;background:#f3f6f2;border:1px solid #e2e9e1;border-radius:12px}
+.student-quick-nav a{display:inline-flex;align-items:center;justify-content:center;padding:8px 13px;border-radius:9px;background:#fff;border:1px solid #dfe8df;color:#355b45;text-decoration:none;font-weight:700;font-size:14px;line-height:1.35}
+.student-quick-nav a:hover{background:#eaf2eb}
+#studentPanel{margin-top:18px;padding:18px 20px}
+#studentPanel h2{margin:0 0 6px;color:#355b45;font-size:21px}
+#studentPanel>.sub{margin:0 0 10px;font-size:14px}
+#studentAssignmentMessage{margin:8px 0 12px;font-size:13px}
+.student-assignment-item{padding:15px!important;margin:12px 0!important;border-radius:12px!important}
+.student-assignment-item h3{margin:0 0 8px;font-size:17px;color:#355b45;line-height:1.45}
+.student-assignment-item button{width:auto;min-width:130px;padding:10px 16px}
+#revisionPanel{margin-top:18px;padding:20px}
+#revisionPanel>h2{font-size:21px;margin-bottom:5px}
+#revisionPanel>.sub{font-size:14px;margin-bottom:12px}
+#revisionPanel .revision-unit{margin-top:10px;padding:14px;border-radius:12px}
+#revisionPanel .revision-unit h3{font-size:17px;margin-bottom:8px}
+#revisionPanel .revision-unit details{margin:7px 0;padding:11px 13px}
+@media(max-width:700px){
+ .student-quick-nav{gap:6px;padding:8px}
+ .student-quick-nav a{flex:1 1 145px;padding:9px 10px;font-size:13px}
+ #studentPanel{padding:14px;margin-top:14px}
+ #revisionPanel{padding:14px;margin-top:14px}
+ .student-assignment-item{padding:12px!important}
+}
+</style>
+</head>
+
+<body>
+<main class="container">
+
+<section id="loginSection">
+<div class="brand">
+<div class="book">📚</div>
+<h1>Học Văn 6 cùng cô Thương</h1>
+<div class="sub">Cùng học Văn, cùng khám phá và trưởng thành.</div>
+</div>
+
+<form id="loginForm">
+<label for="email">Email hoặc tên đăng nhập</label>
+<input id="email" type="text" placeholder="Nhập email hoặc tên tài khoản" required>
+<label for="password">Mật khẩu</label>
+<input id="password" type="password" placeholder="Nhập mật khẩu" required>
+<button type="submit" id="loginButton">Đăng nhập</button>
+</form>
+<div id="loginMessage" class="message"></div>
+<div class="note">Không có tài khoản? Liên hệ cô Thương để được cấp tài khoản.</div>
+</section>
+
+<section id="homeSection" class="hidden">
+<div class="home-topbar" style="display:flex;justify-content:flex-end;align-items:center;margin:0 0 14px;">
+  <button type="button" class="logout" id="logoutButton" style="width:auto;min-width:120px;padding:10px 18px;">Đăng xuất</button>
+</div>
+<div class="book">🌿</div>
+<h1>Chào mừng em!</h1>
+<p id="userName"></p>
+<p id="userRole" class="sub"></p>
+<div id="dashboardMessage" class="message"></div>
+<div class="workspace-home-link" style="margin:12px 0 22px;">
+  <a href="https://vanhocso.hocvancungcothuong.workers.dev/" style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border:1px solid #dfd2c1;border-radius:12px;background:#fffaf3;color:#68452f;text-decoration:none;font-weight:700;">← Quay lại trang chủ Văn học số</a>
+</div>
+
+<div id="teacherPanel" class="hidden">
+
+<section id="adminClassManager" class="hidden" style="margin:0 0 22px;padding:18px;background:#f3f7ff;border:1px solid #d7e2f4;border-radius:16px;">
+  <h2 style="margin:0 0 8px;">Quản trị phân lớp giáo viên</h2>
+  <p class="sub">Chỉ quản trị viên được phân công lớp. Giáo viên chỉ nhìn thấy học sinh và giao bài trong các lớp được cấp.</p>
+  <label for="adminTeacherSelect">Chọn giáo viên</label>
+  <select id="adminTeacherSelect"><option value="">Đang tải danh sách giáo viên...</option></select>
+  <div id="adminClassChoices" style="display:flex;gap:12px;flex-wrap:wrap;margin:12px 0;padding:12px;background:#fff;border:1px solid #dce4f0;border-radius:12px;"></div>
+  <button type="button" id="saveTeacherClassesButton">Lưu phân lớp</button>
+  <div id="adminClassMessage" class="message" aria-live="polite"></div>
+</section>
+
+<nav id="teacherQuickNav" aria-label="Điều hướng nhanh khu vực giáo viên">
+  <a href="#teacherStudentsTop">👥 Học sinh</a>
+  <a href="#progressDashboard">📊 Tiến độ</a>
+  <a href="#teacherCreateAssignment">📝 Giao bài</a>
+  <a href="#teacherDeadlines">⏰ Hạn nộp</a>
+  <a href="#teacherSubmissions">📥 Bài nộp</a>
+  <a href="#revisionPanel">📚 Hệ thống kiến thức</a>
+</nav>
+
+  <section id="teacherClassManager" style="margin:12px 0 20px;padding:18px;background:#fffdf9;border:1px solid #eadfce;border-radius:14px;">
+    <h3 style="margin:0 0 6px;color:#68452f;">Tạo lớp mới</h3>
+    <p class="sub" style="margin:0 0 12px;">Thầy/cô có thể tự đặt tên lớp trong khối đã được cấp quyền. Ví dụ: 6D, 6E, 6A1.</p>
+    <form id="createTeacherClassForm" style="display:grid;grid-template-columns:minmax(130px,190px) minmax(160px,1fr) auto;gap:10px;align-items:end;margin:0;">
+      <div>
+        <label for="newClassGrade" style="display:block;margin:0 0 5px;">Khối lớp</label>
+        <select id="newClassGrade" required style="margin:0;"><option value="">Đang tải...</option></select>
+      </div>
+      <div>
+        <label for="newClassName" style="display:block;margin:0 0 5px;">Tên lớp mới</label>
+        <input id="newClassName" type="text" maxlength="5" pattern="[6-9][A-Za-z0-9]{1,4}" placeholder="Ví dụ: 6D" required style="margin:0;text-transform:uppercase;">
+      </div>
+      <button type="submit" style="margin:0;">Tạo lớp mới</button>
+    </form>
+    <div id="createTeacherClassMessage" class="message" aria-live="polite"></div>
+  </section>
+
+  <h2 id="teacherStudentsTop">Quản lý học sinh</h2>
+
+  <form id="createStudentForm">
+    <h3>Cấp tài khoản mới</h3>
+
+    <label for="studentName">Họ và tên học sinh</label>
+    <input id="studentName" type="text" required>
+
+    <label for="studentClass">Lớp</label>
+    <select id="studentClass" required>
+      <option value="">Đang tải danh sách lớp...</option>
+    </select>
+
+    <p>Tên đăng nhập và mật khẩu được hệ thống tự động tạo.</p>
+
+    <button type="submit">Tạo tài khoản học sinh</button>
+    <div id="createStudentMessage" class="message"></div>
+  </form>
+
+  <hr>
+
+  <h3>Cấp tài khoản hàng loạt</h3>
+  <p>Nhập mỗi học sinh một dòng theo mẫu: Họ tên | Lớp</p>
+  <textarea id="bulkStudentList" rows="8"
+    placeholder="Nguyễn Văn An | 6A"></textarea>
+
+  <button type="button" id="createBulkStudents">
+    Tạo tài khoản hàng loạt
+  </button>
+  <div id="bulkStudentMessage" class="message"></div>
+  <div id="bulkStudentResults"></div>
+
+  <hr>
+
+  <h3>Danh sách học sinh</h3>
+  <button type="button" id="refreshStudents">Làm mới danh sách</button>
+  <div id="studentListMessage" class="message"></div>
+  <div id="studentList"></div>
+
+  <hr>
+
+  <section id="progressDashboard" class="progress-dashboard" style="padding:20px;background:#fffaf3;border:1px solid #e9ddca;border-radius:18px;">
+    <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;">
+      <div>
+        <h2 style="margin:0 0 6px;">Bảng theo dõi tiến độ học tập</h2>
+        <p class="sub" style="margin:0;">Tổng hợp tình hình làm bài, bài còn thiếu và kết quả của từng học sinh.</p>
+      </div>
+      <button type="button" id="refreshProgressDashboard">Làm mới tiến độ</button>
+    </div>
+    <div id="progressDashboardMessage" class="message" aria-live="polite">Bảng tiến độ sẽ hiển thị tại đây.</div>
+    <div id="progressDashboardStats" class="progress-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin:16px 0;"></div>
+    <div id="progressDashboardList"></div>
+  </section>
+
+  <hr>
+
+  <div class="assignment-section" id="teacherCreateAssignment">
+    <h2>Giao bài tập</h2>
+
+    <form id="createAssignmentForm">
+      <label for="assignmentTitle">Tên bài tập</label>
+      <input id="assignmentTitle" type="text" required>
+
+      <label>Lớp nhận bài (có thể chọn nhiều lớp)</label>
+      <div id="assignmentClassChoices" style="display:flex;gap:16px;flex-wrap:wrap;margin:8px 0 14px;padding:12px 14px;background:#fffefa;border:1px solid #dfd2c1;border-radius:12px;">
+        <span class="sub">Danh sách lớp sẽ được tải theo quyền của tài khoản giáo viên.</span>
+      </div>
+
+      <label for="assignmentBody">Nội dung bài tập</label>
+      <textarea id="assignmentBody" required></textarea>
+
+      <label>Hạn cuối nhận bài (không bắt buộc)</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><label for="assignmentDueDate">Ngày</label><input id="assignmentDueDate" type="date"></div>
+        <div><label for="assignmentDueTime">Giờ (24 giờ)</label><input id="assignmentDueTime" type="text" inputmode="numeric" maxlength="5" placeholder="Ví dụ: 17:30" pattern="([01][0-9]|2[0-3]):[0-5][0-9]" autocomplete="off"></div>
+      </div>
+      <p class="sub">Nhập giờ theo dạng 00:00–23:59. Cô có thể gia hạn hoặc bỏ hạn nộp sau khi giao bài.</p>
+
+      <label for="assignmentFile">Tệp đề bài đính kèm (không bắt buộc)</label>
+      <input id="assignmentFile" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+      <p class="sub">Cô có thể tải lên đề PDF hoặc Word, tối đa 25 MB. Học sinh sẽ thấy nút mở/tải đề trong bài tập.</p>
+
+      <label for="assignmentAnswerType">Hình thức học sinh nộp bài</label>
+      <select id="assignmentAnswerType" required>
+        <option value="short">Trả lời ngắn</option>
+        <option value="long" selected>Trả lời dài</option>
+        <option value="file">Bắt buộc tải tệp</option>
+      </select>
+      <p class="sub">Nếu chọn tải tệp, học sinh phải đính kèm ít nhất 1 tệp và được chọn tối đa 10 tệp mỗi lần nộp.</p>
+
+      <div style="margin:18px 0;padding:16px;background:#f3f7f2;border:1px solid #dce8df;border-radius:12px;">
+        <h3 style="margin:0 0 8px;">Đáp án và hướng dẫn chấm (chỉ giáo viên xem)</h3>
+        <label for="assignmentAnswerKey">Nhập đáp án / thang điểm / tiêu chí chấm</label>
+        <textarea id="assignmentAnswerKey" rows="5" placeholder="Cô nhập đáp án, các ý cần đạt, thang điểm và lưu ý khi chấm..."></textarea>
+        <label for="assignmentAnswerKeyFiles">Hoặc tải tệp đáp án (PDF, Word .docx, TXT; tối đa 10 tệp, 25 MB/tệp)</label>
+        <input id="assignmentAnswerKeyFiles" type="file" multiple accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
+        <p class="sub">Đáp án được lưu riêng tư, không xuất hiện trong tài khoản học sinh.</p>
+      </div>
+
+      <button type="submit" id="previewAssignmentButton">Xem trước bài tập</button>
+      <div id="assignmentPreviewPanel" hidden style="margin-top:16px;padding:18px;background:#fff;border:1px solid #cdbb9f;border-radius:14px;">
+        <h3 style="margin:0 0 12px;">Xem trước trước khi giao</h3>
+        <div id="assignmentPreviewContent" style="line-height:1.7;overflow-wrap:anywhere;"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+          <button type="button" id="confirmAssignmentButton">Xác nhận giao bài</button>
+          <button type="button" id="cancelAssignmentPreview" class="logout">Quay lại chỉnh sửa</button>
+        </div>
+      </div>
+      <div id="assignmentMessage" class="message"></div>
+    </form>
+  </div>
+
+  <div class="assignment-deadline-manager" id="teacherDeadlines" style="margin:18px 0;padding:18px;background:#f8faf8;border:1px solid #dce8df;border-radius:14px;">
+    <h3>Quản lý hạn nộp và gia hạn bài tập</h3>
+    <p class="sub">Cô có thể thay đổi thời gian nhận bài hoặc bỏ hạn nộp cho từng bài đã giao.</p>
+    <button type="button" id="refreshAssignmentDeadlines">Làm mới danh sách bài tập</button>
+    <div id="assignmentDeadlineMessage" class="message"></div>
+    <div id="assignmentDeadlineList"></div>
+  </div>
+
+  <hr>
+
+  <div class="submission-section" id="teacherSubmissions">
+    <h2>Bài nộp của học sinh</h2>
+    <p class="sub">Theo dõi, xem bài làm và chấm điểm cho học sinh.</p>
+
+    <button type="button" id="refreshSubmissions">Làm mới bài nộp</button>
+    <div id="submissionMessage" class="message"></div>
+
+    <div class="submission-filters">
+      <div>
+        <label for="filterStudent">Lọc theo học sinh</label>
+        <select id="filterStudent">
+          <option value="">Tất cả học sinh</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="filterAssignment">Lọc theo bài tập</label>
+        <select id="filterAssignment">
+          <option value="">Tất cả bài tập</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="submissionList"></div>
+  </div>
+
+</div>
+
+<div id="studentPanel" class="hidden">
+<nav class="student-quick-nav" aria-label="Mục lục học sinh">
+  <a href="#studentAssignments">📝 Bài tập của em</a>
+  <a href="#revisionPanel">📚 Ôn tập Ngữ văn 6</a>
+</nav>
+<h2>Bài tập của em</h2>
+<p class="sub">Những bài tập cô Thương đã giao cho lớp mình.</p>
+<div id="studentAssignmentMessage" class="message">Đang chờ tải bài tập...</div>
+<div id="studentAssignments"></div>
+</div>
+
+<!-- KHO ÔN TẬP -->
+<section id="revisionPanel">
+<h2>Ôn tập Ngữ văn 6</h2>
+<p class="sub">Hệ thống kiến thức trọng tâm học kì I theo chương trình Ngữ văn 6, bộ sách Kết nối tri thức với cuộc sống. Học theo hướng nhận diện kiến thức, biết cách đọc hiểu và biết cách triển khai bài viết.</p>
+
+<div class="revision-unit">
+<h3>I. ĐỌC HIỂU VĂN BẢN</h3>
+<details open><summary>1. Truyện và truyện đồng thoại</summary><div class="revision-content">
+<h4>Những yếu tố cần nhận biết</h4>
+<ul>
+<li><strong>Người kể chuyện:</strong> Người kể chuyện ngôi thứ nhất thường xưng “tôi”, trực tiếp tham gia hoặc chứng kiến câu chuyện; ngôi thứ ba gọi tên nhân vật, kể linh hoạt về các sự việc.</li>
+<li><strong>Nhân vật:</strong> Người hoặc con vật được miêu tả, kể lại trong truyện. Nhận xét nhân vật qua ngoại hình, hành động, lời nói, suy nghĩ, cảm xúc và quan hệ với nhân vật khác.</li>
+<li><strong>Sự việc:</strong> Những việc xảy ra trong câu chuyện, thường có quan hệ trước – sau và nguyên nhân – kết quả.</li>
+<li><strong>Chi tiết tiêu biểu:</strong> Chi tiết quan trọng góp phần thể hiện tính cách nhân vật hoặc làm rõ chủ đề.</li>
+<li><strong>Chủ đề:</strong> Vấn đề, ý nghĩa chính mà văn bản muốn gửi gắm.</li>
+<li><strong>Truyện đồng thoại:</strong> Truyện viết cho trẻ em, thường có nhân vật là loài vật hoặc đồ vật được nhân hóa, vừa mang đặc điểm riêng vừa có nét giống con người.</li>
+</ul>
+<h4>Cách làm câu hỏi đọc hiểu truyện</h4>
+<ol><li>Đọc văn bản, xác định người kể chuyện và nhân vật chính.</li><li>Tóm tắt ngắn gọn sự việc theo đúng trình tự.</li><li>Tìm chi tiết trong văn bản để nhận xét nhân vật; không nhận xét chung chung.</li><li>Với câu hỏi về tác dụng chi tiết, nêu chi tiết đó làm rõ điều gì về nhân vật, sự việc hoặc chủ đề.</li><li>Với câu hỏi thông điệp, rút ra bài học phù hợp và giải thích ngắn gọn.</li></ol>
+</div></details>
+
+<details><summary>2. Thơ lục bát</summary><div class="revision-content">
+<h4>Đặc điểm thể thơ</h4>
+<ul>
+<li>Một cặp cơ bản gồm một dòng sáu tiếng và một dòng tám tiếng; các cặp thơ thường nối tiếp nhau.</li>
+<li>Vần thường được gieo ở tiếng thứ sáu của dòng sáu với tiếng thứ sáu của dòng tám; tiếng thứ tám của dòng tám thường hiệp vần với tiếng thứ sáu của dòng sáu tiếp theo.</li>
+<li>Nhịp thơ thường mềm mại, phổ biến là nhịp 2/2/2 ở dòng sáu và 2/2/2/2 hoặc 4/4 ở dòng tám, nhưng có thể linh hoạt.</li>
+<li>Ngôn ngữ giàu nhạc điệu, hình ảnh gần gũi, thường thể hiện tình cảm gia đình, quê hương, thiên nhiên và con người.</li>
+</ul>
+<h4>Khi đọc hiểu thơ lục bát</h4>
+<ol><li>Đếm tiếng để nhận diện thể thơ.</li><li>Chỉ ra từ ngữ, hình ảnh nổi bật và cảm xúc được thể hiện.</li><li>Nhận xét cách gieo vần, ngắt nhịp khi đề yêu cầu.</li><li>Xác định biện pháp tu từ và phân tích tác dụng gắn với hình ảnh, cảm xúc cụ thể.</li><li>Nêu nội dung, tình cảm hoặc thông điệp của bài thơ bằng lời văn của mình.</li></ol>
+</div></details>
+
+<details><summary>3. Kí và văn bản ghi lại trải nghiệm</summary><div class="revision-content">
+<ul>
+<li><strong>Kí:</strong> Nhóm văn bản thường ghi lại người thật, việc thật hoặc những trải nghiệm có cơ sở từ đời sống; người viết có thể trực tiếp bộc lộ cảm xúc, suy nghĩ.</li>
+<li><strong>Chi tiết chân thực:</strong> Địa điểm, thời gian, con người, sự việc và cảm nhận cụ thể giúp câu chuyện có sức thuyết phục.</li>
+<li><strong>Cái tôi người viết:</strong> Dấu ấn riêng thể hiện qua cách quan sát, lựa chọn chi tiết, kể lại và bộc lộ cảm xúc.</li>
+<li>Khi đọc, cần xác định sự việc được ghi lại, chi tiết đáng chú ý, cảm xúc của người viết và ý nghĩa của trải nghiệm.</li>
+</ul>
+<h4>Trả lời câu hỏi về kí</h4>
+<p>Nêu đúng sự việc hoặc trải nghiệm; chọn chi tiết làm căn cứ; chỉ ra cảm xúc, suy nghĩ của người viết; cuối cùng khái quát ý nghĩa của trải nghiệm.</p>
+</div></details>
+</div>
+
+<div class="revision-unit">
+<h3>II. THỰC HÀNH TIẾNG VIỆT</h3>
+<details open><summary>1. Từ đơn, từ phức; từ ghép và từ láy</summary><div class="revision-content">
+<ul>
+<li><strong>Từ đơn:</strong> Từ gồm một tiếng có nghĩa. Ví dụ: cây, nhà, đẹp.</li>
+<li><strong>Từ phức:</strong> Từ gồm hai tiếng trở lên. Từ phức gồm từ ghép và từ láy.</li>
+<li><strong>Từ ghép:</strong> Các tiếng có quan hệ về nghĩa. Ví dụ: học sinh, bàn ghế, nhà cửa.</li>
+<li><strong>Từ láy:</strong> Các tiếng có quan hệ láy âm. Ví dụ: long lanh, xanh xao, rì rào.</li>
+</ul>
+<p><strong>Cách làm:</strong> Tách từ thành các tiếng; xem các tiếng có quan hệ nghĩa hay chủ yếu có quan hệ âm thanh; từ đó xác định từ ghép hoặc từ láy.</p>
+</div></details>
+<details><summary>2. Nghĩa của từ; từ đa nghĩa và từ đồng âm</summary><div class="revision-content">
+<ul>
+<li><strong>Nghĩa của từ:</strong> Nội dung mà từ biểu thị. Muốn hiểu đúng nghĩa của từ phải đặt từ trong câu và tình huống giao tiếp.</li>
+<li><strong>Từ đa nghĩa:</strong> Một từ có một nghĩa gốc và có thể phát triển thêm nghĩa chuyển có liên quan với nhau. Ví dụ: “chân” trong chân người, chân bàn.</li>
+<li><strong>Từ đồng âm:</strong> Những từ có âm thanh giống nhau nhưng nghĩa khác nhau, không có mối liên hệ về nghĩa. Ví dụ: “đường” trong đường đi và đường ăn.</li>
+</ul>
+<p><strong>Mẹo phân biệt:</strong> Nếu các nghĩa có mối liên hệ với nhau thì thường là từ đa nghĩa; nếu nghĩa hoàn toàn khác nhau, không liên hệ thì là từ đồng âm. Luôn căn cứ vào ngữ cảnh.</p>
+</div></details>
+<details><summary>3. Cụm danh từ, cụm động từ, cụm tính từ</summary><div class="revision-content">
+<table class="revision-table"><tr><th>Loại cụm từ</th><th>Trung tâm</th><th>Ví dụ</th></tr>
+<tr><td>Cụm danh từ</td><td>Danh từ</td><td>những bông hoa đỏ</td></tr>
+<tr><td>Cụm động từ</td><td>Động từ</td><td>đang chăm chú đọc sách</td></tr>
+<tr><td>Cụm tính từ</td><td>Tính từ</td><td>rất dịu dàng và thân thiện</td></tr></table>
+<p>Cụm từ có cấu tạo mở rộng hơn từ trung tâm, giúp diễn đạt đầy đủ, cụ thể hơn. Khi xác định, tìm tiếng trung tâm trước rồi xác định phần phụ đi kèm.</p>
+</div></details>
+<details><summary>4. Mở rộng chủ ngữ, vị ngữ và trạng ngữ</summary><div class="revision-content">
+<ul>
+<li><strong>Chủ ngữ:</strong> Thường nêu người, vật hoặc sự việc được nói đến.</li>
+<li><strong>Vị ngữ:</strong> Thường nêu hoạt động, trạng thái, đặc điểm của chủ ngữ.</li>
+<li><strong>Trạng ngữ:</strong> Thành phần phụ bổ sung thông tin về thời gian, nơi chốn, nguyên nhân, mục đích, phương tiện hoặc cách thức.</li>
+<li>Các thành phần câu có thể được mở rộng bằng cụm từ để câu cụ thể, giàu thông tin hơn.</li>
+</ul>
+<p><strong>Ví dụ:</strong> “Chim hót” → “Những chú chim sâu nhỏ bé đang hót líu lo trên cành cây.” Chủ ngữ và vị ngữ được mở rộng; trạng ngữ “trên cành cây” bổ sung nơi chốn.</p>
+<p><strong>Cách làm:</strong> Tìm chủ ngữ, vị ngữ trước; xác định trạng ngữ nếu có; sau đó chỉ ra phần được mở rộng và tác dụng bổ sung thông tin.</p>
+</div></details>
+<details><summary>5. Biện pháp tu từ thường gặp</summary><div class="revision-content">
+<ul>
+<li><strong>So sánh:</strong> Đối chiếu sự vật này với sự vật khác có nét tương đồng. Tác dụng: làm hình ảnh cụ thể, sinh động, dễ hình dung.</li>
+<li><strong>Nhân hóa:</strong> Gọi hoặc tả vật bằng từ ngữ vốn dùng cho người. Tác dụng: làm sự vật gần gũi, có hồn.</li>
+<li><strong>Ẩn dụ:</strong> Gọi tên sự vật này bằng tên sự vật khác có nét tương đồng. Tác dụng: tăng sức gợi hình, gợi cảm, làm cách diễn đạt hàm súc.</li>
+<li><strong>Điệp ngữ:</strong> Lặp lại từ ngữ hoặc cấu trúc nhằm nhấn mạnh ý, tạo nhịp điệu và cảm xúc.</li>
+</ul>
+<p><strong>Công thức trả lời tác dụng:</strong> Gọi tên biện pháp → chỉ ra từ ngữ/hình ảnh thể hiện → nêu tác dụng về hình ảnh, nhấn mạnh nội dung và cảm xúc phù hợp với ngữ cảnh.</p>
+</div></details>
+<details><summary>6. Dấu câu và cách dùng từ trong ngữ cảnh</summary><div class="revision-content">
+<ul><li>Dấu chấm kết thúc câu kể; dấu chấm hỏi kết thúc câu hỏi; dấu chấm than biểu thị cảm xúc hoặc lời gọi, lời đáp mạnh.</li><li>Dấu phẩy dùng để ngăn cách các bộ phận câu, thành phần phụ hoặc các ý liệt kê.</li><li>Dấu hai chấm thường báo hiệu phần giải thích, thuyết minh hoặc lời dẫn trực tiếp.</li><li>Dấu ngoặc kép đánh dấu lời dẫn trực tiếp hoặc từ ngữ được dùng với ý nghĩa đặc biệt.</li><li>Chọn từ phải đúng nghĩa, đúng sắc thái và phù hợp với ngữ cảnh.</li></ul>
+</div></details>
+</div>
+
+<div class="revision-unit">
+<h3>III. VIẾT: CÁCH LÀM CÁC KIỂU BÀI TRỌNG TÂM</h3>
+<details open><summary>1. Kể lại một trải nghiệm của bản thân</summary><div class="revision-content">
+<h4>Yêu cầu</h4><p>Kể lại một sự việc có thật mà người viết đã trải qua; sử dụng ngôi kể thứ nhất; lựa chọn chi tiết tiêu biểu; thể hiện cảm xúc và suy nghĩ của bản thân.</p>
+<h4>Cách tìm ý</h4><ol><li>Trải nghiệm diễn ra khi nào, ở đâu?</li><li>Có những ai tham gia?</li><li>Sự việc bắt đầu, diễn biến và kết thúc ra sao?</li><li>Chi tiết nào đáng nhớ nhất?</li><li>Em có cảm xúc, suy nghĩ gì trong và sau trải nghiệm?</li><li>Trải nghiệm đem lại bài học gì?</li></ol>
+<h4>Bố cục</h4><ul><li><strong>Mở bài:</strong> Giới thiệu trải nghiệm và ấn tượng chung.</li><li><strong>Thân bài:</strong> Nêu hoàn cảnh; kể diễn biến theo trình tự thời gian; chọn chi tiết nổi bật; kết hợp miêu tả và cảm xúc.</li><li><strong>Kết bài:</strong> Nêu cảm xúc, suy nghĩ và bài học sau trải nghiệm.</li></ul>
+<p><strong>Lưu ý:</strong> Kể đúng sự việc, dùng ngôi “tôi/em”, không kể lan man; cần có cảm xúc và bài học riêng.</p>
+</div></details>
+<details><summary>2. Viết đoạn văn ghi lại cảm xúc về một bài thơ lục bát</summary><div class="revision-content">
+<h4>Bố cục đoạn văn</h4><ul><li><strong>Mở đoạn:</strong> Giới thiệu bài thơ/tác giả (nếu biết) và cảm xúc chung.</li><li><strong>Thân đoạn:</strong> Nêu cảm xúc về nội dung; chọn một hoặc hai hình ảnh, từ ngữ, cách gieo vần/ngắt nhịp tiêu biểu; trích dẫn ngắn và phân tích tác dụng.</li><li><strong>Kết đoạn:</strong> Khẳng định ấn tượng, ý nghĩa của bài thơ đối với bản thân.</li></ul>
+<h4>Khung triển khai</h4>
+<p>“Bài thơ ... đã để lại trong em ... Qua những câu thơ ..., em cảm nhận được ... Hình ảnh/từ ngữ ... gợi ... Đặc biệt, cách sử dụng ... khiến ... Từ bài thơ, em thêm ...”</p>
+<p><strong>Tránh:</strong> Kể lại hoặc diễn xuôi toàn bộ bài thơ; chép dẫn chứng quá dài; chỉ khen hay mà không giải thích vì sao xúc động.</p>
+</div></details>
+<details><summary>3. Sáng tác một bài thơ lục bát</summary><div class="revision-content">
+<ol><li>Chọn đề tài gần gũi: gia đình, mái trường, quê hương, thiên nhiên.</li><li>Xác định cảm xúc muốn gửi gắm.</li><li>Tìm hình ảnh và từ ngữ phù hợp.</li><li>Viết từng cặp câu sáu – tám tiếng; chú ý cách gieo vần và nhịp.</li><li>Đọc thành tiếng, chỉnh sửa từ ngữ, vần và cảm xúc.</li></ol>
+<p>Không cần dùng từ cầu kì; ưu tiên hình ảnh chân thực, cảm xúc tự nhiên và sự liên kết giữa các câu thơ.</p>
+</div></details>
+<details><summary>4. Tả cảnh sinh hoạt</summary><div class="revision-content">
+<h4>Yêu cầu</h4><p>Giới thiệu được cảnh sinh hoạt; miêu tả hoạt động, con người và không khí; lựa chọn chi tiết tiêu biểu; thể hiện cảm nhận của người viết.</p>
+<h4>Cách quan sát và tìm ý</h4><ul><li>Cảnh diễn ra ở đâu, vào thời gian nào?</li><li>Quang cảnh chung có đặc điểm gì?</li><li>Có những ai, họ đang làm gì?</li><li>Âm thanh, màu sắc, hoạt động nào nổi bật?</li><li>Không khí chung vui vẻ, náo nhiệt, ấm áp hay trang nghiêm?</li><li>Em có cảm xúc, suy nghĩ gì về cảnh ấy?</li></ul>
+<h4>Bố cục</h4><ul><li><strong>Mở bài:</strong> Giới thiệu cảnh sinh hoạt.</li><li><strong>Thân bài:</strong> Tả bao quát; tả hoạt động cụ thể của con người; chọn chi tiết nổi bật; kết hợp quan sát theo trình tự không gian hoặc thời gian.</li><li><strong>Kết bài:</strong> Nêu cảm nghĩ, ấn tượng và ý nghĩa của cảnh sinh hoạt.</li></ul>
+<p><strong>Lưu ý:</strong> Không liệt kê hoạt động khô khan; cần dùng từ ngữ gợi hình, gợi âm thanh và thể hiện không khí.</p>
+</div></details>
+</div>
+
+<div class="revision-unit">
+<h3>IV. QUY TRÌNH LÀM BÀI KIỂM TRA</h3>
+<details open><summary>1. Phần đọc hiểu</summary><div class="revision-content">
+<ol><li>Đọc toàn bộ ngữ liệu ít nhất một lượt.</li><li>Xác định thể loại: truyện, thơ lục bát hay kí.</li><li>Gạch chân từ khóa trong câu hỏi: xác định, chỉ ra, nêu tác dụng, giải thích, nhận xét, thông điệp.</li><li>Trả lời đúng trọng tâm, dùng chi tiết trong văn bản làm căn cứ.</li><li>Với câu hỏi tác dụng tu từ, phải có cả tên biện pháp, biểu hiện và tác dụng cụ thể.</li></ol>
+</div></details>
+<details><summary>2. Phần Tiếng Việt</summary><div class="revision-content">
+<ol><li>Đọc kĩ câu/đoạn văn và đặt từ ngữ trong ngữ cảnh.</li><li>Xác định đúng kiến thức được hỏi: cấu tạo từ, nghĩa từ, cụm từ, thành phần câu, trạng ngữ, biện pháp tu từ hoặc dấu câu.</li><li>Nếu đề yêu cầu tác dụng, giải thích tác dụng trong chính câu văn, không chép định nghĩa chung.</li></ol>
+</div></details>
+<details><summary>3. Phần Viết</summary><div class="revision-content">
+<ol><li>Khoanh từ khóa để xác định đúng kiểu bài và đối tượng.</li><li>Dành vài phút tìm ý, lập dàn ý ngắn theo bố cục.</li><li>Viết đủ mở bài, thân bài, kết bài; các ý sắp xếp hợp lí.</li><li>Dùng dẫn chứng, chi tiết, hình ảnh cụ thể; kết hợp kể, tả và biểu cảm đúng yêu cầu.</li><li>Đọc lại để sửa lỗi chính tả, dùng từ, đặt câu và dấu câu.</li></ol>
+<div class="revision-note"><strong>Ghi nhớ trước khi nộp bài:</strong><p>Đọc hiểu: đúng thể loại, đúng chi tiết, trả lời đủ ý.</p><p>Tiếng Việt: nhận diện chính xác, giải thích theo ngữ cảnh.</p><p>Viết: đúng kiểu bài, đủ bố cục, có chi tiết cụ thể và cảm xúc chân thành.</p></div>
+</div></details>
+</div>
+</section>
+</main>
+
+<div id="aiChat" aria-label="Trợ lí AI Ngữ văn">
+  <div class="ai-head">
+    <div><strong>Trợ lí học tập Ngữ văn</strong><small>Đồng hành cùng em trong từng bài học</small></div>
+    <button class="ai-close" id="aiClose" type="button" aria-label="Đóng">×</button>
+  </div>
+  <div class="ai-intro">Em có thể hỏi kiến thức, nhờ gợi ý đọc hiểu, tìm ý hoặc góp ý bài viết. Trợ lí sẽ hướng dẫn từng bước để em tự hoàn thành bài.</div>
+  <div class="ai-suggestions">
+    <button type="button" data-prompt="Hướng dẫn em cách tìm ý cho một đoạn văn biểu cảm.">Tìm ý viết văn</button>
+    <button type="button" data-prompt="Giải thích cho em cách nhận biết và nêu tác dụng của biện pháp tu từ.">Tiếng Việt</button>
+    <button type="button" data-prompt="Hướng dẫn em các bước đọc hiểu một văn bản truyện.">Đọc hiểu truyện</button>
+  </div>
+  <div class="ai-messages" id="aiMessages" aria-live="polite">
+    <div class="ai-msg bot">Chào em! 🌿 Em đang vướng ở phần kiến thức hay bài tập nào? Hãy gửi câu hỏi, cô trợ lí sẽ cùng em tháo gỡ nhé.</div>
+  </div>
+  <div class="ai-status" id="aiStatus">Trợ lí AI hỗ trợ học tập, không thay em làm bài.</div>
+  <form class="ai-compose" id="aiForm">
+    <textarea id="aiInput" rows="1" maxlength="3000" placeholder="Nhập câu hỏi của em..." required></textarea>
+    <button type="submit" id="aiSend">Gửi</button>
+  </form>
+</div>
+<button id="aiLauncher" type="button"><span class="ai-spark">✦</span> Hỏi trợ lí AI</button>
+
+<script>
+const SUPABASE_URL="https://xhgxxbjdidpkizxvrsfo.supabase.co";
+const SUPABASE_KEY="sb_publishable_NcGKpKd7YSw9CnofZh1XCw_4qfOm71i";
+
+const loginSection=document.getElementById("loginSection");
+const homeSection=document.getElementById("homeSection");
+const loginMessage=document.getElementById("loginMessage");
+
+let supabaseClient=null;
+
+if(SUPABASE_URL.startsWith("https://")&&SUPABASE_KEY.startsWith("sb_publishable_")){
+supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+}else{
+loginMessage.textContent="Website đang chờ cấu hình thông tin kết nối Supabase.";
+}
+
+let availableTeacherClasses=[];
+let availableTeacherGrades=[];
+let currentTeacherId=null;
+const platformClassList=["6A","6B","6C"];
+
+async function loadTeacherClasses(teacherId){
+  const {data,error}=await supabaseClient
+    .from("teacher_classes")
+    .select("class_name, grade_level")
+    .eq("teacher_id",teacherId)
+    .eq("grade_level","6")
+    .order("class_name",{ascending:true});
+
+  if(error) throw new Error("Không tải được danh sách lớp được phân quyền: "+error.message);
+
+  availableTeacherClasses=[...new Set((data||[])
+    .map(item=>String(item.class_name||"").trim().toUpperCase())
+    .filter(Boolean))].sort((a,b)=>a.localeCompare(b,"vi",{numeric:true}));
+  availableTeacherGrades=[...new Set((data||[])
+    .map(item=>String(item.grade_level||String(item.class_name||"").trim().charAt(0)))
+    .filter(grade=>grade==="6"))].sort();
+  try{
+    const {data:gradeData,error:gradeError}=await supabaseClient.functions.invoke("clever-api",{
+      body:{action:"list_teacher_class_grades"}
+    });
+    if(!gradeError&&gradeData?.success){
+      availableTeacherGrades=(gradeData.grade_levels||availableTeacherGrades).filter(grade=>String(grade)==="6");
+    }
+  }catch(_gradeError){}
+  const gradeSelect=document.getElementById("newClassGrade");
+  if(gradeSelect){
+    gradeSelect.replaceChildren();
+    availableTeacherGrades.forEach(grade=>{
+      const option=document.createElement("option");
+      option.value=grade;
+      option.textContent="Khối "+grade;
+      gradeSelect.appendChild(option);
+    });
+    gradeSelect.disabled=!availableTeacherGrades.length;
+  }
+
+  const studentSelect=document.getElementById("studentClass");
+  studentSelect.replaceChildren();
+  availableTeacherClasses.forEach(className=>{
+    const option=document.createElement("option");
+    option.value=className;
+    option.textContent=className;
+    studentSelect.appendChild(option);
+  });
+
+  const assignmentChoices=document.getElementById("assignmentClassChoices");
+  assignmentChoices.replaceChildren();
+  if(!availableTeacherClasses.length){
+    const empty=document.createElement("span");
+    empty.className="sub";
+    empty.textContent="Tài khoản chưa được cấp quyền ở khối nào. Cô liên hệ quản trị viên.";
+    assignmentChoices.appendChild(empty);
+  }else{
+    availableTeacherClasses.forEach(className=>{
+      const label=document.createElement("label");
+      label.style.cssText="display:flex;align-items:center;gap:8px;margin:0;";
+      const checkbox=document.createElement("input");
+      checkbox.type="checkbox";
+      checkbox.name="assignmentClass";
+      checkbox.value=className;
+      checkbox.style.cssText="width:auto;margin:0;";
+      label.append(checkbox,document.createTextNode(" Lớp "+className));
+      assignmentChoices.appendChild(label);
+    });
+  }
+}
+
+async function loadAdminTeacherClassManager(){
+  const panel=document.getElementById("adminClassManager");
+  const select=document.getElementById("adminTeacherSelect");
+  const message=document.getElementById("adminClassMessage");
+  if(!panel||!select||!message||!supabaseClient)return;
+  panel.classList.remove("hidden");
+  message.textContent="Đang tải danh sách giáo viên...";
+  const {data,error}=await supabaseClient.functions.invoke("clever-api",{body:{action:"list_teacher_classes"}});
+  if(error||!data?.success){
+    message.textContent=data?.error||error?.message||"Không tải được danh sách giáo viên.";
+    return;
+  }
+  select.replaceChildren();
+  (data.teachers||[]).forEach(item=>{
+    const option=document.createElement("option");
+    option.value=item.id;
+    option.textContent=item.full_name+" · "+(item.classes?.length?item.classes.join(", "):"Chưa phân lớp");
+    option.dataset.classes=JSON.stringify(item.classes||[]);
+    select.appendChild(option);
+  });
+  if(!select.options.length){
+    message.textContent="Chưa có tài khoản giáo viên.";
+    return;
+  }
+  const renderChoices=()=>{
+    const container=document.getElementById("adminClassChoices");
+    container.replaceChildren();
+    const selected=select.options[select.selectedIndex];
+    const current=new Set(selected?JSON.parse(selected.dataset.classes||"[]"):[]);
+    [...new Set([...platformClassList,...(selected?JSON.parse(selected.dataset.classes||"[]"):[])])]
+      .sort((a,b)=>a.localeCompare(b,"vi",{numeric:true}))
+      .forEach(className=>{
+      const label=document.createElement("label");
+      label.style.cssText="display:flex;align-items:center;gap:6px;margin:0;";
+      const input=document.createElement("input");
+      input.type="checkbox";
+      input.name="adminTeacherClass";
+      input.value=className;
+      input.checked=current.has(className);
+      input.style.cssText="width:auto;margin:0;";
+      label.append(input,document.createTextNode(className));
+      container.appendChild(label);
+    });
+    message.textContent="Đang chỉnh sửa phân lớp của "+(selected?.textContent||"giáo viên")+".";
+  };
+  select.onchange=renderChoices;
+  renderChoices();
+  document.getElementById("saveTeacherClassesButton").onclick=async()=>{
+    const button=document.getElementById("saveTeacherClassesButton");
+    const classes=Array.from(document.querySelectorAll('input[name="adminTeacherClass"]:checked')).map(input=>input.value);
+    button.disabled=true;
+    message.textContent="Đang lưu phân lớp...";
+    const result=await supabaseClient.functions.invoke("clever-api",{
+      body:{action:"set_teacher_classes",teacher_id:select.value,classes}
+    });
+    button.disabled=false;
+    if(result.error||!result.data?.success){
+      message.textContent=result.data?.error||result.error?.message||"Không lưu được phân lớp.";
+      return;
+    }
+    const option=select.options[select.selectedIndex];
+    option.dataset.classes=JSON.stringify(classes);
+    option.textContent=option.textContent.split(" · ")[0]+" · "+(classes.length?classes.join(", "):"Chưa phân lớp");
+    message.textContent="Đã lưu. Giáo viên này hiện được phân quyền: "+(classes.join(", ")||"chưa có lớp")+".";
+    if(select.value===currentTeacherId){
+      await loadTeacherClasses(currentTeacherId);
+      await loadStudents();
+    }
+  };
+}
+
+async function showUser(user){
+if(!supabaseClient||!user)return;
+
+const {data,error}=await supabaseClient
+.from("profiles")
+.select("full_name, role, class_name, is_platform_admin")
+.eq("id",user.id)
+.single();
+
+if(error||!data){
+loginMessage.textContent="Tài khoản chưa có hồ sơ được cấp. Vui lòng liên hệ cô Thương.";
+return;
+}
+if(data.role==="student"&&!String(data.class_name||"").toUpperCase().startsWith("6")){
+await supabaseClient.auth.signOut();
+loginMessage.textContent="Tài khoản này không thuộc khối 6. Em hãy vào đúng không gian học tập của khối mình nhé.";
+return;
+}
+
+loginSection.classList.add("hidden");
+homeSection.classList.remove("hidden");
+if(aiLauncher)aiLauncher.style.display="inline-flex";
+
+document.getElementById("userName").textContent=data.full_name||user.email;
+document.getElementById("userRole").textContent=data.role==="teacher"?"Tài khoản giáo viên":"Tài khoản học sinh";
+document.querySelector("#homeSection h1").textContent=data.role==="teacher"?"Chào mừng thầy/cô!":"Chào mừng em!";
+document.getElementById("dashboardMessage").textContent=data.role==="teacher"?"Chào thầy/cô "+(data.full_name||"")+". Chúc thầy/cô có những giờ học thật vui.":"Chào em! Cùng hoàn thành tốt những bài tập cô giao nhé.";
+const aiGreeting=document.querySelector("#aiMessages .ai-msg.bot");
+if(aiGreeting)aiGreeting.textContent=data.role==="teacher"?"Chào thầy/cô! 🌿 Thầy/cô cần hỗ trợ soạn bài, xây dựng câu hỏi hay hướng dẫn học sinh phần kiến thức nào?":"Chào em! 🌿 Em đang vướng ở phần kiến thức hay bài tập nào? Hãy gửi câu hỏi, cô trợ lí sẽ cùng em tháo gỡ nhé.";
+document.getElementById("aiInput").placeholder=data.role==="teacher"?"Nhập câu hỏi của thầy/cô...":"Nhập câu hỏi của em...";
+
+document.getElementById("revisionPanel").classList.remove("hidden");
+
+const teacherPanel=document.getElementById("teacherPanel");
+const studentPanel=document.getElementById("studentPanel");
+
+teacherPanel.classList.toggle("hidden",data.role!=="teacher");
+studentPanel.classList.toggle("hidden",data.role!=="student");
+
+if(data.role==="teacher"){
+currentTeacherId=user.id;
+document.getElementById("adminClassManager").classList.toggle("hidden",data.is_platform_admin!==true);
+if(data.is_platform_admin===true)await loadAdminTeacherClassManager();
+try{
+  await loadTeacherClasses(user.id);
+}catch(classError){
+  document.getElementById("dashboardMessage").textContent=classError.message;
+  return;
+}
+await loadStudents();
+await loadProgressDashboard();
+await loadSubmissions();
+await loadTeacherAssignmentDeadlines();
+}
+
+if(data.role==="student"){
+currentTeacherId=null;
+await loadAssignments(data.class_name);
+}
+if(window.initStemFeatures) await window.initStemFeatures(data);
+}
+
+document.getElementById("loginForm").addEventListener("submit",async(event)=>{
+event.preventDefault();
+
+if(!supabaseClient){
+loginMessage.textContent="Chưa cấu hình kết nối. Hãy kiểm tra API URL và Publishable key.";
+return;
+}
+
+const button=document.getElementById("loginButton");
+button.disabled=true;
+button.textContent="Đang đăng nhập...";
+loginMessage.textContent="";
+
+const loginId=document.getElementById("email").value.trim();
+const email=loginId.includes("@")?loginId:`${loginId.toLowerCase()}@students.hocvan6.invalid`;
+const password=document.getElementById("password").value;
+
+const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+
+button.disabled=false;
+button.textContent="Đăng nhập";
+
+if(error){
+loginMessage.textContent="Đăng nhập chưa thành công: "+error.message;
+return;
+}
+await showUser(data.user);
+});
+
+document.getElementById("logoutButton").addEventListener("click",async()=>{
+if(supabaseClient)await supabaseClient.auth.signOut();
+homeSection.classList.add("hidden");
+loginSection.classList.remove("hidden");
+if(aiLauncher)aiLauncher.style.display="none";
+if(aiChat)aiChat.classList.remove("open");
+aiHistory=[];
+loginMessage.textContent=currentTeacherId?"Thầy/cô đã đăng xuất.":"Em đã đăng xuất.";
+currentTeacherId=null;
+});
+
+const createTeacherClassForm=document.getElementById("createTeacherClassForm");
+if(createTeacherClassForm){
+  createTeacherClassForm.addEventListener("submit",async(event)=>{
+    event.preventDefault();
+    const message=document.getElementById("createTeacherClassMessage");
+    const button=createTeacherClassForm.querySelector('button[type="submit"]');
+    const gradeLevel=document.getElementById("newClassGrade").value;
+    const className=document.getElementById("newClassName").value.trim().toUpperCase();
+
+    if(!currentTeacherId){
+      message.textContent="Phiên đăng nhập giáo viên không còn hợp lệ. Cô vui lòng đăng nhập lại.";
+      return;
+    }
+    if(!availableTeacherGrades.includes(gradeLevel)){
+      message.textContent="Tài khoản chưa được cấp quyền ở khối này.";
+      return;
+    }
+    if(!new RegExp("^"+gradeLevel+"[A-Z0-9]{1,4}$").test(className)){
+      message.textContent="Tên lớp phải bắt đầu bằng số khối đã chọn. Ví dụ: "+gradeLevel+"D hoặc "+gradeLevel+"A1.";
+      return;
+    }
+
+    button.disabled=true;
+    button.textContent="Đang tạo lớp...";
+    message.textContent="";
+    try{
+      const {data,error}=await supabaseClient.functions.invoke("clever-api",{
+        body:{action:"create_teacher_class",grade_level:gradeLevel,class_name:className}
+      });
+      if(error||!data?.success) throw new Error(data?.error||error?.message||"Chưa tạo được lớp.");
+      message.textContent=data.message||("Đã tạo lớp "+className+".");
+      document.getElementById("newClassName").value="";
+      await loadTeacherClasses(currentTeacherId);
+      await loadStudents();
+    }catch(err){
+      message.textContent="Không tạo được lớp: "+err.message;
+    }finally{
+      button.disabled=false;
+      button.textContent="Tạo lớp mới";
+    }
+  });
+}
+
+const createStudentForm=document.getElementById("createStudentForm");
+
+
+createStudentForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const message = document.getElementById("createStudentMessage");
+  const button = createStudentForm.querySelector('button[type="submit"]');
+
+  if (!supabaseClient) {
+    message.textContent = "Chưa kết nối được hệ thống.";
+    return;
+  }
+
+  const full_name = document.getElementById("studentName").value.trim();
+  const class_name = document.getElementById("studentClass").value;
+
+  if (!availableTeacherClasses.includes(class_name)) {
+    message.textContent = "Lớp này chưa được quản trị viên phân công cho tài khoản.";
+    return;
+  }
+
+  if (!full_name) {
+    message.textContent = "Cô chưa nhập họ tên học sinh.";
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Đang tạo tài khoản...";
+  message.textContent = "";
+
+  try {
+    const { data, error } =
+      await supabaseClient.functions.invoke("clever-api", {
+        body: {
+          action: "create_student",
+          full_name,
+          class_name
+        }
+      });
+
+    if (error || !data || !data.success) {
+      message.textContent =
+        (data && data.error) ||
+        (error && error.message) ||
+        "Chưa tạo được tài khoản.";
+      return;
+    }
+
+    message.textContent =
+      `Đã tạo tài khoản cho ${data.full_name}.\n` +
+      `Tên đăng nhập: ${data.username}\n` +
+      `Mật khẩu: ${data.password}`;
+
+    createStudentForm.reset();
+
+    await loadStudents();
+
+  } catch (err) {
+    message.textContent = "Có lỗi xảy ra: " + err.message;
+
+  } finally {
+    button.disabled = false;
+    button.textContent = "Tạo tài khoản học sinh";
+  }
+});
+
+const bulkButton = document.getElementById("createBulkStudents");
+
+bulkButton.addEventListener("click", async () => {
+  const input = document.getElementById("bulkStudentList").value.trim();
+  const message = document.getElementById("bulkStudentMessage");
+  let results = document.getElementById("bulkStudentResults");
+
+  if (!message) {
+    alert("Không tìm thấy vùng thông báo cấp tài khoản.");
+    return;
+  }
+
+  if (!results) {
+    results = document.createElement("div");
+    results.id = "bulkStudentResults";
+    message.insertAdjacentElement("afterend", results);
+  }
+
+  message.textContent = "";
+  results.textContent = "";
+
+  if (!input) {
+    message.textContent = "Cô chưa nhập danh sách học sinh.";
+    return;
+  }
+
+  const students = input.split("\n")
+    .map(line => line.trim())
+    .filter(Boolean)
+    .map(line => {
+      const parts = line.split("|").map(x => x.trim());
+      return {
+        full_name: parts[0],
+        class_name: (parts[1] || "").toUpperCase()
+      };
+    });
+
+  const invalidStudents = students.filter(student =>
+    !student.full_name ||
+    !availableTeacherClasses.includes(student.class_name)
+  );
+
+  if (invalidStudents.length > 0) {
+    message.textContent =
+      "Có dòng chưa hợp lệ. Hãy kiểm tra họ tên và mã lớp trong danh sách lớp được cấp cho tài khoản.";
+    return;
+  }
+
+  if (!confirm(
+    `Cô chuẩn bị tạo ${students.length} tài khoản học sinh.\n\n` +
+    "Hệ thống sẽ tự tạo tên đăng nhập và mật khẩu mặc định.\n\n" +
+    "Em xác nhận tiếp tục nhé?"
+  )) {
+    return;
+  }
+
+  bulkButton.disabled = true;
+  bulkButton.textContent = "Đang tạo tài khoản...";
+
+  const accountResults = [];
+  const accountRows = [];
+  let successCount = 0;
+  let failedCount = 0;
+
+  try {
+    for (const student of students) {
+      try {
+        const { data, error } =
+          await supabaseClient.functions.invoke("clever-api", {
+            body: {
+              action: "create_student",
+              full_name: student.full_name,
+              class_name: student.class_name
+            }
+          });
+
+        if (error || !data || !data.success) {
+          failedCount++;
+          accountResults.push(
+            `THẤT BẠI: ${student.full_name} | Lớp ${student.class_name}\n` +
+            `Lý do: ${(data && data.error) || (error && error.message) || "Không rõ lỗi"}`
+          );
+          continue;
+        }
+
+        successCount++;
+
+        accountRows.push([
+          data.full_name,
+          data.class_name,
+          data.username,
+          data.password
+        ]);
+
+        accountResults.push(
+          `HỌC SINH: ${data.full_name}\n` +
+          `LỚP: ${data.class_name}\n` +
+          `TÊN ĐĂNG NHẬP: ${data.username}\n` +
+          `MẬT KHẨU: ${data.password}\n` +
+          `------------------------------`
+        );
+
+      } catch (err) {
+        failedCount++;
+        accountResults.push(
+          `THẤT BẠI: ${student.full_name} | Lớp ${student.class_name}\n` +
+          `Lý do: ${err.message}`
+        );
+      }
+    }
+
+    message.textContent =
+      `Hoàn thành! Thành công: ${successCount} | Thất bại: ${failedCount}.`;
+
+    results.textContent = accountResults.join("\n\n");
+
+    // Tạo file tải danh sách tài khoản
+    if (accountRows.length > 0) {
+      const csvRows = [
+        ["Họ và tên", "Lớp", "Tên đăng nhập", "Mật khẩu"],
+        ...accountRows
+      ];
+
+      const csvContent = "\uFEFF" + csvRows
+        .map(row => row.map(value =>
+          '"' + String(value ?? "").replace(/"/g, '""') + '"'
+        ).join(","))
+        .join("\r\n");
+
+      const blob = new Blob(
+        [csvContent],
+        { type: "text/csv;charset=utf-8;" }
+      );
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = "Danh_sach_tai_khoan_hoc_sinh.csv";
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+      message.textContent += " Đã tải file danh sách tài khoản.";
+    }
+
+    if (successCount > 0) {
+      await loadStudents();
+    }
+
+  } finally {
+    bulkButton.disabled = false;
+    bulkButton.textContent = "Tạo tài khoản hàng loạt";
+  }
+});
+
+function formatVietnamDateTime(value){
+  if(!value) return "";
+  const date=value instanceof Date?value:new Date(value);
+  if(Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("vi-VN",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).format(date);
+}
+
+function openSubmissionImage(url,altText){
+  let overlay=document.getElementById("submissionImageLightbox");
+  if(!overlay){
+    overlay=document.createElement("div");
+    overlay.id="submissionImageLightbox";
+    overlay.style.cssText="position:fixed;inset:0;z-index:99999;background:rgba(12,18,14,.92);display:none;align-items:center;justify-content:center;padding:24px;cursor:zoom-out;";
+    const close=document.createElement("button");
+    close.type="button";
+    close.textContent="✕ Đóng";
+    close.setAttribute("aria-label","Đóng ảnh");
+    close.style.cssText="position:absolute;top:18px;right:18px;background:#fff;color:#26352b;border:0;border-radius:20px;padding:10px 16px;font-size:15px;cursor:pointer;z-index:2;";
+    const large=document.createElement("img");
+    large.id="submissionImageLightboxContent";
+    large.style.cssText="display:block;max-width:96vw;max-height:92vh;object-fit:contain;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.35);cursor:default;";
+    close.addEventListener("click",()=>{overlay.style.display="none";});
+    overlay.addEventListener("click",event=>{if(event.target===overlay)overlay.style.display="none";});
+    large.addEventListener("click",event=>event.stopPropagation());
+    overlay.append(close,large);
+    document.body.appendChild(overlay);
+    document.addEventListener("keydown",event=>{if(event.key==="Escape"&&overlay.style.display==="flex")overlay.style.display="none";});
+  }
+  const large=overlay.querySelector("#submissionImageLightboxContent");
+  large.src=url;
+  large.alt=altText||"Ảnh bài làm phóng to";
+  overlay.style.display="flex";
+}
+
+function assignmentDateToLocalInput(value){
+  if(!value) return "";
+  const date=new Date(value);
+  if(Number.isNaN(date.getTime())) return "";
+  const local=new Date(date.getTime()-date.getTimezoneOffset()*60000);
+  return local.toISOString().slice(0,16);
+}
+
+function combineLocalDateTime(dateValue,timeValue){
+  if(!dateValue&&!timeValue) return null;
+  if(!dateValue||!timeValue) return null;
+  const match=timeValue.trim().match(/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/);
+  if(!match) return null;
+  const [year,month,day]=dateValue.split("-").map(Number);
+  const date=new Date(year,month-1,day,Number(match[1]),Number(match[2]),0,0);
+  if(date.getFullYear()!==year||date.getMonth()!==month-1||date.getDate()!==day) return null;
+  return date;
+}
+
+async function loadTeacherAssignmentDeadlines(){
+  const list=document.getElementById("assignmentDeadlineList");
+  const message=document.getElementById("assignmentDeadlineMessage");
+  if(!list||!message||!supabaseClient) return;
+  list.innerHTML="";
+  message.textContent="Đang tải danh sách bài tập...";
+  const {data:userData,error:userError}=await supabaseClient.auth.getUser();
+  const user=userData?.user;
+  if(userError||!user){message.textContent="Phiên đăng nhập đã hết hạn.";return;}
+  const {data,error}=await supabaseClient.from("assignments")
+    .select("id,title,body,class_name,due_at,created_at,file_path,file_name")
+    .eq("created_by",user.id)
+    .order("created_at",{ascending:true});
+  if(error){message.textContent="Không tải được danh sách bài tập: "+error.message;return;}
+  if(!data||!data.length){message.textContent="Cô chưa giao bài tập nào.";return;}
+  message.textContent="Có "+data.length+" bài tập. Danh sách xếp theo thứ tự giao bài cũ trước, mới sau. Cô có thể mở đề và chỉnh hạn nộp tại từng bài.";
+  data.forEach((assignment,index)=>{
+    const card=document.createElement("div");
+    card.style.cssText="display:block;padding:15px 0;border-bottom:1px solid #e3ebe5;";
+    const info=document.createElement("div");
+    const title=document.createElement("strong");
+    title.textContent="Bài "+(index+1)+": "+(assignment.title||"Bài tập chưa có tên")+" · Lớp "+(assignment.class_name||"");
+    const current=document.createElement("p");
+    current.style.cssText="margin:5px 0 0;color:#68756d;font-size:13px;";
+    current.textContent=assignment.due_at?"Hạn hiện tại: "+formatVietnamDateTime(assignment.due_at):"Chưa đặt hạn nộp";
+    info.append(title,current);
+    const detail=document.createElement("details");
+    detail.style.cssText="margin:10px 0 14px;padding:10px 12px;background:#f7faf7;border-radius:10px;";
+    const summary=document.createElement("summary");
+    summary.textContent="Xem lại nội dung đề đã giao";
+    summary.style.cssText="cursor:pointer;font-weight:700;color:#355b45;";
+    const content=document.createElement("div");
+    content.style.cssText="white-space:pre-wrap;line-height:1.75;margin-top:10px;";
+    content.textContent=assignment.body||"Bài tập này chưa có nội dung đề.";
+    detail.append(summary,content);
+    if(assignment.file_path){
+      const fileLine=document.createElement("div");
+      fileLine.style.cssText="margin-top:12px;padding-top:10px;border-top:1px solid #e8eee9;";
+      const fileLink=document.createElement("button");
+      fileLink.type="button";
+      fileLink.textContent="👁 Xem tệp đề: "+(assignment.file_name||"Tệp đính kèm");
+      fileLink.style.cssText="background:#496b59;padding:9px 13px;margin:0;";
+      fileLink.addEventListener("click",async()=>{
+        fileLink.disabled=true;fileLink.textContent="Đang tải bản xem trước...";
+        const signed=await supabaseClient.storage.from("assignment-files").createSignedUrl(assignment.file_path,3600,{download:false});
+        fileLink.disabled=false;
+        if(signed.error||!signed.data?.signedUrl){fileLink.textContent="Không tạo được bản xem trước. Thử tải lại trang.";return;}
+        const overlay=document.createElement("div");
+        overlay.style.cssText="position:fixed;inset:0;z-index:99999;background:rgba(18,28,22,.78);display:flex;align-items:center;justify-content:center;padding:14px;";
+        const panel=document.createElement("div");
+        panel.style.cssText="background:#fff;width:min(100%,1050px);height:min(92vh,850px);border-radius:14px;display:flex;flex-direction:column;overflow:hidden;";
+        const bar=document.createElement("div");
+        bar.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid #e5eae6;";
+        const fileTitle=document.createElement("strong");
+        fileTitle.textContent=assignment.file_name||"Tệp đề bài";
+        const close=document.createElement("button");
+        close.type="button";close.textContent="Đóng";close.style.cssText="margin:0;padding:8px 14px;";
+        close.addEventListener("click",()=>overlay.remove());
+        bar.append(fileTitle,close);
+        const frame=document.createElement("iframe");
+        frame.src=signed.data.signedUrl;
+        frame.title="Xem trước tệp đề bài";
+        frame.style.cssText="width:100%;height:100%;border:0;flex:1;";
+        const note=document.createElement("p");
+        note.textContent="Nếu tệp Word không hiển thị trực tiếp trên trình duyệt, em có thể mở bằng ứng dụng Word hoặc tải tệp xuống.";
+        note.style.cssText="font-size:12px;color:#68756d;padding:6px 14px;margin:0;";
+        panel.append(bar,frame,note);overlay.appendChild(panel);
+        overlay.addEventListener("click",event=>{if(event.target===overlay)overlay.remove();});
+        document.body.appendChild(overlay);
+        fileLink.textContent="👁 Xem tệp đề: "+(assignment.file_name||"Tệp đính kèm");
+      });
+      fileLine.appendChild(fileLink);detail.appendChild(fileLine);
+    }
+    info.appendChild(detail);
+    const controls=document.createElement("div");
+    controls.style.cssText="display:grid;grid-template-columns:minmax(210px,280px) auto;gap:10px;align-items:end;";
+    const field=document.createElement("div");
+    field.style.cssText="display:grid;grid-template-columns:1fr 1fr;gap:8px;";
+    const localValue=assignmentDateToLocalInput(assignment.due_at);
+    const [savedDate="",savedTime=""]=localValue.split("T");
+    const dateLabel=document.createElement("label");
+    dateLabel.textContent="Ngày mới";
+    const dateInput=document.createElement("input");
+    dateInput.type="date";
+    dateInput.value=savedDate;
+    dateInput.style.marginBottom="0";
+    dateLabel.appendChild(dateInput);
+    const timeLabel=document.createElement("label");
+    timeLabel.textContent="Giờ mới (24 giờ)";
+    const timeInput=document.createElement("input");
+    timeInput.type="text";
+    timeInput.inputMode="numeric";
+    timeInput.maxLength=5;
+    timeInput.placeholder="17:30";
+    timeInput.pattern="([01][0-9]|2[0-3]):[0-5][0-9]";
+    timeInput.autocomplete="off";
+    timeInput.value=savedTime;
+    timeInput.style.marginBottom="0";
+    timeLabel.appendChild(timeInput);
+    field.append(dateLabel,timeLabel);
+    const save=document.createElement("button");
+    save.type="button";
+    save.textContent="Lưu / gia hạn";
+    const result=document.createElement("p");
+    result.className="message";
+    result.style.gridColumn="1 / -1";
+    save.addEventListener("click",async()=>{
+      const hasDate=!!dateInput.value;
+      const hasTime=!!timeInput.value.trim();
+      const date=hasDate||hasTime?combineLocalDateTime(dateInput.value,timeInput.value):null;
+      if((hasDate||hasTime)&&!date){result.textContent="Cô nhập đủ ngày và giờ theo dạng 24 giờ, ví dụ 17:30 nhé.";return;}
+      save.disabled=true;save.textContent="Đang lưu...";
+      const update=await supabaseClient.from("assignments")
+        .update({due_at:date?date.toISOString():null})
+        .eq("id",assignment.id).eq("created_by",user.id);
+      if(update.error){result.textContent="Chưa cập nhật được: "+update.error.message;save.disabled=false;save.textContent="Lưu / gia hạn";return;}
+      result.textContent=date?"Đã cập nhật hạn nộp thành "+formatVietnamDateTime(date)+".":"Đã bỏ hạn nộp. Học sinh có thể nộp bài không giới hạn thời gian.";
+      current.textContent=date?"Hạn hiện tại: "+date.toLocaleString("vi-VN"):"Chưa đặt hạn nộp";
+      save.disabled=false;save.textContent="Lưu / gia hạn";
+    });
+    controls.append(field,save);
+
+    const editButton=document.createElement("button");
+    editButton.type="button";
+    editButton.textContent="✏️ Chỉnh sửa đề";
+    editButton.style.cssText="margin-top:12px;margin-right:8px;background:#496b59;padding:9px 14px;";
+    const editor=document.createElement("div");
+    editor.hidden=true;
+    editor.style.cssText="margin-top:12px;padding:14px;background:#f7faf7;border:1px solid #dfe9e1;border-radius:11px;";
+    const editTitleLabel=document.createElement("label");
+    editTitleLabel.textContent="Tên bài tập";
+    const editTitle=document.createElement("input");
+    editTitle.type="text";editTitle.value=assignment.title||"";editTitle.style.width="100%";
+    editTitleLabel.appendChild(editTitle);
+    const editBodyLabel=document.createElement("label");
+    editBodyLabel.textContent="Nội dung đề bài";
+    const editBody=document.createElement("textarea");
+    editBody.value=assignment.body||"";editBody.rows=7;editBody.style.width="100%";
+    editBodyLabel.appendChild(editBody);
+    const editStatus=document.createElement("p");
+    editStatus.style.cssText="font-size:13px;color:#68756d;margin:8px 0;";
+    const editSave=document.createElement("button");
+    editSave.type="button";editSave.textContent="Lưu nội dung đã sửa";
+    const editCancel=document.createElement("button");
+    editCancel.type="button";editCancel.textContent="Đóng";editCancel.style.cssText="margin-left:8px;background:#78847c;";
+    editButton.addEventListener("click",()=>{
+      editor.hidden=!editor.hidden;
+      editButton.textContent=editor.hidden?"✏️ Chỉnh sửa đề":"Ẩn phần chỉnh sửa";
+    });
+    editCancel.addEventListener("click",()=>{editor.hidden=true;editButton.textContent="✏️ Chỉnh sửa đề";});
+    editSave.addEventListener("click",async()=>{
+      const nextTitle=editTitle.value.trim(),nextBody=editBody.value.trim();
+      if(!nextTitle||!nextBody){editStatus.textContent="Cô nhập đầy đủ tên bài và nội dung đề nhé.";return;}
+      if(!confirm("Lưu nội dung đề mới? Học sinh sẽ nhìn thấy nội dung đã chỉnh sửa khi tải lại trang."))return;
+      editSave.disabled=true;editSave.textContent="Đang lưu...";
+      const update=await supabaseClient.from("assignments").update({title:nextTitle,body:nextBody})
+        .eq("id",assignment.id).eq("created_by",user.id);
+      if(update.error){editStatus.textContent="Chưa lưu được: "+update.error.message;editSave.disabled=false;editSave.textContent="Lưu nội dung đã sửa";return;}
+      assignment.title=nextTitle;assignment.body=nextBody;
+      title.textContent="Bài "+(index+1)+": "+nextTitle+" · Lớp "+(assignment.class_name||"");
+      summary.textContent="Xem lại nội dung đề đã giao";
+      content.textContent=nextBody;
+      editStatus.textContent="Đã cập nhật đề thành công.";
+      editSave.disabled=false;editSave.textContent="Lưu nội dung đã sửa";
+      editor.hidden=true;editButton.textContent="✏️ Chỉnh sửa đề";
+    });
+    editor.append(editTitleLabel,editBodyLabel,editStatus,editSave,editCancel);
+
+    const removeButton=document.createElement("button");
+    removeButton.type="button";
+    removeButton.textContent="Xóa bài tập";
+    removeButton.style.cssText="margin-top:12px;background:#a94f45;padding:9px 14px;";
+    removeButton.addEventListener("click",async()=>{
+      if(!confirm("Cô muốn xóa bài tập “"+(assignment.title||"Chưa có tên")+"” của lớp "+(assignment.class_name||"")+"?\n\nBài tập chỉ được xóa khi chưa có học sinh nộp bài. Dữ liệu bài nộp và điểm số sẽ được bảo vệ."))return;
+      removeButton.disabled=true;removeButton.textContent="Đang kiểm tra...";
+      const {data:submitted,error:submittedError}=await supabaseClient.from("submissions")
+        .select("id").eq("assignment_id",assignment.id).limit(1);
+      if(submittedError){
+        result.textContent="Không kiểm tra được bài nộp nên chưa thể xóa: "+submittedError.message;
+        removeButton.disabled=false;removeButton.textContent="Xóa bài tập";return;
+      }
+      if(submitted&&submitted.length){
+        result.textContent="Chưa thể xóa vì bài tập đã có học sinh nộp. Ara giữ nguyên bài làm và điểm số để tránh mất dữ liệu. Cô có thể điều chỉnh hạn nộp hoặc liên hệ hỗ trợ để xử lý trường hợp này.";
+        removeButton.disabled=false;removeButton.textContent="Xóa bài tập";return;
+      }
+      const {data:rubric}=await supabaseClient.from("assignment_rubrics")
+        .select("file_paths").eq("assignment_id",assignment.id).eq("teacher_id",user.id).maybeSingle();
+      const rubricPaths=rubric?.file_paths||[];
+      const {error:rubricDeleteError}=await supabaseClient.from("assignment_rubrics")
+        .delete().eq("assignment_id",assignment.id).eq("teacher_id",user.id);
+      if(rubricDeleteError){
+        result.textContent="Chưa xóa được đáp án riêng: "+rubricDeleteError.message;
+        removeButton.disabled=false;removeButton.textContent="Xóa bài tập";return;
+      }
+      const {error:assignmentDeleteError}=await supabaseClient.from("assignments")
+        .delete().eq("id",assignment.id).eq("created_by",user.id);
+      if(assignmentDeleteError){
+        result.textContent="Chưa xóa được bài tập: "+assignmentDeleteError.message;
+        removeButton.disabled=false;removeButton.textContent="Xóa bài tập";return;
+      }
+      if(assignment.file_path)await supabaseClient.storage.from("assignment-files").remove([assignment.file_path]);
+      if(rubricPaths.length)await supabaseClient.storage.from("teacher-answer-keys").remove(rubricPaths);
+      card.remove();
+      message.textContent="Đã xóa bài tập chưa có lượt nộp.";
+    });
+
+    card.append(info,controls,result,editButton,editor,removeButton);
+    list.appendChild(card);
+  });
+}
+
+document.getElementById("refreshAssignmentDeadlines")?.addEventListener("click",loadTeacherAssignmentDeadlines);
+
+const createAssignmentForm = document.getElementById("createAssignmentForm");
+let assignmentPreviewConfirmed = false;
+
+document.getElementById("cancelAssignmentPreview")?.addEventListener("click",()=>{
+  document.getElementById("assignmentPreviewPanel").hidden=true;
+  assignmentPreviewConfirmed=false;
+});
+
+document.getElementById("confirmAssignmentButton")?.addEventListener("click",()=>{
+  assignmentPreviewConfirmed=true;
+  createAssignmentForm.requestSubmit();
+});
+
+createAssignmentForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const message = document.getElementById("assignmentMessage");
+  const button = document.getElementById("previewAssignmentButton");
+  const title = document.getElementById("assignmentTitle").value.trim();
+  const body = document.getElementById("assignmentBody").value.trim();
+  const classNames = Array.from(createAssignmentForm.querySelectorAll('input[name="assignmentClass"]:checked')).map(input=>input.value);
+  const answerType = document.getElementById("assignmentAnswerType").value;
+  const dueDateValue = document.getElementById("assignmentDueDate").value;
+  const dueTimeValue = document.getElementById("assignmentDueTime").value.trim();
+  const dueAt = dueDateValue||dueTimeValue ? combineLocalDateTime(dueDateValue,dueTimeValue) : null;
+  const hasDueAt = !!dueDateValue || !!dueTimeValue;
+  const file = document.getElementById("assignmentFile").files[0] || null;
+  const answerKeyText = document.getElementById("assignmentAnswerKey").value.trim();
+  const answerKeyFiles = Array.from(document.getElementById("assignmentAnswerKeyFiles").files || []);
+  const allowedKeyExtensions = ["pdf","docx","txt"];
+  const allowedTypes = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  ];
+
+  if (!title || !body || !classNames.length || !answerType) {
+    message.textContent = "Thầy/cô vui lòng nhập tên bài, nội dung và chọn ít nhất một lớp.";
+    return;
+  }
+  if(classNames.some(className=>!availableTeacherClasses.includes(className))){
+    message.textContent="Có lớp không thuộc quyền quản lý của tài khoản. Thầy/cô tải lại trang và chọn lớp được quản trị viên phân công nhé.";
+    return;
+  }
+  if (hasDueAt && (!dueAt || Number.isNaN(dueAt.getTime()))) {
+    message.textContent = "Thời hạn nộp bài chưa hợp lệ. Cô kiểm tra lại nhé.";
+    return;
+  }
+  if (file && (file.size > 25 * 1024 * 1024 || !allowedTypes.includes(file.type))) {
+    message.textContent = "Tệp đề phải là PDF hoặc Word và không vượt quá 25 MB.";
+    return;
+  }
+  if (answerKeyFiles.length > 10 || answerKeyFiles.some(f => f.size > 25 * 1024 * 1024 || !allowedKeyExtensions.includes((f.name.split(".").pop()||"").toLowerCase()))) {
+    message.textContent = "Đáp án chỉ nhận tối đa 10 tệp PDF, DOCX hoặc TXT, mỗi tệp không quá 25 MB.";
+    return;
+  }
+
+  if(!assignmentPreviewConfirmed){
+    const preview=document.getElementById("assignmentPreviewPanel");
+    const previewContent=document.getElementById("assignmentPreviewContent");
+    const dueText=dueAt?dueAt.toLocaleString("vi-VN"):"Không giới hạn thời gian";
+    const fileText=file?file.name:"Không có tệp đề đính kèm";
+    const keyFilesText=answerKeyFiles.length?answerKeyFiles.map(f=>f.name).join(", "):"Không có tệp đáp án";
+    const answerLabel=answerType==="short"?"Trả lời ngắn":answerType==="file"?"Bắt buộc tải tệp":"Trả lời dài";
+    previewContent.replaceChildren();
+    const addLine=(label,value)=>{
+      const p=document.createElement("p");p.style.margin="7px 0";
+      const strong=document.createElement("strong");strong.textContent=label+": ";
+      const span=document.createElement("span");span.textContent=value;
+      p.append(strong,span);previewContent.appendChild(p);
+    };
+    addLine("Tên bài",title);
+    addLine("Lớp nhận bài",classNames.join(", "));
+    addLine("Nội dung",body);
+    addLine("Hạn nộp",dueText);
+    addLine("Hình thức nộp",answerLabel);
+    addLine("Tệp đề",fileText);
+    addLine("Đáp án riêng của giáo viên",answerKeyText?"Đã nhập nội dung đáp án":"Chưa nhập nội dung đáp án");
+    addLine("Tệp đáp án",keyFilesText);
+    preview.hidden=false;
+    preview.scrollIntoView({behavior:"smooth",block:"center"});
+    message.textContent="Cô kiểm tra kỹ nội dung và lớp nhận bài. Bài chưa được giao cho học sinh.";
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Đang giao bài...";
+  document.getElementById("confirmAssignmentButton").disabled=true;
+
+  try {
+    const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+    const user = userData?.user;
+    if (userError || !user) throw new Error("Phiên đăng nhập đã hết hạn. Cô vui lòng đăng nhập lại.");
+
+    const createdAssignments=[];
+    const uploadedKeyPaths=[];
+    const uploadedAssignmentPaths=[];
+    try{
+      for(const className of classNames){
+        const {data:assignment,error:insertError}=await supabaseClient
+          .from("assignments")
+          .insert({
+            title,body,class_name:className,answer_type:answerType,
+            due_at:dueAt?dueAt.toISOString():null,created_by:user.id
+          })
+          .select("id").single();
+        if(insertError) throw insertError;
+        createdAssignments.push(assignment);
+
+        const rubricPaths=[];
+        const rubricNames=[];
+        for(let i=0;i<answerKeyFiles.length;i++){
+          const keyFile=answerKeyFiles[i];
+          const ext=(keyFile.name.split(".").pop()||"pdf").toLowerCase();
+          const safe=keyFile.name.replace(/[^a-zA-Z0-9._-]+/g,"_");
+          const keyPath=user.id+"/"+assignment.id+"/"+Date.now()+"-"+i+"-"+safe;
+          const keyUpload=await supabaseClient.storage.from("teacher-answer-keys").upload(keyPath,keyFile,{upsert:false,contentType:keyFile.type||(ext==="pdf"?"application/pdf":ext==="docx"?"application/vnd.openxmlformats-officedocument.wordprocessingml.document":"text/plain")});
+          if(keyUpload.error) throw keyUpload.error;
+          rubricPaths.push(keyPath);rubricNames.push(keyFile.name);uploadedKeyPaths.push(keyPath);
+        }
+        const {error:rubricError}=await supabaseClient.from("assignment_rubrics").upsert({
+          assignment_id:assignment.id,teacher_id:user.id,answer_text:answerKeyText,
+          file_paths:rubricPaths,file_names:rubricNames,updated_at:new Date().toISOString()
+        },{onConflict:"assignment_id"});
+        if(rubricError) throw rubricError;
+
+        if(file){
+          const safeName=file.name.replace(/[^a-zA-Z0-9._-]+/g,"_");
+          const path=assignment.id+"/"+user.id+"/"+Date.now()+"-"+safeName;
+          const upload=await supabaseClient.storage.from("assignment-files").upload(path,file,{upsert:false,contentType:file.type});
+          if(upload.error) throw upload.error;
+          uploadedAssignmentPaths.push(path);
+          const {error:updateError}=await supabaseClient.from("assignments")
+            .update({file_path:path,file_name:file.name,file_size:file.size,mime_type:file.type})
+            .eq("id",assignment.id).eq("created_by",user.id);
+          if(updateError) throw updateError;
+        }
+      }
+    }catch(createError){
+      if(uploadedKeyPaths.length) await supabaseClient.storage.from("teacher-answer-keys").remove(uploadedKeyPaths);
+      if(uploadedAssignmentPaths.length) await supabaseClient.storage.from("assignment-files").remove(uploadedAssignmentPaths);
+      for(const created of createdAssignments){
+        await supabaseClient.from("assignment_rubrics").delete().eq("assignment_id",created.id).eq("teacher_id",user.id);
+        await supabaseClient.from("assignments").delete().eq("id",created.id).eq("created_by",user.id);
+      }
+      throw createError;
+    }
+
+    message.textContent="Đã giao bài tập thành công cho "+classNames.join(", ")+(file?" và tải tệp đề lên thành công!":"!");
+    assignmentPreviewConfirmed=false;
+    document.getElementById("assignmentPreviewPanel").hidden=true;
+    createAssignmentForm.reset();
+    await loadTeacherAssignmentDeadlines();
+  } catch (error) {
+    assignmentPreviewConfirmed=false;
+    message.textContent = "Chưa giao được bài: " + (error.message || "Có lỗi xảy ra.") + " Cô kiểm tra lại rồi xem trước và xác nhận lại nhé.";
+  } finally {
+    button.disabled = false;
+    button.textContent = "Xem trước bài tập";
+    document.getElementById("confirmAssignmentButton").disabled=false;
+  }
+});
+
+async function loadStudents() {
+  const list = document.getElementById("studentList");
+  const message = document.getElementById("studentListMessage");
+
+  if (!list || !message || !supabaseClient) return;
+
+  list.textContent = "";
+  list.style.display = "block";
+  list.style.width = "100%";
+  message.textContent = "Đang tải danh sách học sinh...";
+
+  try {
+    if(!currentTeacherId || !availableTeacherClasses.length){
+      message.textContent="Tài khoản chưa có lớp thuộc quyền quản lý. Cô hãy tạo lớp mới nếu đã được cấp quyền khối, hoặc liên hệ quản trị viên.";
+      return;
+    }
+    const { data, error } = await supabaseClient
+      .from("profiles")
+      .select("id, full_name, username, class_name")
+      .eq("role", "student")
+      .eq("teacher_id", currentTeacherId)
+      .in("class_name", availableTeacherClasses)
+      .order("full_name", { ascending: true });
+
+    if (error) {
+      message.textContent = "Không tải được danh sách: " + error.message;
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      message.textContent = "Chưa có học sinh nào.";
+      return;
+    }
+
+    // Chuẩn hóa mã lớp để tránh sai khác do chữ hoa, chữ thường hoặc khoảng trắng.
+    data.forEach(student => {
+      student.class_name = (student.class_name || "").trim().toUpperCase();
+    });
+
+    const allClasses = [...new Set([
+      ...availableTeacherClasses,
+      ...data.map(s => s.class_name).filter(Boolean)
+    ])].sort((a,b)=>a.localeCompare(b,"vi",{numeric:true}));
+
+    message.textContent = `Tổng cộng ${data.length} học sinh.`;
+
+    allClasses.forEach(className => {
+      const students = data.filter(
+        student => student.class_name === className
+      );
+
+      const section = document.createElement("div");
+      section.className = "student-class-section";
+      section.style.cssText = `
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        grid-column: 1 / -1;
+        clear: both;
+        margin: 20px 0;
+        padding: 18px;
+        background: #f8faf8;
+        border: 1px solid #dce8df;
+        border-radius: 14px;
+      `;
+
+      const heading = document.createElement("div");
+      heading.className = "student-class-heading";
+      heading.style.cssText = `
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        width: 100%;
+        margin-bottom: 14px;
+      `;
+
+      const title = document.createElement("h3");
+      title.textContent = `Lớp ${className} (${students.length} học sinh)`;
+      title.style.cssText = "margin:0;color:#315d43;";
+
+      heading.appendChild(title);
+
+      // NÚT XÓA TOÀN BỘ HỌC SINH TRONG LỚP
+      if (students.length > 0) {
+        const deleteClassButton = document.createElement("button");
+        deleteClassButton.type = "button";
+        deleteClassButton.textContent = "Xóa toàn bộ lớp";
+        deleteClassButton.className = "delete-class-button";
+
+        deleteClassButton.addEventListener("click", async () => {
+          const firstConfirm = confirm(
+            `CẢNH BÁO!\n\n` +
+            `Mày đang chuẩn bị xóa toàn bộ ${students.length} học sinh lớp ${className}.\n\n` +
+            `Tài khoản, bài nộp, điểm, nhận xét và ảnh bài làm liên quan cũng sẽ bị xóa.\n\n` +
+            `Lớp còn lại không bị ảnh hưởng.\n\n` +
+            `Mày có chắc chắn muốn tiếp tục không?`
+          );
+
+          if (!firstConfirm) return;
+
+          const secondConfirm = prompt(
+            `Để xác nhận xóa lớp ${className}, hãy nhập chính xác:\n\nXOA ${className}`
+          );
+
+          if (secondConfirm !== `XOA ${className}`) {
+            alert("Đã hủy thao tác. Không có học sinh nào bị xóa.");
+            return;
+          }
+
+          deleteClassButton.disabled = true;
+          deleteClassButton.textContent = "Đang xóa...";
+
+          try {
+            const { data: result, error } =
+              await supabaseClient.functions.invoke("clever-api", {
+                body: {
+                  action: "delete_class",
+                  class_name: className
+                }
+              });
+
+            if (error || !result || !result.success) {
+              const failedNames = result?.failed
+                ? "\n\nChi tiết:\n" + result.failed.join("\n")
+                : "";
+
+              alert(
+                (result && result.error) ||
+                (result && result.message) ||
+                (error && error.message) ||
+                "Không xóa được danh sách." +
+                failedNames
+              );
+              return;
+            }
+
+            alert(
+              `Đã xóa ${result.deleted} học sinh lớp ${className}.`
+            );
+
+            await loadStudents();
+
+          } catch (err) {
+            alert("Có lỗi xảy ra: " + err.message);
+          } finally {
+            deleteClassButton.disabled = false;
+            deleteClassButton.textContent = "Xóa toàn bộ lớp";
+          }
+        });
+
+        heading.appendChild(deleteClassButton);
+      }
+
+      section.appendChild(heading);
+
+      if (students.length === 0) {
+        const empty = document.createElement("p");
+        empty.textContent = "Chưa có học sinh trong lớp này.";
+        section.appendChild(empty);
+      }
+
+      students.forEach((student, index) => {
+        const item = document.createElement("div");
+        item.className = "student-item";
+        item.style.cssText = `
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 10px;
+          width: 100%;
+          box-sizing: border-box;
+          padding: 12px 0;
+          border-bottom: 1px solid #e3ebe5;
+        `;
+
+        const info = document.createElement("span");
+        info.textContent =
+          `${index + 1}. ${student.full_name || "Chưa có họ tên"} | ` +
+          `${student.username || "Chưa có tên đăng nhập"}`;
+        info.style.cssText = "flex:1 1 240px;min-width:0;";
+
+        // NÚT ĐẶT LẠI MẬT KHẨU
+        const resetButton = document.createElement("button");
+        resetButton.type = "button";
+        resetButton.textContent = "Đặt lại mật khẩu";
+
+        resetButton.addEventListener("click", async () => {
+          if (!confirm(
+            `Đặt lại mật khẩu cho ${student.full_name}?`
+          )) return;
+
+          resetButton.disabled = true;
+          resetButton.textContent = "Đang xử lý...";
+
+          try {
+            const { data: result, error } =
+              await supabaseClient.functions.invoke("clever-api", {
+                body: {
+                  action: "reset_password",
+                  student_id: student.id
+                }
+              });
+
+            if (error || !result || !result.success) {
+              alert(
+                (result && result.error) ||
+                (error && error.message) ||
+                "Không đặt lại được mật khẩu."
+              );
+              return;
+            }
+
+            alert(
+              "ĐÃ ĐẶT LẠI MẬT KHẨU\n\n" +
+              "Học sinh: " + result.student_name + "\n" +
+              "Lớp: " + result.class_name + "\n" +
+              "Tên đăng nhập: " + student.username + "\n" +
+              "Mật khẩu mới: " + result.password
+            );
+
+          } catch (err) {
+            alert("Có lỗi xảy ra: " + err.message);
+          } finally {
+            resetButton.disabled = false;
+            resetButton.textContent = "Đặt lại mật khẩu";
+          }
+        });
+
+        // NÚT XÓA TỪNG HỌC SINH
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.textContent = "Xóa học sinh";
+
+        deleteButton.addEventListener("click", async () => {
+          if (!confirm(
+            `Mày có chắc chắn muốn xóa học sinh ${student.full_name} không?\n\n` +
+            "Toàn bộ tài khoản và dữ liệu liên quan sẽ bị xóa."
+          )) return;
+
+          deleteButton.disabled = true;
+          deleteButton.textContent = "Đang xóa...";
+
+          try {
+            const { data: result, error } =
+              await supabaseClient.functions.invoke("clever-api", {
+                body: {
+                  action: "delete_student",
+                  student_id: student.id
+                }
+              });
+
+            if (error || !result || !result.success) {
+              alert(
+                (result && result.error) ||
+                (error && error.message) ||
+                "Chưa xóa được học sinh."
+              );
+              return;
+            }
+
+            alert("Đã xóa học sinh và dữ liệu liên quan.");
+            await loadStudents();
+
+          } catch (err) {
+            alert("Có lỗi xảy ra: " + err.message);
+          } finally {
+            deleteButton.disabled = false;
+            deleteButton.textContent = "Xóa học sinh";
+          }
+        });
+
+        item.appendChild(info);
+        item.appendChild(resetButton);
+        item.appendChild(deleteButton);
+
+        section.appendChild(item);
+      });
+
+      list.appendChild(section);
+    });
+
+  } catch (err) {
+    message.textContent = "Có lỗi xảy ra: " + err.message;
+  }
+}
+document.getElementById("refreshStudents").addEventListener("click",loadStudents);
+
+
+async function loadProgressDashboard(){
+  const message=document.getElementById("progressDashboardMessage");
+  const stats=document.getElementById("progressDashboardStats");
+  const list=document.getElementById("progressDashboardList");
+  if(!message||!stats||!list||!supabaseClient)return;
+  message.textContent="Đang tổng hợp tiến độ học sinh...";
+  stats.innerHTML="";
+  list.innerHTML="";
+  try{
+    const {data:userData,error:userError}=await supabaseClient.auth.getUser();
+    const user=userData?.user;
+    if(userError||!user)throw new Error("Phiên đăng nhập đã hết hạn.");
+
+    const [studentResult,assignmentResult]=await Promise.all([
+      supabaseClient.from("profiles").select("id,full_name,class_name").eq("role","student").order("full_name",{ascending:true}),
+      supabaseClient.from("assignments").select("id,title,class_name,due_at,created_at").eq("created_by",user.id).order("created_at",{ascending:true})
+    ]);
+    if(studentResult.error)throw new Error("Không tải được danh sách học sinh: "+studentResult.error.message);
+    if(assignmentResult.error)throw new Error("Không tải được bài tập: "+assignmentResult.error.message);
+
+    const students=(studentResult.data||[]).map(x=>({...x,class_name:(x.class_name||"").trim().toUpperCase()}));
+    const assignments=assignmentResult.data||[];
+    let submissions=[];
+    if(assignments.length){
+      const submissionResult=await supabaseClient.from("submissions")
+        .select("id,assignment_id,student_id,attempt,score,feedback,submitted_at")
+        .in("assignment_id",assignments.map(x=>x.id))
+        .order("submitted_at",{ascending:true});
+      if(submissionResult.error)throw new Error("Không tải được dữ liệu bài nộp: "+submissionResult.error.message);
+      submissions=submissionResult.data||[];
+    }
+
+    const now=Date.now();
+    const submissionMap=new Map();
+    submissions.forEach(sub=>{
+      const key=sub.student_id+"::"+sub.assignment_id;
+      if(!submissionMap.has(key))submissionMap.set(key,[]);
+      submissionMap.get(key).push(sub);
+    });
+    submissionMap.forEach(items=>items.sort((a,b)=>
+      (Number(a.attempt||0)-Number(b.attempt||0))||
+      (new Date(a.submitted_at||0).getTime()-new Date(b.submitted_at||0).getTime())
+    ));
+
+    const classNames=[...new Set(students.map(x=>x.class_name).filter(Boolean))].sort();
+    const totalPairs=students.reduce((sum,student)=>sum+assignments.filter(a=>(a.class_name||"").trim().toUpperCase()===student.class_name).length,0);
+    let completedPairs=0,overduePairs=0,scoredCount=0,scoreSum=0;
+    students.forEach(student=>{
+      const ownAssignments=assignments.filter(a=>(a.class_name||"").trim().toUpperCase()===student.class_name);
+      ownAssignments.forEach(a=>{
+        const items=submissionMap.get(student.id+"::"+a.id)||[];
+        if(items.length)completedPairs++;
+        else if(a.due_at&&new Date(a.due_at).getTime()<now)overduePairs++;
+        if(items.length){
+          const latest=items[items.length-1];
+          if(latest.score!==null&&latest.score!==undefined&&Number.isFinite(Number(latest.score))){
+            scoredCount++;scoreSum+=Number(latest.score);
+          }
+        }
+      });
+    });
+    const pendingPairs=Math.max(0,totalPairs-completedPairs);
+    const average=scoredCount?scoreSum/scoredCount:null;
+    const statItems=[
+      ["Tổng học sinh",students.length,"👩‍🎓"],
+      ["Bài tập đã giao",assignments.length,"📚"],
+      ["Lượt hoàn thành",completedPairs,"✓"],
+      ["Còn thiếu",pendingPairs,"⏳"],
+      ["Quá hạn chưa nộp",overduePairs,"⚠"],
+      ["Điểm trung bình",average===null?"—":average.toFixed(2)+"/10","★"]
+    ];
+    statItems.forEach(([label,value,emoji])=>{
+      const card=document.createElement("div");
+      card.style.cssText="padding:14px;border:1px solid #e9ddca;border-radius:13px;background:#fff;min-width:0;";
+      const caption=document.createElement("div");
+      caption.textContent=emoji+" "+label;
+      caption.style.cssText="font-size:12px;color:#88796d;margin-bottom:7px;";
+      const number=document.createElement("strong");
+      number.textContent=String(value);
+      number.style.cssText="font-size:23px;color:#68452f;";
+      card.append(caption,number);stats.appendChild(card);
+    });
+
+    if(!students.length){
+      message.textContent="Chưa có học sinh để thống kê.";
+      return;
+    }
+    message.textContent="Đã tổng hợp "+students.length+" học sinh, "+assignments.length+" bài tập và "+submissions.length+" lượt nộp. Số liệu được tính theo các bài cô đã giao cho từng lớp.";
+    const orderedClasses=[...classNames].sort((a,b)=>a.localeCompare(b,"vi",{numeric:true}));
+    orderedClasses.forEach(className=>{
+      const classStudents=students.filter(x=>x.class_name===className);
+      if(!classStudents.length)return;
+      const classAssignments=assignments.filter(a=>(a.class_name||"").trim().toUpperCase()===className);
+      const section=document.createElement("details");
+      section.open=false;
+      section.style.cssText="margin:14px 0;padding:14px 16px;background:#fff;border:1px solid #e9ddca;border-radius:14px;";
+      const classSummary=document.createElement("summary");
+      let classDone=0,classPending=0,classOverdue=0;
+      classStudents.forEach(student=>classAssignments.forEach(a=>{
+        const items=submissionMap.get(student.id+"::"+a.id)||[];
+        if(items.length)classDone++;
+        else if(a.due_at&&new Date(a.due_at).getTime()<now)classOverdue++;
+        else classPending++;
+      }));
+      classSummary.textContent="LỚP "+className+" · "+classStudents.length+" học sinh · "+classDone+" lượt hoàn thành · "+classPending+" còn thiếu · "+classOverdue+" quá hạn";
+      classSummary.style.cssText="cursor:pointer;font-weight:700;color:#68452f;line-height:1.6;";
+      section.appendChild(classSummary);
+      if(!classAssignments.length){
+        const empty=document.createElement("p");empty.textContent="Lớp này chưa có bài tập được giao.";section.appendChild(empty);
+      }
+      classStudents.forEach(student=>{
+        const ownAssignments=classAssignments;
+        let done=0,pending=0,overdue=0;
+        const scored=[];
+        ownAssignments.forEach(a=>{
+          const items=submissionMap.get(student.id+"::"+a.id)||[];
+          if(items.length){
+            done++;
+            const latest=items[items.length-1];
+            if(latest.score!==null&&latest.score!==undefined&&Number.isFinite(Number(latest.score)))scored.push(Number(latest.score));
+          }else{
+            pending++;
+            if(a.due_at&&new Date(a.due_at).getTime()<now)overdue++;
+          }
+        });
+        const row=document.createElement("details");
+        row.style.cssText="margin:10px 0;padding:11px 12px;border:1px solid #eee4d7;border-radius:11px;background:#fffdf9;";
+        const summary=document.createElement("summary");
+        const avg=scored.length?(scored.reduce((a,b)=>a+b,0)/scored.length).toFixed(2)+"/10":"Chưa có điểm";
+        summary.textContent=(student.full_name||"Chưa rõ tên")+" · "+done+"/"+ownAssignments.length+" bài · "+(ownAssignments.length?Math.round(done/ownAssignments.length*100):0)+"% · TB "+avg;
+        summary.style.cssText="cursor:pointer;color:#433329;font-weight:600;line-height:1.6;";
+        row.appendChild(summary);
+        const progress=document.createElement("div");
+        progress.style.cssText="height:7px;background:#eee7dd;border-radius:99px;overflow:hidden;margin:10px 0;";
+        const fill=document.createElement("div");
+        fill.style.cssText="height:100%;width:"+(ownAssignments.length?done/ownAssignments.length*100:0)+"%;background:#8a9d78;border-radius:99px;";
+        progress.appendChild(fill);row.appendChild(progress);
+        const summaryLine=document.createElement("p");
+        summaryLine.style.cssText="font-size:13px;color:#756557;margin:6px 0 10px;";
+        summaryLine.textContent="Đã nộp: "+done+" · Chưa nộp: "+pending+" · Quá hạn: "+overdue+" · Đã có điểm: "+scored.length;
+        row.appendChild(summaryLine);
+        ownAssignments.forEach(a=>{
+          const items=submissionMap.get(student.id+"::"+a.id)||[];
+          const latest=items.length?items[items.length-1]:null;
+          const item=document.createElement("div");
+          item.style.cssText="padding:9px 0;border-top:1px solid #f0e8dd;font-size:13px;line-height:1.6;";
+          const title=document.createElement("strong");
+          title.textContent=a.title||"Bài tập chưa có tên";
+          const status=document.createElement("div");
+          if(latest){
+            status.textContent="✓ Đã nộp "+(latest.submitted_at?"· "+formatVietnamDateTime(latest.submitted_at):"")+
+              " · Lần "+(latest.attempt||1)+"/2"+
+              (latest.score!==null&&latest.score!==undefined?" · Điểm "+latest.score+"/10":" · Chưa chấm");
+            status.style.color="#477b58";
+          }else if(a.due_at&&new Date(a.due_at).getTime()<now){
+            status.textContent="⚠ Quá hạn, chưa nộp · Hạn: "+formatVietnamDateTime(a.due_at);
+            status.style.color="#a13d32";
+          }else{
+            status.textContent="Chưa nộp"+(a.due_at?" · Hạn: "+formatVietnamDateTime(a.due_at):" · Không giới hạn thời gian");
+            status.style.color="#92724f";
+          }
+          item.append(title,status);
+          if(latest?.feedback){
+            const feedback=document.createElement("div");
+            feedback.textContent="Nhận xét: "+latest.feedback;
+            feedback.style.cssText="margin-top:4px;color:#756557;";
+            item.appendChild(feedback);
+          }
+          row.appendChild(item);
+        });
+        section.appendChild(row);
+      });
+      list.appendChild(section);
+    });
+  }catch(error){
+    message.textContent="Chưa tổng hợp được tiến độ: "+(error.message||"Có lỗi xảy ra.");
+  }
+}
+document.getElementById("refreshProgressDashboard")?.addEventListener("click",loadProgressDashboard);
+
+const filterStudent=document.getElementById("filterStudent");
+const filterAssignment=document.getElementById("filterAssignment");
+const list=document.getElementById("submissionList");
+const message=document.getElementById("submissionMessage");
+
+async function loadSubmissions(){
+if(!list||!message||!supabaseClient)return;
+
+list.innerHTML="";
+message.textContent="Đang tải bài nộp của học sinh...";
+
+const r=await supabaseClient.from("submissions").select("id, assignment_id, student_id, attempt, answer, image_paths, feedback, score, submitted_at").order("submitted_at",{ascending:false});
+
+if(r.error){
+message.textContent="Không tải được bài nộp: "+r.error.message;
+return;
+}
+
+const submissions=r.data||[];
+
+if(!submissions.length){
+message.textContent="Chưa có học sinh nào nộp bài.";
+return;
+}
+
+const assignmentIds=Array.from(new Set(submissions.map(x=>x.assignment_id)));
+const studentIds=Array.from(new Set(submissions.map(x=>x.student_id)));
+
+const ar=await supabaseClient.from("assignments").select("id,title,body,class_name").in("id",assignmentIds);
+
+if(ar.error){
+message.textContent="Không tải được thông tin bài tập: "+ar.error.message;
+return;
+}
+
+const sr=await supabaseClient.from("profiles").select("id,full_name,class_name").in("id",studentIds);
+
+if(sr.error){
+message.textContent="Không tải được tên học sinh: "+sr.error.message;
+return;
+}
+
+const assignments=ar.data||[];
+const students=sr.data||[];
+
+const assignmentMap=new Map(assignments.map(x=>[x.id,x]));
+const studentMap=new Map(students.map(x=>[x.id,x]));
+
+const keepStudent=filterStudent.value;
+const keepAssignment=filterAssignment.value;
+
+filterStudent.innerHTML='<option value="">Tất cả học sinh</option>';
+
+students.forEach(x=>{
+const o=document.createElement("option");
+o.value=x.id;
+o.textContent=x.full_name||"Chưa rõ tên";
+filterStudent.appendChild(o);
+});
+
+filterStudent.value=keepStudent;
+
+filterAssignment.innerHTML='<option value="">Tất cả bài tập</option>';
+
+assignments.forEach(x=>{
+const o=document.createElement("option");
+o.value=x.id;
+o.textContent=x.title||"Bài tập chưa có tên";
+filterAssignment.appendChild(o);
+});
+
+filterAssignment.value=keepAssignment;
+
+const filtered=submissions.filter(x=>
+(!filterStudent.value||x.student_id===filterStudent.value)&&
+(!filterAssignment.value||x.assignment_id===filterAssignment.value)
+);
+
+message.textContent="Hiển thị "+filtered.length+"/"+submissions.length+" lượt nộp. Đã gom theo lớp và bài tập.";
+
+if(!filtered.length){
+message.textContent="Không có bài nộp phù hợp với bộ lọc.";
+return;
+}
+
+const grouped={};
+
+filtered.forEach(sub=>{
+const a=assignmentMap.get(sub.assignment_id);
+const p=studentMap.get(sub.student_id);
+const cn=(a&&a.class_name)||(p&&p.class_name)||"Chưa xác định lớp";
+const ak=sub.assignment_id||"unknown-assignment";
+const sk=sub.student_id||"unknown-student";
+
+if(!grouped[cn])grouped[cn]={};
+if(!grouped[cn][ak])grouped[cn][ak]={assignment:a,students:{}};
+if(!grouped[cn][ak].students[sk])grouped[cn][ak].students[sk]={student:p,submissions:[]};
+
+grouped[cn][ak].students[sk].submissions.push(sub);
+});
+
+Object.keys(grouped).sort().forEach(cn=>{
+const classDetails=document.createElement("details");
+classDetails.style.cssText="background:#f8faf8;border:1px solid #dce8df;border-radius:14px;padding:12px 16px;margin:14px 0;";
+
+const classSummary=document.createElement("summary");
+let classCount=0;
+
+Object.keys(grouped[cn]).forEach(k=>
+Object.keys(grouped[cn][k].students).forEach(sk=>
+classCount+=grouped[cn][k].students[sk].submissions.length
+));
+
+classSummary.textContent="LỚP "+cn+" • "+Object.keys(grouped[cn]).length+" bài tập • "+classCount+" lượt nộp";
+classSummary.style.cssText="cursor:pointer;font-weight:700;color:#355b45;padding:5px 0;";
+classDetails.appendChild(classSummary);
+
+Object.keys(grouped[cn]).sort((x,y)=>{
+const ax=grouped[cn][x].assignment;
+const ay=grouped[cn][y].assignment;
+return ((ax&&ax.title)||"").localeCompare((ay&&ay.title)||"");
+}).forEach(ak=>{
+
+const ag=grouped[cn][ak];
+
+const assignmentDetails=document.createElement("details");
+assignmentDetails.style.cssText="background:#fff;border:1px solid #e3ebe5;border-radius:11px;padding:10px 13px;margin:10px 0;";
+
+const assignmentSummary=document.createElement("summary");
+const studentKeys=Object.keys(ag.students);
+
+let count=0;
+studentKeys.forEach(k=>count+=ag.students[k].submissions.length);
+
+assignmentSummary.textContent=((ag.assignment&&ag.assignment.title)||"Bài tập chưa xác định")+" • "+studentKeys.length+" học sinh • "+count+" lượt nộp";
+assignmentSummary.style.cssText="cursor:pointer;font-weight:600;color:#496b59;padding:4px 0;";
+assignmentDetails.appendChild(assignmentSummary);
+
+// Nội dung đề được xem trong mục Quản lý hạn nộp và gia hạn bài tập.
+// Khu vực xem bài học sinh nộp chỉ tập trung vào danh sách và bài làm đã nộp.
+
+// DANH SÁCH HỌC SINH ĐÃ NỘP BÀI
+studentKeys.sort((x,y)=>
+((ag.students[x].student&&ag.students[x].student.full_name)||"").localeCompare(
+((ag.students[y].student&&ag.students[y].student.full_name)||"")
+)
+).forEach(sk=>{
+
+const sg=ag.students[sk];
+const studentName=(sg.student&&sg.student.full_name)||"Học sinh chưa xác định";
+
+const studentDetails=document.createElement("details");
+studentDetails.style.cssText="border-top:1px solid #edf1ed;padding:9px 4px;margin-top:8px;";
+
+const studentSummary=document.createElement("summary");
+studentSummary.textContent=studentName+" • "+sg.submissions.length+" lượt nộp";
+studentSummary.style.cssText="cursor:pointer;color:#35443d;font-weight:600;";
+studentDetails.appendChild(studentSummary);
+
+sg.submissions.sort((x,y)=>(x.attempt||1)-(y.attempt||1)).forEach(async sub=>{
+
+const attemptDetails=document.createElement("details");
+attemptDetails.style.cssText="background:#fbfcfb;border:1px solid #e7eee8;border-radius:9px;padding:10px;margin:9px 0;";
+
+const attemptSummary=document.createElement("summary");
+attemptSummary.textContent="Lần nộp "+(sub.attempt||1)+"/2"+(sub.score!==null&&sub.score!==undefined?" • Điểm: "+sub.score+"/10":" • Chưa chấm");
+attemptSummary.style.cssText="cursor:pointer;color:#477b58;font-weight:600;";
+attemptDetails.appendChild(attemptSummary);
+
+// BÀI LÀM CỦA HỌC SINH
+const answer=document.createElement("p");
+answer.style.whiteSpace="pre-wrap";
+answer.textContent=sub.answer||"Học sinh không nhập nội dung văn bản.";
+attemptDetails.appendChild(answer);
+
+const time=document.createElement("p");
+time.textContent=sub.submitted_at?"Thời gian nộp: "+new Date(sub.submitted_at).toLocaleString("vi-VN"):"";
+attemptDetails.appendChild(time);
+
+const paths=Array.isArray(sub.image_paths)?sub.image_paths:[];
+
+if(paths.length){
+const h=document.createElement("p");
+h.textContent="Tệp đính kèm ("+paths.length+"):";
+attemptDetails.appendChild(h);
+
+for(const path of paths){
+
+const signed=await supabaseClient.storage.from("student-submissions").createSignedUrl(path,3600);
+
+if(signed.error||!signed.data){
+const e=document.createElement("p");
+e.textContent="Không mở được tệp: "+path;
+attemptDetails.appendChild(e);
+continue;
+}
+
+const fileName=String(path).split("/").pop()||"Tệp bài làm";
+
+if(/\.(jpg|jpeg|png|webp|gif)$/i.test(fileName)){
+const img=document.createElement("img");
+img.src=signed.data.signedUrl;
+img.alt="Ảnh bài làm";
+img.style.cssText="display:block;max-width:100%;max-height:500px;margin:10px 0;border-radius:8px;cursor:zoom-in;transition:transform .15s ease;";
+img.title="Nhấn để xem ảnh kích thước lớn";
+img.tabIndex=0;
+img.setAttribute("role","button");
+img.addEventListener("click",()=>openSubmissionImage(img.src,img.alt));
+img.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();openSubmissionImage(img.src,img.alt);}});
+attemptDetails.appendChild(img);
+}else{
+const link=document.createElement("a");
+link.href=signed.data.signedUrl;
+link.target="_blank";
+link.rel="noopener noreferrer";
+link.textContent="Mở/tải tệp: "+fileName;
+attemptDetails.appendChild(link);
+}
+}
+}
+
+const scoreLabel=document.createElement("label");
+scoreLabel.textContent="Điểm (thang 10)";
+
+const scoreInput=document.createElement("input");
+scoreInput.type="number";
+scoreInput.min="0";
+scoreInput.max="10";
+scoreInput.step="0.25";
+scoreInput.value=sub.score??"";
+scoreInput.style.maxWidth="180px";
+
+const feedbackLabel=document.createElement("label");
+feedbackLabel.textContent="Nhận xét của cô";
+
+const feedbackInput=document.createElement("textarea");
+feedbackInput.rows=3;
+feedbackInput.value=sub.feedback||"";
+
+const saveButton=document.createElement("button");
+saveButton.type="button";
+saveButton.textContent="Lưu điểm và nhận xét";
+
+const result=document.createElement("p");
+result.className="message";
+
+saveButton.addEventListener("click",async()=>{
+const t=scoreInput.value.trim();
+const feedback=feedbackInput.value.trim();
+let score=null;
+
+if(t!==""){
+score=Number(t);
+if(!Number.isFinite(score)||score<0||score>10){
+result.textContent="Điểm phải nằm trong khoảng từ 0 đến 10.";
+return;
+}
+}
+
+saveButton.disabled=true;
+saveButton.textContent="Đang lưu...";
+
+const update=await supabaseClient.from("submissions").update({score,feedback:feedback||null}).eq("id",sub.id);
+
+if(update.error){
+result.textContent="Chưa lưu được: "+update.error.message;
+saveButton.disabled=false;
+saveButton.textContent="Lưu điểm và nhận xét";
+return;
+}
+
+result.textContent="Đã lưu điểm và nhận xét thành công!";
+saveButton.disabled=false;
+saveButton.textContent="Lưu điểm và nhận xét";
+});
+
+const aiGradeButton=document.createElement("button");
+aiGradeButton.type="button";
+aiGradeButton.textContent="AI chấm thử";
+aiGradeButton.style.cssText="background:#725b8d;margin:10px 8px 8px 0;";
+const aiPanel=document.createElement("div");
+aiPanel.style.cssText="display:none;margin:10px 0;padding:14px;background:#f7f3fb;border:1px solid #e4d9ef;border-radius:10px;white-space:normal;";
+aiGradeButton.addEventListener("click",async()=>{
+  aiGradeButton.disabled=true; aiGradeButton.textContent="AI đang đọc bài...";
+  aiPanel.style.display="block"; aiPanel.textContent="Đang đối chiếu bài làm với đáp án và hướng dẫn chấm của cô...";
+  try{
+    const {data,error}=await supabaseClient.functions.invoke("learning-api",{body:{action:"grade_submission",assignment_id:sub.assignment_id,submission_id:sub.id}});
+    if(error)throw error;
+    if(!data||!data.success)throw new Error(data&&data.error||"AI chưa chấm được bài này.");
+    aiPanel.innerHTML="";
+    const heading=document.createElement("strong"); heading.textContent="Kết quả AI đề xuất: "+data.suggested_score+"/10"; aiPanel.appendChild(heading);
+    if(data.needs_teacher_review){const warn=document.createElement("p");warn.textContent="Cần cô xem lại: "+(data.review_reason||"Có nội dung chưa rõ.");warn.style.color="#9a5b21";aiPanel.appendChild(warn);}
+    (data.criteria||[]).forEach(c=>{const p=document.createElement("p");p.textContent=(c.name||"Tiêu chí")+": "+c.score+"/"+c.max_score+" – "+(c.comment||"");aiPanel.appendChild(p);});
+    if((data.strengths||[]).length){const p=document.createElement("p");p.textContent="Ưu điểm: "+data.strengths.join("; ");aiPanel.appendChild(p);}
+    if((data.improvements||[]).length){const p=document.createElement("p");p.textContent="Cần cải thiện: "+data.improvements.join("; ");aiPanel.appendChild(p);}
+    const fb=document.createElement("p");fb.textContent="Nhận xét gợi ý: "+(data.teacher_feedback||"");aiPanel.appendChild(fb);
+    const use=document.createElement("button");use.type="button";use.textContent="Dùng đề xuất (chưa lưu)";
+    use.addEventListener("click",()=>{scoreInput.value=data.suggested_score;feedbackInput.value=data.teacher_feedback||"";result.textContent="Đã đưa đề xuất vào ô điểm và nhận xét. Cô kiểm tra, chỉnh sửa rồi nhấn “Lưu điểm và nhận xét”.";});
+    aiPanel.appendChild(use);
+  }catch(err){aiPanel.textContent="Chưa chấm được: "+(err.message||"Lỗi kết nối");}
+  finally{aiGradeButton.disabled=false;aiGradeButton.textContent="AI chấm thử";}
+});
+attemptDetails.append(aiGradeButton,aiPanel);
+attemptDetails.append(scoreLabel,scoreInput,feedbackLabel,feedbackInput,saveButton,result);
+studentDetails.appendChild(attemptDetails);
+});
+
+assignmentDetails.appendChild(studentDetails);
+});
+
+classDetails.appendChild(assignmentDetails);
+});
+
+list.appendChild(classDetails);
+});
+}
+
+document.getElementById("filterAssignment").addEventListener("change",loadSubmissions);
+
+async function loadAssignments(className){
+const list=document.getElementById("studentAssignments");
+const message=document.getElementById("studentAssignmentMessage");
+
+if(!list||!message||!supabaseClient)return;
+
+list.innerHTML="";
+message.textContent="Đang tải bài tập...";
+
+if(!className){
+message.textContent="Tài khoản chưa được gán lớp. Em liên hệ cô Thương nhé.";
+return;
+}
+
+const {data:userData,error:userError}=await supabaseClient.auth.getUser();
+
+if(userError||!userData||!userData.user){
+message.textContent="Phiên đăng nhập đã hết hạn.";
+return;
+}
+
+const student=userData.user;
+
+const {data,error}=await supabaseClient
+.from("assignments")
+.select("id,title,body,answer_type,file_path,file_name,due_at,created_at")
+.eq("class_name",className)
+.order("created_at",{ascending:true});
+
+if(error){
+message.textContent="Chưa tải được bài tập: "+error.message;
+return;
+}
+
+if(!data||data.length===0){
+message.textContent="Hiện chưa có bài tập nào được giao.";
+return;
+}
+
+const {data:submissions,error:submissionError}=await supabaseClient
+.from("submissions")
+.select("assignment_id,attempt,answer,image_paths,feedback,score,submitted_at")
+.eq("student_id",student.id)
+.order("attempt",{ascending:true});
+
+if(submissionError){
+message.textContent="Không tải được trạng thái bài nộp: "+submissionError.message;
+return;
+}
+
+const submittedMap=new Map();
+(submissions||[]).forEach(item=>{
+if(!submittedMap.has(item.assignment_id))submittedMap.set(item.assignment_id,[]);
+submittedMap.get(item.assignment_id).push(item);
+});
+
+message.textContent=`Lớp ${className} có ${data.length} bài tập. Em hãy làm lần lượt theo thứ tự Bài 1, Bài 2, ... (bài được giao trước hiển thị trước).`;
+
+data.forEach((assignment,index)=>{
+const card=document.createElement("div");
+card.className="student-assignment-item";
+card.style.cssText="background:#fff;border:1px solid #e3ebe5;border-radius:14px;padding:20px;margin:16px 0;";
+
+const title=document.createElement("h3");
+title.textContent=`Bài ${index+1}: ${assignment.title}`;
+
+const bodyDetails=document.createElement("details");
+bodyDetails.style.cssText="margin:12px 0;padding:12px 14px;background:#f7faf7;border:1px solid #e3ebe5;border-radius:11px;";
+const bodySummary=document.createElement("summary");
+bodySummary.textContent="📖 Xem nội dung đề bài";
+bodySummary.style.cssText="cursor:pointer;font-weight:700;color:#355b45;";
+const body=document.createElement("div");
+body.textContent=assignment.body||"Bài tập này chưa có nội dung đề.";
+body.style.cssText="white-space:pre-wrap;line-height:1.75;margin-top:12px;";
+bodyDetails.append(bodySummary,body);
+card.append(title,bodyDetails);
+
+const isPastDeadline=!!assignment.due_at&&new Date(assignment.due_at).getTime()<Date.now();
+const deadlineInfo=document.createElement("p");
+deadlineInfo.style.cssText="margin:10px 0;padding:10px 12px;border-radius:10px;background:"+(isPastDeadline?"#fff0ed":"#f0f6f1")+";color:"+(isPastDeadline?"#a13d32":"#355b45")+";font-weight:700;";
+deadlineInfo.textContent=assignment.due_at
+  ? (isPastDeadline?"Đã hết hạn nộp bài: ":"Hạn cuối nộp bài: ")+new Date(assignment.due_at).toLocaleString("vi-VN")
+  : "Bài tập không giới hạn thời gian nộp.";
+card.appendChild(deadlineInfo);
+
+if(assignment.file_path){
+  const fileInfo=document.createElement("div");
+  fileInfo.style.cssText="margin-top:12px;padding-top:10px;border-top:1px solid #e8eee9;";
+  const fileLink=document.createElement("a");
+  fileLink.textContent="📎 Mở / tải tệp đề bài: "+(assignment.file_name||"Tệp đề bài");
+  fileLink.href="#";
+  fileLink.style.cssText="color:#68452f;font-weight:700;";
+  fileLink.addEventListener("click",async(event)=>{
+    event.preventDefault();
+    const popup=window.open("about:blank","_blank");
+    if(!popup){
+      fileLink.textContent="Trình duyệt đang chặn cửa sổ mới. Hãy cho phép mở cửa sổ bật lên rồi thử lại.";
+      return;
+    }
+    fileLink.textContent="Đang mở tệp...";
+    const {data,error}=await supabaseClient.storage.from("assignment-files").createSignedUrl(assignment.file_path,3600);
+    if(error||!data?.signedUrl){
+      popup.close();
+      fileLink.textContent="Không mở được tệp. Em hãy tải lại trang.";
+      return;
+    }
+    popup.location=data.signedUrl;
+    fileLink.textContent="📎 Mở / tải tệp đề bài: "+(assignment.file_name||"Tệp đề bài");
+  });
+  fileInfo.appendChild(fileLink);
+  bodyDetails.appendChild(fileInfo);
+}
+
+const existingList=submittedMap.get(assignment.id)||[];
+
+existingList.forEach(existing=>{
+const status=document.createElement("p");
+status.textContent=`✓ Em đã nộp bài lần ${existing.attempt||1}.`;
+status.style.cssText="color:#477b58;font-weight:bold";
+card.appendChild(status);
+
+if(existing.answer){
+const answer=document.createElement("p");
+answer.style.whiteSpace="pre-wrap";
+answer.textContent="Bài làm: "+existing.answer;
+card.appendChild(answer);
+}
+
+if(existing.image_paths&&existing.image_paths.length){
+const imageInfo=document.createElement("p");
+imageInfo.textContent=`Đã đính kèm ${existing.image_paths.length} tệp bài làm.`;
+card.appendChild(imageInfo);
+}
+
+if(existing.score!==null&&existing.score!==undefined){
+const score=document.createElement("p");
+score.textContent="Điểm: "+existing.score+"/10";
+card.appendChild(score);
+}
+
+if(existing.feedback){
+const feedback=document.createElement("p");
+feedback.textContent="Nhận xét của cô: "+existing.feedback;
+card.appendChild(feedback);
+}
+});
+
+if(isPastDeadline){
+const closed=document.createElement("p");
+closed.textContent="Bài tập đã đóng. Em vẫn có thể xem đề và bài đã nộp, nhưng không thể nộp thêm sau hạn."; 
+closed.style.cssText="color:#a13d32;font-weight:700;margin-top:12px;";
+card.appendChild(closed);
+}else if(existingList.length>=2){
+const finished=document.createElement("p");
+finished.textContent="Em đã sử dụng hết 2 lần nộp bài. Không thể nộp thêm.";
+finished.style.cssText="color:#477b58;font-weight:bold";
+card.appendChild(finished);
+}else{
+const attemptNumber=existingList.length+1;
+const answerType=assignment.answer_type||"mixed";
+const answerLabel=document.createElement("label");
+const answerInput=answerType==="file"?null:document.createElement("textarea");
+if(answerInput){
+answerLabel.textContent=answerType==="short"
+?`Câu trả lời ngắn (lần nộp ${attemptNumber}/2)`
+:`Bài làm của em (lần nộp ${attemptNumber}/2)`;
+answerInput.rows=answerType==="short"?3:8;
+answerInput.placeholder=answerType==="short"?"Nhập câu trả lời ngắn của em...":"Nhập bài làm của em...";
+}
+
+const needsFiles=answerType==="file"||answerType==="mixed";
+let fileLabel=null;
+let fileInput=null;
+if(needsFiles){
+fileLabel=document.createElement("label");
+fileLabel.textContent=answerType==="file"?"Tải tệp bài làm (bắt buộc, tối đa 10 tệp)":"Đính kèm bài làm (tối đa 10 tệp)";
+fileInput=document.createElement("input");
+fileInput.type="file";
+fileInput.accept=".doc,.docx,.pdf,.jpg,.jpeg,.png,.webp,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,image/jpeg,image/png,image/webp";
+fileInput.multiple=true;
+}
+
+const submitButton=document.createElement("button");
+submitButton.type="button";
+submitButton.textContent=attemptNumber===1?"Nộp bài lần 1":"Nộp lại lần 2";
+const result=document.createElement("p");
+result.className="message";
+if(fileInput){
+fileInput.addEventListener("change",()=>{
+if(fileInput.files.length>10){
+fileInput.value="";
+result.textContent="Mỗi lần nộp bài chỉ được chọn tối đa 10 tệp. Em hãy chọn lại nhé.";
+}else{
+result.textContent=fileInput.files.length?`Đã chọn ${fileInput.files.length}/10 tệp.`:"";
+}
+});
+}
+submitButton.addEventListener("click",async()=>{
+if(assignment.due_at&&new Date(assignment.due_at).getTime()<Date.now()){
+  result.textContent="Đã hết hạn nộp bài. Em không thể gửi bài này nữa.";
+  submitButton.disabled=true;
+  return;
+}
+const answer=answerInput?answerInput.value.trim():"";
+const files=fileInput?Array.from(fileInput.files||[]):[];
+const allowedExtensions=["doc","docx","pdf","jpg","jpeg","png","webp"];
+const mimeByExtension={doc:"application/msword",docx:"application/vnd.openxmlformats-officedocument.wordprocessingml.document",pdf:"application/pdf",jpg:"image/jpeg",jpeg:"image/jpeg",png:"image/png",webp:"image/webp"};
+if(files.length>10){result.textContent="Mỗi lần nộp bài chỉ được đính kèm tối đa 10 tệp.";return;}
+if(answerType==="file"&&files.length===0){result.textContent="Đây là bài tập bắt buộc tải tệp. Em hãy chọn ít nhất 1 tệp nhé.";return;}
+if((answerType==="short"||answerType==="long")&&!answer){result.textContent="Em hãy nhập câu trả lời trước khi nộp bài nhé.";return;}
+if(answerType==="mixed"&&!answer&&files.length===0){result.textContent="Em hãy nhập bài làm hoặc chọn tệp đính kèm nhé.";return;}
+if(files.some(file=>file.size>10*1024*1024)){result.textContent="Mỗi tệp không được vượt quá 10 MB.";return;}
+if(files.some(file=>!allowedExtensions.includes(file.name.split(".").pop().toLowerCase()))){result.textContent="Chỉ nhận file Word (.doc, .docx), PDF hoặc ảnh JPG, PNG, WebP.";return;}
+submitButton.disabled=true;
+submitButton.textContent="Đang nộp bài...";
+result.textContent="Đang tải tệp và lưu bài làm...";
+const imagePaths=[];
+let uploadFailed=false;
+for(let i=0;i<files.length;i++){
+const file=files[i],extension=file.name.split(".").pop().toLowerCase();
+const fileName=Date.now()+"-"+i+"-"+Math.random().toString(36).slice(2)+"."+extension;
+const path=assignment.id+"/"+student.id+"/"+fileName;
+const upload=await supabaseClient.storage.from("student-submissions").upload(path,file,{cacheControl:"3600",upsert:false,contentType:file.type||mimeByExtension[extension]});
+if(upload.error){result.textContent="Chưa tải được tệp "+file.name+": "+upload.error.message;uploadFailed=true;break;}
+imagePaths.push(path);
+}
+if(uploadFailed){
+if(imagePaths.length)await supabaseClient.storage.from("student-submissions").remove(imagePaths);
+submitButton.disabled=false;
+submitButton.textContent=attemptNumber===1?"Nộp bài lần 1":"Nộp lại lần 2";
+return;
+}
+const saved=await supabaseClient.from("submissions").insert({assignment_id:assignment.id,student_id:student.id,answer,image_paths:imagePaths,attempt:attemptNumber});
+if(saved.error){
+if(imagePaths.length)await supabaseClient.storage.from("student-submissions").remove(imagePaths);
+result.textContent="Chưa lưu được bài nộp: "+saved.error.message;
+submitButton.disabled=false;
+submitButton.textContent=attemptNumber===1?"Nộp bài lần 1":"Nộp lại lần 2";
+return;
+}
+await loadAssignments(className);
+document.getElementById("studentAssignmentMessage").textContent="Em đã nộp bài lần "+attemptNumber+" thành công!";
+});
+if(answerInput)card.append(answerLabel,answerInput);
+if(fileInput)card.append(fileLabel,fileInput);
+card.append(submitButton,result);
+}
+
+list.appendChild(card);
+});
+}
+
+async function checkSession(){
+if(!supabaseClient)return;
+
+// Đăng nhập một lần từ Văn học số: token chỉ nằm trong fragment URL,
+// không gửi kèm khi trình duyệt tải trang hay các tài nguyên bên ngoài.
+const hashParams=new URLSearchParams((window.location.hash||"").replace(/^#/,""));
+const ssoToken=hashParams.get("sso");
+if(ssoToken){
+  // BẮT BUỘC xóa phiên cũ trước khi đổi sang tài khoản giáo viên khác.
+  // Nếu không, khi SSO lỗi/hết hạn, ứng dụng có thể dùng lại phiên giáo viên trước.
+  await supabaseClient.auth.signOut();
+  history.replaceState(null,"",window.location.pathname+window.location.search);
+  loginMessage.textContent="Đang xác thực phiên đăng nhập Văn học số...";
+  const {data,error}=await supabaseClient.auth.verifyOtp({
+    token_hash:ssoToken,
+    type:"magiclink"
+  });
+  if(error){
+    loginMessage.textContent="Không thể vào không gian học tập: "+error.message+". Cô hãy quay lại Văn học số và thử vào lại.";
+    return;
+  }
+  if(data.user){
+    await showUser(data.user);
+    return;
+  }
+  loginMessage.textContent="Không nhận được tài khoản từ Văn học số. Cô hãy quay lại cổng giáo viên và thử vào lại.";
+  return;
+}
+const {data}=await supabaseClient.auth.getSession();
+if(data.session)await showUser(data.session.user);
+}
+
+
+/* TRO LI AI - goi Edge Function learning-api, khong de khoa AI o trinh duyet */
+let aiHistory=[];
+const aiChat=document.getElementById("aiChat");
+const aiLauncher=document.getElementById("aiLauncher");
+const aiMessages=document.getElementById("aiMessages");
+const aiInput=document.getElementById("aiInput");
+const aiForm=document.getElementById("aiForm");
+const aiSend=document.getElementById("aiSend");
+const aiStatus=document.getElementById("aiStatus");
+function addAiMessage(text,who){
+ const node=document.createElement("div");
+ node.className="ai-msg "+who;
+ node.textContent=text;
+ aiMessages.appendChild(node);
+ aiMessages.scrollTop=aiMessages.scrollHeight;
+}
+function openAiChat(){aiChat.classList.add("open");aiInput.focus();}
+aiLauncher.addEventListener("click",()=>aiChat.classList.contains("open")?aiChat.classList.remove("open"):openAiChat());
+document.getElementById("aiClose").addEventListener("click",()=>aiChat.classList.remove("open"));
+document.querySelectorAll(".ai-suggestions [data-prompt]").forEach(btn=>btn.addEventListener("click",()=>{aiInput.value=btn.dataset.prompt;aiInput.focus();}));
+aiForm.addEventListener("submit",async(event)=>{
+ event.preventDefault();
+ const question=aiInput.value.trim();
+ if(!question||!supabaseClient)return;
+ const {data:sessionData}=await supabaseClient.auth.getSession();
+ const session=sessionData?.session;
+ if(!session){addAiMessage("Phiên đăng nhập đã hết hạn. Em đăng nhập lại rồi thử nhé.","bot");return;}
+ addAiMessage(question,"user");
+ aiInput.value="";
+ aiSend.disabled=true;aiSend.textContent="...";
+ aiStatus.textContent="Trợ lí đang suy nghĩ...";
+ const transcript=aiHistory.slice(-6).map(m=>(m.role==="user"?"Học sinh: ":"Trợ lí: ")+m.content).join("\n");
+ const prompt=(transcript?transcript+"\n":"")+"Câu hỏi hiện tại: "+question;
+ try{
+  const {data,error}=await supabaseClient.functions.invoke("learning-api",{body:{action:"study_assistant",prompt}});
+  if(error)throw error;
+  if(!data?.success)throw new Error(data?.error||"Trợ lí chưa thể trả lời lúc này.");
+  const answer=String(data.answer||"Trợ lí chưa tạo được câu trả lời.");
+  addAiMessage(answer,"bot");
+  aiHistory.push({role:"user",content:question},{role:"assistant",content:answer});
+  aiHistory=aiHistory.slice(-12);
+  aiStatus.textContent="Câu trả lời do AI gợi ý. Em hãy suy nghĩ và tự hoàn thiện bài nhé.";
+ }catch(err){
+  addAiMessage("Mình chưa kết nối được trợ lí AI: "+(err.message||"Lỗi kết nối")+". Em thử lại sau nhé.","bot");
+  aiStatus.textContent="Kiểm tra cấu hình AI trên máy chủ nếu lỗi tiếp tục.";
+ }finally{aiSend.disabled=false;aiSend.textContent="Gửi";aiInput.focus();}
+});
+
+checkSession();
+</script>
+
+
+
+<script src="./stem-features.js"></script>
+</body>
+</html>
