@@ -49,6 +49,12 @@ body:has(#homeSection:not(.hidden)){padding:24px 32px}
   box-sizing:border-box;
 }
 
+#teacherPanel #createTeacherClassForm input,
+#teacherPanel #createTeacherClassForm select{min-height:40px}
+@media(max-width:650px){
+  #teacherPanel #createTeacherClassForm{grid-template-columns:1fr!important}
+  #teacherPanel #createTeacherClassForm button{width:100%}
+}
 #teacherPanel #createStudentForm{
   width:100%;
   max-width:700px;
@@ -458,6 +464,23 @@ p,li,label,summary,a,small,strong,em,span,div{
   <a href="#teacherSubmissions">📥 Bài nộp</a>
   <a href="#revisionPanel">📚 Hệ thống kiến thức</a>
 </nav>
+
+  <section id="teacherClassManager" style="margin:12px 0 20px;padding:18px;background:#fffdf9;border:1px solid #eadfce;border-radius:14px;">
+    <h3 style="margin:0 0 6px;color:#68452f;">Tạo lớp mới</h3>
+    <p class="sub" style="margin:0 0 12px;">Thầy/cô có thể tự đặt tên lớp trong khối đã được cấp quyền. Ví dụ: 7D, 7E, 7A1.</p>
+    <form id="createTeacherClassForm" style="display:grid;grid-template-columns:minmax(130px,190px) minmax(160px,1fr) auto;gap:10px;align-items:end;margin:0;">
+      <div>
+        <label for="newClassGrade" style="display:block;margin:0 0 5px;">Khối lớp</label>
+        <select id="newClassGrade" required style="margin:0;"><option value="">Đang tải...</option></select>
+      </div>
+      <div>
+        <label for="newClassName" style="display:block;margin:0 0 5px;">Tên lớp mới</label>
+        <input id="newClassName" type="text" maxlength="5" pattern="[6-9][A-Za-z0-9]{1,4}" placeholder="Ví dụ: 7D" required style="margin:0;text-transform:uppercase;">
+      </div>
+      <button type="submit" style="margin:0;">Tạo lớp mới</button>
+    </form>
+    <div id="createTeacherClassMessage" class="message" aria-live="polite"></div>
+  </section>
 
   <h2 id="teacherStudentsTop">Quản lý học sinh</h2>
 
@@ -2712,13 +2735,14 @@ loginMessage.textContent="Website đang chờ cấu hình thông tin kết nối
 }
 
 let availableTeacherClasses=[];
+let availableTeacherGrades=[];
 let currentTeacherId=null;
 const platformClassList=["6A","6B","6C","7A","7B","7C","8A","8B","8C","9A","9B","9C","9D"];
 
 async function loadTeacherClasses(teacherId){
   const {data,error}=await supabaseClient
     .from("teacher_classes")
-    .select("class_name")
+    .select("class_name, grade_level")
     .eq("teacher_id",teacherId)
     .order("class_name",{ascending:true});
 
@@ -2727,6 +2751,20 @@ async function loadTeacherClasses(teacherId){
   availableTeacherClasses=[...new Set((data||[])
     .map(item=>String(item.class_name||"").trim().toUpperCase())
     .filter(Boolean))].sort((a,b)=>a.localeCompare(b,"vi",{numeric:true}));
+  availableTeacherGrades=[...new Set((data||[])
+    .map(item=>String(item.grade_level||String(item.class_name||"").trim().charAt(0)))
+    .filter(grade=>["6","7","8","9"].includes(grade)))].sort();
+  const gradeSelect=document.getElementById("newClassGrade");
+  if(gradeSelect){
+    gradeSelect.replaceChildren();
+    availableTeacherGrades.forEach(grade=>{
+      const option=document.createElement("option");
+      option.value=grade;
+      option.textContent="Khối "+grade;
+      gradeSelect.appendChild(option);
+    });
+    gradeSelect.disabled=!availableTeacherGrades.length;
+  }
 
   const studentSelect=document.getElementById("studentClass");
   studentSelect.replaceChildren();
@@ -2742,7 +2780,7 @@ async function loadTeacherClasses(teacherId){
   if(!availableTeacherClasses.length){
     const empty=document.createElement("span");
     empty.className="sub";
-    empty.textContent="Tài khoản chưa được phân quyền lớp nào. Cô liên hệ quản trị viên.";
+    empty.textContent="Tài khoản chưa được cấp quyền ở khối nào. Cô liên hệ quản trị viên.";
     assignmentChoices.appendChild(empty);
   }else{
     availableTeacherClasses.forEach(className=>{
@@ -2788,7 +2826,9 @@ async function loadAdminTeacherClassManager(){
     container.replaceChildren();
     const selected=select.options[select.selectedIndex];
     const current=new Set(selected?JSON.parse(selected.dataset.classes||"[]"):[]);
-    platformClassList.forEach(className=>{
+    [...new Set([...platformClassList,...(selected?JSON.parse(selected.dataset.classes||"[]"):[])])]
+      .sort((a,b)=>a.localeCompare(b,"vi",{numeric:true}))
+      .forEach(className=>{
       const label=document.createElement("label");
       label.style.cssText="display:flex;align-items:center;gap:6px;margin:0;";
       const input=document.createElement("input");
@@ -2924,6 +2964,49 @@ aiHistory=[];
 loginMessage.textContent=currentTeacherId?"Thầy/cô đã đăng xuất.":"Em đã đăng xuất.";
 currentTeacherId=null;
 });
+
+const createTeacherClassForm=document.getElementById("createTeacherClassForm");
+if(createTeacherClassForm){
+  createTeacherClassForm.addEventListener("submit",async(event)=>{
+    event.preventDefault();
+    const message=document.getElementById("createTeacherClassMessage");
+    const button=createTeacherClassForm.querySelector('button[type="submit"]');
+    const gradeLevel=document.getElementById("newClassGrade").value;
+    const className=document.getElementById("newClassName").value.trim().toUpperCase();
+
+    if(!currentTeacherId){
+      message.textContent="Phiên đăng nhập giáo viên không còn hợp lệ. Cô vui lòng đăng nhập lại.";
+      return;
+    }
+    if(!availableTeacherGrades.includes(gradeLevel)){
+      message.textContent="Tài khoản chưa được cấp quyền ở khối này.";
+      return;
+    }
+    if(!new RegExp("^"+gradeLevel+"[A-Z0-9]{1,4}$").test(className)){
+      message.textContent="Tên lớp phải bắt đầu bằng số khối đã chọn. Ví dụ: "+gradeLevel+"D hoặc "+gradeLevel+"A1.";
+      return;
+    }
+
+    button.disabled=true;
+    button.textContent="Đang tạo lớp...";
+    message.textContent="";
+    try{
+      const {data,error}=await supabaseClient.functions.invoke("clever-api",{
+        body:{action:"create_teacher_class",grade_level:gradeLevel,class_name:className}
+      });
+      if(error||!data?.success) throw new Error(data?.error||error?.message||"Chưa tạo được lớp.");
+      message.textContent=data.message||("Đã tạo lớp "+className+".");
+      document.getElementById("newClassName").value="";
+      await loadTeacherClasses(currentTeacherId);
+      await loadStudents();
+    }catch(err){
+      message.textContent="Không tạo được lớp: "+err.message;
+    }finally{
+      button.disabled=false;
+      button.textContent="Tạo lớp mới";
+    }
+  });
+}
 
 const createStudentForm=document.getElementById("createStudentForm");
 
@@ -3593,7 +3676,7 @@ async function loadStudents() {
 
   try {
     if(!currentTeacherId || !availableTeacherClasses.length){
-      message.textContent="Tài khoản này chưa được quản trị viên phân lớp. Cô vui lòng liên hệ quản trị viên.";
+      message.textContent="Tài khoản chưa có lớp thuộc quyền quản lý. Cô hãy tạo lớp mới nếu đã được cấp quyền khối, hoặc liên hệ quản trị viên.";
       return;
     }
     const { data, error } = await supabaseClient
