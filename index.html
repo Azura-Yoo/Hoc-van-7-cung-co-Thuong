@@ -4550,27 +4550,26 @@ if(assignment.file_path){
   const fileInfo=document.createElement("div");
   fileInfo.style.cssText="margin-top:12px;padding-top:10px;border-top:1px solid #e8eee9;";
   const fileLink=document.createElement("a");
-  fileLink.textContent="📎 Mở / tải tệp đề bài: "+(assignment.file_name||"Tệp đề bài");
+  fileLink.textContent="⬇️ Tải đề bài về máy: "+(assignment.file_name||"Tệp đề bài");
   fileLink.href="#";
-  fileLink.style.cssText="color:#68452f;font-weight:700;";
+  fileLink.style.cssText="display:inline-block;color:#68452f;font-weight:700;padding:9px 12px;border:1px solid #d9c8b9;border-radius:9px;background:#fffaf5;";
   fileLink.addEventListener("click",async(event)=>{
     event.preventDefault();
     if(fileLink.dataset.opening==="1")return;
     fileLink.dataset.opening="1";
-    fileLink.textContent="Đang chuẩn bị tệp...";
+    fileLink.textContent="Đang chuẩn bị tải đề...";
     try{
-      const {data,error}=await supabaseClient.storage.from("assignment-files").createSignedUrl(assignment.file_path,3600,{download:false});
+      const {data,error}=await supabaseClient.storage.from("assignment-files").createSignedUrl(assignment.file_path,3600,{download:assignment.file_name||true});
       if(error||!data?.signedUrl){
-        throw error||new Error("Không tạo được đường dẫn mở tệp.");
+        throw error||new Error("Không tạo được đường dẫn tải tệp.");
       }
-      // Không dùng window.open() sau một thao tác bất đồng bộ:
-      // trình duyệt điện thoại thường chặn tab about:blank, khiến học sinh chỉ thấy trang trắng.
-      // Điều hướng ngay trong tab hiện tại để PDF/Word được trình duyệt hoặc ứng dụng phù hợp xử lý.
+      // Yêu cầu trình duyệt tải tệp xuống máy thay vì chỉ mở bản xem trước.
       window.location.assign(data.signedUrl);
+      fileLink.textContent="⬇️ Đang tải: "+(assignment.file_name||"Tệp đề bài");
     }catch(error){
       fileLink.dataset.opening="0";
-      fileLink.textContent="Không mở được tệp. Em hãy thử tải lại trang hoặc báo cô kiểm tra tệp đính kèm.";
-      console.error("Lỗi mở tệp đề bài:",error);
+      fileLink.textContent="Chưa tải được đề. Em hãy thử lại hoặc báo cô kiểm tra tệp đính kèm.";
+      console.error("Lỗi tải tệp đề bài:",error);
     }
   });
   fileInfo.appendChild(fileLink);
